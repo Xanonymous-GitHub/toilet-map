@@ -1,12 +1,16 @@
 import { LocateFixed, Map as MapIcon, MapPin, Minus, Plus } from "lucide-react";
 import * as maplibregl from "maplibre-gl";
-import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { scheduleState, type Toilet } from "./core";
 
 maplibregl.setWorkerUrl(mapWorkerUrl);
 
 type Props = {
+  dark: boolean;
   items: Toilet[];
   center: [number, number];
   zoom: number;
@@ -69,6 +73,8 @@ export default function MapView(p: Props) {
       return;
     }
     map.current = m;
+    const observer = new ResizeObserver(() => m.resize());
+    observer.observe(container);
     const emitBounds = () => {
       const b = m.getBounds(),
         c = m.getCenter();
@@ -182,6 +188,7 @@ export default function MapView(p: Props) {
       if (e.sourceId === "osm" && e.tile?.state === "loaded") setTileError(false);
     });
     return () => {
+      observer.disconnect();
       markers.forEach((marker) => {
         marker.remove();
       });
@@ -193,7 +200,14 @@ export default function MapView(p: Props) {
   }, []);
   useEffect(() => {
     const m = map.current;
-    if (ready && m) m.flyTo({ center: p.center, zoom: p.zoom, duration: 800, essential: true });
+    if (!ready || !m) return;
+    m.setPaintProperty("base", "raster-brightness-max", p.dark ? 0.5 : 1);
+    m.setPaintProperty("base", "raster-saturation", p.dark ? -0.9 : -0.6);
+    m.setPaintProperty("base", "raster-contrast", p.dark ? 0.15 : -0.12);
+  }, [p.dark, ready]);
+  useEffect(() => {
+    const m = map.current;
+    if (ready && m) m.flyTo({ center: p.center, zoom: p.zoom, duration: 800 });
   }, [p.center, p.zoom, ready]);
   useEffect(() => {
     const m = map.current;
@@ -320,36 +334,56 @@ export default function MapView(p: Props) {
       )}
       <div className="map-controls">
         <div className="zoom-controls">
-          <button
-            type="button"
-            aria-label="放大地圖"
-            onClick={() => {
-              p.onManual();
-              map.current?.zoomIn();
-            }}
-          >
-            <Plus size={19} />
-          </button>
-          <button
-            type="button"
-            aria-label="縮小地圖"
-            onClick={() => {
-              p.onManual();
-              map.current?.zoomOut();
-            }}
-          >
-            <Minus size={19} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                aria-label="放大地圖"
+                onClick={() => {
+                  p.onManual();
+                  map.current?.zoomIn();
+                }}
+              >
+                <Plus size={19} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">放大地圖</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                aria-label="縮小地圖"
+                onClick={() => {
+                  p.onManual();
+                  map.current?.zoomOut();
+                }}
+              >
+                <Minus size={19} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">縮小地圖</TooltipContent>
+          </Tooltip>
         </div>
-        <button
-          type="button"
-          className={`locate-control ${p.locating ? "locating" : ""}`}
-          aria-label="定位目前位置"
-          disabled={p.locating || !p.locateSupported}
-          onClick={p.onLocate}
-        >
-          <LocateFixed size={22} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              type="button"
+              className={`locate-control ${p.locating ? "locating" : ""}`}
+              aria-label="定位目前位置"
+              disabled={p.locating || !p.locateSupported}
+              onClick={p.onLocate}
+            >
+              <LocateFixed size={22} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">定位目前位置</TooltipContent>
+        </Tooltip>
       </div>
       <div className="map-legend">
         <span className="legend-dot open" />

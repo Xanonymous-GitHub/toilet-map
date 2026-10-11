@@ -189,6 +189,43 @@ with sync_playwright() as pw:
         "Tokyo data loaded and interactive map initialized",
         page.locator(".maplibregl-canvas").count() == 1,
     )
+    check("Permanent map slogan has been removed", page.locator(".map-note").count() == 0)
+    expect(page.locator(".map-install")).to_have_count(0, timeout=12000)
+    check("Installation promotion hides automatically")
+    page.get_by_role("button", name="收起側邊欄", exact=True).click()
+    expect(page.locator(".sidebar")).to_have_count(0)
+    page.wait_for_timeout(250)
+    check(
+        "Collapsing the sidebar gives its space to a resized map",
+        page.locator(".map-panel").bounding_box()["width"] == 1440
+        and page.locator(".maplibregl-canvas").bounding_box()["width"] == 1440,
+    )
+    page.get_by_role("button", name="展開側邊欄", exact=True).click()
+    expect(page.locator(".sidebar")).to_be_visible()
+    page.get_by_role("button", name="切換外觀", exact=True).click()
+    page.get_by_role("menuitemradio", name="深色", exact=True).click()
+    page.wait_for_function("document.documentElement.classList.contains('dark')")
+    check(
+        "Dark mode is persisted and applied to the whole app",
+        page.evaluate("localStorage.getItem('theme') === JSON.stringify('dark')"),
+    )
+    page.screenshot(path=str(out / "desktop-dark.png"))
+    page.reload(wait_until="networkidle")
+    check(
+        "Saved dark preference survives reload",
+        page.evaluate("document.documentElement.classList.contains('dark')"),
+    )
+    page.get_by_role("button", name="切換外觀", exact=True).click()
+    page.get_by_role("menuitemradio", name="淺色", exact=True).click()
+    expect(page.locator(".map-loading")).to_have_count(0, timeout=20000)
+    check(
+        "Desktop map controls sit at the bottom",
+        page.evaluate("""(() => {
+        const panel=document.querySelector('.map-panel').getBoundingClientRect();
+        const controls=document.querySelector('.map-controls').getBoundingClientRect();
+        return panel.bottom-controls.bottom < 60 && controls.top > panel.top+panel.height/2;
+    })()"""),
+    )
     page.get_by_role("button", name="縮小地圖", exact=True).click()
     page.get_by_role("button", name="縮小地圖", exact=True).click()
     expect(page.locator(".cluster-label").first).to_be_visible(timeout=20000)
@@ -255,12 +292,13 @@ with sync_playwright() as pw:
     check("Source attribution and caveats are visible", page.locator(".source-row").count() == 6)
     page.keyboard.press("Shift+Tab")
     check(
-        "Native modal prevents background controls from receiving keyboard focus",
+        "shadcn dialog traps focus and prevents background keyboard access",
         page.evaluate("""(() => {
             const dialog=document.querySelector('.modal');
             const background=document.querySelector('.source-button');
             background.focus();
-            return dialog.matches(':modal') && document.activeElement !== background;
+            return dialog.getAttribute('aria-modal') === 'true'
+                && document.activeElement !== background;
         })()"""),
     )
     page.get_by_role("button", name="關閉說明").click()

@@ -11,18 +11,25 @@ import {
   Info,
   Map as MapIcon,
   MapPin,
+  PanelLeftClose,
+  PanelLeftOpen,
   RefreshCw,
   Search,
   ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   WifiOff,
   X,
 } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { InformationModal } from "./components/InformationModal";
-import { ToiletDetail } from "./components/ToiletDetail";
+
+import { ThemeMenu } from "./components/ThemeMenu";
+
 import { ToiletStatus } from "./components/ToiletStatus";
+import { Button } from "./components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./components/ui/collapsible";
+import { Input } from "./components/ui/input";
+import { NativeSelect, NativeSelectOption } from "./components/ui/native-select";
+import { Toggle } from "./components/ui/toggle";
 import {
   distanceMeters,
   type Filters,
@@ -39,9 +46,18 @@ import {
   type Toilet,
 } from "./core";
 import { type Position, useGeolocation } from "./hooks/useGeolocation";
+import { useInstallPromotion } from "./hooks/useInstallPromotion";
 import { useToiletData } from "./hooks/useToiletData";
 import { isRegion, searchableBounds } from "./regions";
 import { readPreference, savePreference } from "./storage";
+import { useTheme } from "./theme";
+
+const InformationModal = lazy(() =>
+  import("./components/InformationModal").then((module) => ({ default: module.InformationModal })),
+);
+const ToiletDetail = lazy(() =>
+  import("./components/ToiletDetail").then((module) => ({ default: module.ToiletDetail })),
+);
 
 const MapView = lazy(() =>
   import("./MapView").catch(() => ({
@@ -68,6 +84,11 @@ const initialRegion = () => {
   return isRegion(r) ? r : "tokyo";
 };
 export default function App() {
+  const { theme, setTheme, dark } = useTheme();
+  const promotion = useInstallPromotion();
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    readPreference("sidebar-open", true, (v): v is boolean => typeof v === "boolean"),
+  );
   const [region, setRegion] = useState<Region>(initialRegion);
   const [center, setCenter] = useState<[number, number]>(REGIONS[region].center);
   const targetCenter = useRef(center);
@@ -269,433 +290,511 @@ export default function App() {
   const dateLabel = (date: string) =>
     new Intl.DateTimeFormat("zh-TW", { month: "numeric", day: "numeric" }).format(new Date(date));
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <header className="brand-bar">
-          <a className="brand" href="/" aria-label="一點方便首頁">
-            <span className="brand-symbol">
-              <MapPin size={23} strokeWidth={2.5} />
-            </span>
-            <span>
-              <strong>
-                一點方便<span className="brand-period">.</span>
-              </strong>
-              <small>A LITTLE RELIEF, ON THE GO</small>
-            </span>
-          </a>
-          <button
-            type="button"
-            className="icon-button source-button"
-            aria-label="資料來源與使用說明"
-            onClick={() => setModal("sources")}
-          >
-            <Info size={21} />
-          </button>
-        </header>
-        <div className="intro">
-          <span className="eyebrow">
-            <span /> JAPAN & KOREA
-          </span>
-          <h1>
-            旅途，
-            <br />
-            隨時<span>方便一點。</span>
-          </h1>
-          <p>找到附近的廁所，把時間留給風景。</p>
-        </div>
-        <div className="search-wrap">
-          <Search size={19} />
-          <input
-            aria-label="搜尋城市、車站或廁所"
-            placeholder="城市、車站或廁所名稱"
-            value={query}
-            onFocus={() => setSearchFocus(true)}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          {query ? (
-            <button
-              type="button"
-              className="search-clear"
-              aria-label="清除搜尋"
-              onClick={() => setQuery("")}
-            >
-              <X size={16} />
-            </button>
-          ) : (
-            <span className="search-shortcut">⌕</span>
-          )}
-          {searchFocus && (
-            <>
-              <button
+    <Collapsible
+      open={sidebarOpen}
+      onOpenChange={(open) => {
+        setSidebarOpen(open);
+        savePreference("sidebar-open", open);
+      }}
+      asChild
+    >
+      <div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+        <CollapsibleContent asChild>
+          <aside className="sidebar" aria-label="搜尋與廁所清單">
+            <header className="brand-bar">
+              <a className="brand" href="/" aria-label="一點方便首頁">
+                <span className="brand-symbol">
+                  <MapPin size={23} strokeWidth={2.5} />
+                </span>
+                <span>
+                  <strong>
+                    一點方便<span className="brand-period">.</span>
+                  </strong>
+                  <small>A LITTLE RELIEF, ON THE GO</small>
+                </span>
+              </a>
+              <Button
+                variant="ghost"
                 type="button"
-                className="search-dismiss"
-                aria-label="關閉搜尋建議"
-                onClick={() => setSearchFocus(false)}
+                className="icon-button source-button"
+                aria-label="資料來源與使用說明"
+                onClick={() => setModal("sources")}
+              >
+                <Info size={21} />
+              </Button>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="收起側邊欄">
+                  <PanelLeftClose />
+                </Button>
+              </CollapsibleTrigger>
+            </header>
+            <h1 className="sidebar-title">
+              日韓廁所地圖<span>搜尋附近，隨時方便一點。</span>
+            </h1>
+            <div className="search-wrap">
+              <Search size={19} />
+              <Input
+                aria-label="搜尋城市、車站或廁所"
+                placeholder="城市、車站或廁所名稱"
+                value={query}
+                onFocus={() => setSearchFocus(true)}
+                onChange={(e) => setQuery(e.target.value)}
               />
-              <div className="search-results">
-                <div className="suggestion-title">{query ? "符合的地點" : "快速前往"}</div>
-                {suggestions.length ? (
-                  suggestions.map((p) => (
-                    <button
-                      type="button"
-                      key={p.name}
-                      onClick={() => {
-                        switchRegion(p.region, p.center, p.zoom);
-                        setSearchFocus(false);
-                      }}
-                    >
-                      <MapPin size={16} />
-                      <span>
-                        {p.name}
-                        <small>{p.alias.split(" ").slice(0, 2).join(" ")}</small>
-                      </span>
-                      <ArrowUpRight size={16} />
-                    </button>
-                  ))
-                ) : (
-                  <p>移動地圖，或搜尋目前城市的廁所名稱。</p>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-        <fieldset className="region-tabs" aria-label="選擇國家">
-          {(["JP", "KR"] as const).map((country) => (
-            <button
-              type="button"
-              key={country}
-              aria-label={country === "JP" ? "日本" : "韓國"}
-              className={REGIONS[region].country === country ? "active" : ""}
-              aria-pressed={REGIONS[region].country === country}
-              onClick={() =>
-                switchRegion(
-                  readPreference<Region>(
-                    `country-${country}`,
-                    country === "JP" ? "tokyo" : "seoul",
-                    (value): value is Region =>
-                      isRegion(value) && REGIONS[value].country === country,
-                  ),
-                )
-              }
-            >
-              <span className="flag">{country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
-              {country === "JP" ? "日本" : "韓國"}
-              <span className="region-sub">{country === "JP" ? "JAPAN" : "KOREA"}</span>
-            </button>
-          ))}
-        </fieldset>
-        <div className="city-picker">
-          <label htmlFor="city">
-            <MapPin size={16} />
-            城市與周邊
-          </label>
-          <select
-            id="city"
-            aria-label="選擇城市"
-            value={region}
-            onChange={(e) => {
-              if (isRegion(e.target.value)) switchRegion(e.target.value);
-            }}
-          >
-            {REGION_IDS.filter((id) => REGIONS[id].country === REGIONS[region].country).map(
-              (id) => (
-                <option value={id} key={id}>
-                  {REGIONS[id].label}
-                  {data?.cityCounts[id] !== undefined
-                    ? ` · ${data.cityCounts[id].toLocaleString()} 筆`
-                    : ""}
-                </option>
-              ),
-            )}
-          </select>
-        </div>
-        <div className="filters">
-          <button
-            type="button"
-            className={filters.open ? "filter active" : "filter"}
-            aria-pressed={filters.open}
-            onClick={() => setFilter("open")}
-          >
-            <Clock size={15} />
-            現在開放
-          </button>
-          <button
-            type="button"
-            className={filters.wheelchair ? "filter active" : "filter"}
-            aria-pressed={filters.wheelchair}
-            onClick={() => setFilter("wheelchair")}
-          >
-            <Accessibility size={16} />
-            無障礙
-          </button>
-          <button
-            type="button"
-            className={filters.free ? "filter active" : "filter"}
-            aria-pressed={filters.free}
-            onClick={() => setFilter("free")}
-          >
-            免費
-          </button>
-          <button
-            type="button"
-            aria-label="更多篩選條件"
-            aria-expanded={moreFilters}
-            className={`filter filter-icon ${moreFilters ? "active" : ""}`}
-            onClick={() => setMoreFilters(!moreFilters)}
-          >
-            <SlidersHorizontal size={16} />
-          </button>
-        </div>
-        {moreFilters && (
-          <div className="extra-filters">
-            <label>
-              <input
-                type="checkbox"
-                checked={filters.includeUnknown}
-                onChange={() => setFilter("includeUnknown")}
-              />
-              現在開放時，包含時間未知
-            </label>
-            <label>
-              <input type="checkbox" checked={filters.saved} onChange={() => setFilter("saved")} />
-              只看已收藏
-            </label>
-            <small>免費與無障礙篩選僅納入有提供資訊的設施。</small>
-          </div>
-        )}
-        <div className="list-heading">
-          <div>
-            <strong>{filters.saved ? "收藏的廁所" : "這個區域的廁所"}</strong>
-            <span className="count">{loading ? "…" : visible.length}</span>
-          </div>
-          <span>
-            <ArrowDownToLine size={13} />
-            {position ? "依直線距離" : "距離地圖中心"}
-          </span>
-        </div>
-        <div className="toilet-list" aria-live="polite">
-          {loading ? (
-            <div className="loading-list">
-              {[0, 1, 2].map((i) => (
-                <div className="skeleton-card" key={i}>
-                  <i />
-                  <div>
-                    <b />
-                    <b />
-                    <b />
+              {query ? (
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="search-clear"
+                  aria-label="清除搜尋"
+                  onClick={() => setQuery("")}
+                >
+                  <X size={16} />
+                </Button>
+              ) : (
+                <span className="search-shortcut">⌕</span>
+              )}
+              {searchFocus && (
+                <>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="search-dismiss"
+                    aria-label="關閉搜尋建議"
+                    onClick={() => setSearchFocus(false)}
+                  />
+                  <div className="search-results">
+                    <div className="suggestion-title">{query ? "符合的地點" : "快速前往"}</div>
+                    {suggestions.length ? (
+                      suggestions.map((p) => (
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          key={p.name}
+                          onClick={() => {
+                            switchRegion(p.region, p.center, p.zoom);
+                            setSearchFocus(false);
+                          }}
+                        >
+                          <MapPin size={16} />
+                          <span>
+                            {p.name}
+                            <small>{p.alias.split(" ").slice(0, 2).join(" ")}</small>
+                          </span>
+                          <ArrowUpRight size={16} />
+                        </Button>
+                      ))
+                    ) : (
+                      <p>移動地圖，或搜尋目前城市的廁所名稱。</p>
+                    )}
                   </div>
-                </div>
+                </>
+              )}
+            </div>
+            <fieldset className="region-tabs" aria-label="選擇國家">
+              {(["JP", "KR"] as const).map((country) => (
+                <Button
+                  variant="ghost"
+                  type="button"
+                  key={country}
+                  aria-label={country === "JP" ? "日本" : "韓國"}
+                  className={REGIONS[region].country === country ? "active" : ""}
+                  aria-pressed={REGIONS[region].country === country}
+                  onClick={() =>
+                    switchRegion(
+                      readPreference<Region>(
+                        `country-${country}`,
+                        country === "JP" ? "tokyo" : "seoul",
+                        (value): value is Region =>
+                          isRegion(value) && REGIONS[value].country === country,
+                      ),
+                    )
+                  }
+                >
+                  <span className="flag">{country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
+                  {country === "JP" ? "日本" : "韓國"}
+                  <span className="region-sub">{country === "JP" ? "JAPAN" : "KOREA"}</span>
+                </Button>
               ))}
-              <p>正在整理附近的廁所…</p>
-            </div>
-          ) : error ? (
-            <div className="empty-state">
-              <WifiOff size={30} />
-              <h3>資料暫時無法載入</h3>
-              <p>{error}</p>
-              <button type="button" className="small-primary" onClick={refresh}>
-                <RefreshCw size={15} />
-                重新載入
-              </button>
-            </div>
-          ) : visible.length === 0 ? (
-            <div className="empty-state">
-              <MapIcon size={32} />
-              <h3>{filters.saved ? "這個區域還沒有收藏" : "這個區域沒有符合的資料"}</h3>
-              <p>
-                試試放大搜尋範圍、調整篩選，或選擇其他地點。
-                <br />
-                目前涵蓋 {REGIONS[region].coverage}。
-              </p>
-              <button
-                type="button"
-                className="small-primary"
-                onClick={() => {
-                  setFilters({
-                    open: false,
-                    wheelchair: false,
-                    free: false,
-                    includeUnknown: false,
-                    saved: false,
-                  });
-                  switchRegion(region);
+            </fieldset>
+            <div className="city-picker">
+              <label htmlFor="city">
+                <MapPin size={16} />
+                城市與周邊
+              </label>
+              <NativeSelect
+                id="city"
+                aria-label="選擇城市"
+                value={region}
+                onChange={(e) => {
+                  if (isRegion(e.target.value)) switchRegion(e.target.value);
                 }}
               >
-                返回城市範圍
-              </button>
+                {REGION_IDS.filter((id) => REGIONS[id].country === REGIONS[region].country).map(
+                  (id) => (
+                    <NativeSelectOption value={id} key={id}>
+                      {REGIONS[id].label}
+                      {data?.cityCounts[id] !== undefined
+                        ? ` · ${data.cityCounts[id].toLocaleString()} 筆`
+                        : ""}
+                    </NativeSelectOption>
+                  ),
+                )}
+              </NativeSelect>
             </div>
-          ) : (
-            visible.slice(0, limit).map(({ toilet: t, distance }) => (
-              <article className={`toilet-card ${selected === t.id ? "selected" : ""}`} key={t.id}>
-                <button
-                  type="button"
-                  className="card-main"
-                  onClick={() => selectToilet(t)}
-                  aria-label={`查看 ${t.name} 詳情`}
-                >
-                  <span className="wc-icon">WC</span>
-                  <div className="card-content">
-                    <div className="card-title-line">
-                      <h2>{t.name}</h2>
-                      <span className="distance">{formatDistance(distance)}</span>
-                    </div>
-                    <p className="card-address">{t.address || "地址未提供"}</p>
-                    <div className="card-badges">
-                      <ToiletStatus toilet={t} now={now} />
-                      {t.wheelchair === "yes" && (
-                        <span className="feature-badge" title="有無障礙廁所設施">
-                          <Accessibility size={14} />
-                        </span>
-                      )}
-                      {t.changingTable === "yes" && (
-                        <span className="feature-badge" title="有尿布台">
-                          <Baby size={14} />
-                        </span>
-                      )}
-                      {t.access === "public_by_agreement" && (
-                        <span className="mini-label">民間開放</span>
-                      )}
-                      {t.access === "unknown" && <span className="mini-label">條件未知</span>}
-                    </div>
-                  </div>
-                  <ChevronRight className="card-chevron" size={17} />
-                </button>
-                <div className="card-footer">
-                  <span>
-                    <ShieldCheck size={12} />
-                    {data?.sources.find((s) => s.id === t.sourceId)?.name ?? "公開資料"}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label={saved.has(t.id) ? `取消收藏 ${t.name}` : `收藏 ${t.name}`}
-                    className={saved.has(t.id) ? "save saved" : "save"}
-                    onClick={() => toggleSave(t)}
-                  >
-                    <Heart size={16} fill={saved.has(t.id) ? "currentColor" : "none"} />
-                  </button>
-                </div>
-              </article>
-            ))
-          )}
-          {!loading && visible.length > limit && (
-            <button type="button" className="show-more" onClick={() => setLimit((l) => l + 40)}>
-              顯示更多（目前 {Math.min(limit, visible.length)}／{visible.length}）
-              <ChevronDown size={16} />
-            </button>
-          )}
-        </div>
-        <footer className="sidebar-footer">
-          <div className="coverage-indicator">
-            <span />
-            {data?.countryTotal !== undefined
-              ? `${REGIONS[region].country === "JP" ? "日本" : "韓國"}全域收錄 ${data.countryTotal.toLocaleString()} 筆`
-              : REGIONS[region].coverage}
-            <button type="button" aria-label="重新取得資料" onClick={refresh} disabled={loading}>
-              <RefreshCw size={12} />
-            </button>
-          </div>
-          <div className="footer-meta">
-            <span>
-              {data
-                ? `${data.total.toLocaleString()} 筆在載入範圍 · ${dateLabel(data.fetchedAt)} 匯入`
-                : "以官方與開放資料提供資訊"}
-            </span>
-            <button type="button" onClick={triggerInstall}>
-              <ArrowDownToLine size={13} />
-              加入主畫面
-            </button>
-          </div>
-        </footer>
-      </aside>
-      <main className="map-panel">
-        <Suspense
-          fallback={
-            <div className="map-stage">
-              <div className="map-loading">
-                <MapPin size={18} />
-                地圖載入中
+            <div className="filters">
+              <Toggle
+                variant="outline"
+                type="button"
+                className={filters.open ? "filter active" : "filter"}
+                pressed={filters.open}
+                onPressedChange={() => setFilter("open")}
+              >
+                <Clock size={15} />
+                現在開放
+              </Toggle>
+              <Toggle
+                variant="outline"
+                type="button"
+                className={filters.wheelchair ? "filter active" : "filter"}
+                pressed={filters.wheelchair}
+                onPressedChange={() => setFilter("wheelchair")}
+              >
+                <Accessibility size={16} />
+                無障礙
+              </Toggle>
+              <Toggle
+                variant="outline"
+                type="button"
+                className={filters.free ? "filter active" : "filter"}
+                pressed={filters.free}
+                onPressedChange={() => setFilter("free")}
+              >
+                免費
+              </Toggle>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="更多篩選條件"
+                aria-expanded={moreFilters}
+                className={`filter filter-icon ${moreFilters ? "active" : ""}`}
+                onClick={() => setMoreFilters(!moreFilters)}
+              >
+                <SlidersHorizontal size={16} />
+              </Button>
+            </div>
+            {moreFilters && (
+              <div className="extra-filters">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.includeUnknown}
+                    onChange={() => setFilter("includeUnknown")}
+                  />
+                  現在開放時，包含時間未知
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.saved}
+                    onChange={() => setFilter("saved")}
+                  />
+                  只看已收藏
+                </label>
+                <small>免費與無障礙篩選僅納入有提供資訊的設施。</small>
               </div>
-            </div>
-          }
-        >
-          <MapView
-            items={filtered}
-            center={center}
-            zoom={zoom}
-            selected={selected}
-            position={position}
-            now={now}
-            onSelect={setSelected}
-            onBounds={onBounds}
-            onManual={onManual}
-            onLocate={locate}
-            locating={locating}
-            locateSupported={Boolean(navigator.geolocation)}
-          />
-        </Suspense>
-        <div className="map-top">
-          <span className="map-location-pill">
-            <span className="flag">{REGIONS[region].country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
-            <span>
-              {REGIONS[region].label}
-              <small>{REGIONS[region].local}</small>
-            </span>
-            <span className="live-dot" />
-            探索中
-          </span>
-          <button type="button" className="map-install" onClick={triggerInstall}>
-            <ArrowDownToLine size={16} />
-            <span>帶著地圖出發</span>
-          </button>
-        </div>
-        {(!online || data?.offline) && (
-          <div className="offline-banner">
-            <WifiOff size={15} />
-            離線資料 · {data ? dateLabel(data.fetchedAt) : ""} 匯入，現場狀態未確認
-          </div>
-        )}
-        {!selected && (
-          <div className="map-note">
-            <Sparkles size={18} />
-            <div>
-              <strong>找到方便，也找到安心。</strong>
+            )}
+            <div className="list-heading">
+              <div>
+                <strong>{filters.saved ? "收藏的廁所" : "這個區域的廁所"}</strong>
+                <span className="count">{loading ? "…" : visible.length}</span>
+              </div>
               <span>
-                {bounds && !searchableBounds(bounds)
-                  ? "放大地圖以載入附近點位，或從城市選單快速前往。"
-                  : "開放狀態依提供時段推估，來源點位可能尚未完整。"}
+                <ArrowDownToLine size={13} />
+                {position ? "依直線距離" : "距離地圖中心"}
               </span>
             </div>
+            <div className="toilet-list" aria-live="polite">
+              {loading ? (
+                <div className="loading-list">
+                  {[0, 1, 2].map((i) => (
+                    <div className="skeleton-card" key={i}>
+                      <i />
+                      <div>
+                        <b />
+                        <b />
+                        <b />
+                      </div>
+                    </div>
+                  ))}
+                  <p>正在整理附近的廁所…</p>
+                </div>
+              ) : error ? (
+                <div className="empty-state">
+                  <WifiOff size={30} />
+                  <h3>資料暫時無法載入</h3>
+                  <p>{error}</p>
+                  <Button variant="ghost" type="button" className="small-primary" onClick={refresh}>
+                    <RefreshCw size={15} />
+                    重新載入
+                  </Button>
+                </div>
+              ) : visible.length === 0 ? (
+                <div className="empty-state">
+                  <MapIcon size={32} />
+                  <h3>{filters.saved ? "這個區域還沒有收藏" : "這個區域沒有符合的資料"}</h3>
+                  <p>
+                    試試放大搜尋範圍、調整篩選，或選擇其他地點。
+                    <br />
+                    目前涵蓋 {REGIONS[region].coverage}。
+                  </p>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="small-primary"
+                    onClick={() => {
+                      setFilters({
+                        open: false,
+                        wheelchair: false,
+                        free: false,
+                        includeUnknown: false,
+                        saved: false,
+                      });
+                      switchRegion(region);
+                    }}
+                  >
+                    返回城市範圍
+                  </Button>
+                </div>
+              ) : (
+                visible.slice(0, limit).map(({ toilet: t, distance }) => (
+                  <article
+                    className={`toilet-card ${selected === t.id ? "selected" : ""}`}
+                    key={t.id}
+                  >
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      className="card-main"
+                      onClick={() => selectToilet(t)}
+                      aria-label={`查看 ${t.name} 詳情`}
+                    >
+                      <span className="wc-icon">WC</span>
+                      <div className="card-content">
+                        <div className="card-title-line">
+                          <h2>{t.name}</h2>
+                          <span className="distance">{formatDistance(distance)}</span>
+                        </div>
+                        <p className="card-address">{t.address || "地址未提供"}</p>
+                        <div className="card-badges">
+                          <ToiletStatus toilet={t} now={now} />
+                          {t.wheelchair === "yes" && (
+                            <span className="feature-badge" title="有無障礙廁所設施">
+                              <Accessibility size={14} />
+                            </span>
+                          )}
+                          {t.changingTable === "yes" && (
+                            <span className="feature-badge" title="有尿布台">
+                              <Baby size={14} />
+                            </span>
+                          )}
+                          {t.access === "public_by_agreement" && (
+                            <span className="mini-label">民間開放</span>
+                          )}
+                          {t.access === "unknown" && <span className="mini-label">條件未知</span>}
+                        </div>
+                      </div>
+                      <ChevronRight className="card-chevron" size={17} />
+                    </Button>
+                    <div className="card-footer">
+                      <span>
+                        <ShieldCheck size={12} />
+                        {data?.sources.find((s) => s.id === t.sourceId)?.name ?? "公開資料"}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        aria-label={saved.has(t.id) ? `取消收藏 ${t.name}` : `收藏 ${t.name}`}
+                        className={saved.has(t.id) ? "save saved" : "save"}
+                        onClick={() => toggleSave(t)}
+                      >
+                        <Heart size={16} fill={saved.has(t.id) ? "currentColor" : "none"} />
+                      </Button>
+                    </div>
+                  </article>
+                ))
+              )}
+              {!loading && visible.length > limit && (
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="show-more"
+                  onClick={() => setLimit((l) => l + 40)}
+                >
+                  顯示更多（目前 {Math.min(limit, visible.length)}／{visible.length}）
+                  <ChevronDown size={16} />
+                </Button>
+              )}
+            </div>
+            <footer className="sidebar-footer">
+              <div className="coverage-indicator">
+                <span />
+                {data?.countryTotal !== undefined
+                  ? `${REGIONS[region].country === "JP" ? "日本" : "韓國"}全域收錄 ${data.countryTotal.toLocaleString()} 筆`
+                  : REGIONS[region].coverage}
+                <Button
+                  variant="ghost"
+                  type="button"
+                  aria-label="重新取得資料"
+                  onClick={refresh}
+                  disabled={loading}
+                >
+                  <RefreshCw size={12} />
+                </Button>
+              </div>
+              <div className="footer-meta">
+                <span>
+                  {data
+                    ? `${data.total.toLocaleString()} 筆在載入範圍 · ${dateLabel(data.fetchedAt)} 匯入`
+                    : "以官方與開放資料提供資訊"}
+                </span>
+                <Button variant="ghost" type="button" onClick={triggerInstall}>
+                  <ArrowDownToLine size={13} />
+                  加入主畫面
+                </Button>
+              </div>
+            </footer>
+          </aside>
+        </CollapsibleContent>
+        <main className="map-panel">
+          <Suspense
+            fallback={
+              <div className="map-stage">
+                <div className="map-loading">
+                  <MapPin size={18} />
+                  地圖載入中
+                </div>
+              </div>
+            }
+          >
+            <MapView
+              dark={dark}
+              items={filtered}
+              center={center}
+              zoom={zoom}
+              selected={selected}
+              position={position}
+              now={now}
+              onSelect={setSelected}
+              onBounds={onBounds}
+              onManual={() => {
+                promotion.dismiss();
+                onManual();
+              }}
+              onLocate={locate}
+              locating={locating}
+              locateSupported={Boolean(navigator.geolocation)}
+            />
+          </Suspense>
+          <div className="map-top">
+            <div className="map-toolbar">
+              {!sidebarOpen && (
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="sidebar-trigger" aria-label="展開側邊欄">
+                    <PanelLeftOpen />
+                    <span>搜尋廁所</span>
+                  </Button>
+                </CollapsibleTrigger>
+              )}
+              <span className="map-location-pill">
+                <MapPin size={16} />
+                <span>
+                  {REGIONS[region].label}
+                  <small>{REGIONS[region].local}</small>
+                </span>
+              </span>
+            </div>
+            <div className="map-toolbar">
+              {promotion.visible && (
+                <Button
+                  variant="outline"
+                  className="map-install"
+                  onClick={() => {
+                    promotion.dismiss();
+                    void triggerInstall();
+                  }}
+                  onPointerEnter={() => promotion.setHeld(true)}
+                  onPointerLeave={() => promotion.setHeld(false)}
+                  onFocus={() => promotion.setHeld(true)}
+                  onBlur={() => promotion.setHeld(false)}
+                >
+                  <ArrowDownToLine size={16} />
+                  <span>帶著地圖出發</span>
+                </Button>
+              )}
+              {!sidebarOpen && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="toolbar-button source-button"
+                  aria-label="資料來源與使用說明"
+                  onClick={() => setModal("sources")}
+                >
+                  <Info />
+                </Button>
+              )}
+              <ThemeMenu theme={theme} onChange={setTheme} />
+            </div>
+          </div>
+          {(!online || data?.offline) && (
+            <div className="offline-banner">
+              <WifiOff size={15} />
+              離線資料 · {data ? dateLabel(data.fetchedAt) : ""} 匯入，現場狀態未確認
+            </div>
+          )}
+          {!selected && bounds && !searchableBounds(bounds) && (
+            <div className="map-network-note" role="status">
+              放大地圖以載入附近點位，或從城市選單快速前往。
+            </div>
+          )}
+          {detail && (
+            <Suspense fallback={null}>
+              <ToiletDetail
+                detail={detail}
+                now={now}
+                saved={saved}
+                sources={data?.sources ?? []}
+                onClose={() => setSelected(null)}
+                toggleSave={toggleSave}
+                openNav={openNav}
+                copyAddress={copyAddress}
+              />
+            </Suspense>
+          )}
+        </main>
+        {toast && (
+          <div className="toast" role="status">
+            <Check size={17} />
+            {toast}
+            <Button
+              variant="ghost"
+              type="button"
+              aria-label="關閉訊息"
+              onClick={() => setToast("")}
+            >
+              <X size={15} />
+            </Button>
           </div>
         )}
-        {detail && (
-          <ToiletDetail
-            detail={detail}
-            now={now}
-            saved={saved}
-            sources={data?.sources ?? []}
-            onClose={() => setSelected(null)}
-            toggleSave={toggleSave}
-            openNav={openNav}
-            copyAddress={copyAddress}
-          />
+        {modal && (
+          <Suspense fallback={null}>
+            <InformationModal
+              mode={modal}
+              sources={data?.sources ?? []}
+              onClose={() => setModal(null)}
+            />
+          </Suspense>
         )}
-      </main>
-      {toast && (
-        <div className="toast" role="status">
-          <Check size={17} />
-          {toast}
-          <button type="button" aria-label="關閉訊息" onClick={() => setToast("")}>
-            <X size={15} />
-          </button>
-        </div>
-      )}
-      {modal && (
-        <InformationModal
-          mode={modal}
-          sources={data?.sources ?? []}
-          onClose={() => setModal(null)}
-        />
-      )}
-    </div>
+      </div>
+    </Collapsible>
   );
 }
