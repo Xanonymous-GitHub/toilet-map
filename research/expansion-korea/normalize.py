@@ -141,7 +141,7 @@ def coordinate(row, lat_key, lon_key):
         return None, "missingCoordinates"
     try:
         lat, lon = float(row[lat_key]), float(row[lon_key])
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None, "invalidCoordinates"
     if (
         not math.isfinite(lat)
@@ -155,7 +155,7 @@ def coordinate(row, lat_key, lon_key):
 def positive(value):
     try:
         return int(value) > 0
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
 

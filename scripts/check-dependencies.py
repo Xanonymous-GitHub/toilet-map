@@ -1,4 +1,4 @@
-"""Check pinned direct dependencies against official stable-release metadata."""
+"""Check locked direct dependencies against official stable-release metadata."""
 
 import json
 import tomllib
@@ -37,15 +37,25 @@ def check_package(item):
     }
 
 
-def main():
-    package = json.loads((ROOT / "package.json").read_text())
-    python = tomllib.loads((ROOT / "pyproject.toml").read_text())
+def dependency_items(root):
+    package = json.loads((root / "package.json").read_text())
+    python = tomllib.loads((root / "pyproject.toml").read_text())
+    lock = tomllib.loads((root / "uv.lock").read_text())
+    project = next(entry for entry in lock["package"] if entry["name"] == python["project"]["name"])
     dependencies = package["dependencies"] | package["devDependencies"]
     items = [(name, version, "javascript") for name, version in dependencies.items()]
-    for dependency in python["dependency-groups"]["dev"]:
-        name, version = dependency.split("==", 1)
-        items.append((name, version, "python"))
-    items.append(("bun", package["packageManager"].split("@", 1)[1], "runtime"))
+    for dependency in project["dev-dependencies"]["dev"]:
+        name = dependency["name"]
+        versions = {entry["version"] for entry in lock["package"] if entry["name"] == name}
+        if len(versions) != 1:
+            raise ValueError(f"Expected one locked version for {name}, found {sorted(versions)}")
+        items.append((name, versions.pop(), "python"))
+    items.append(("bun", (root / ".bun-version").read_text().strip(), "runtime"))
+    return items
+
+
+def main():
+    items = dependency_items(ROOT)
     with ThreadPoolExecutor(max_workers=8) as pool:
         results = list(pool.map(check_package, items))
     report = {"checkedAt": datetime.now(UTC).isoformat(), "dependencies": results}

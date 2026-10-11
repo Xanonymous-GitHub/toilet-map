@@ -7,12 +7,12 @@
     "dev": "bun --bun vite --host 0.0.0.0",
     "build": "bun --bun vite build && bun scripts/build-worker.mjs && bun run typecheck",
     "typecheck": "bun --bun tsc --noEmit && bun --bun tsc --noEmit -p tsconfig.sw.json",
-    "test": "bun test tests",
+    "test": "bun test tests && uv run --locked python -m unittest discover -s tests -p 'test_*.py'",
     "preview": "bun scripts/serve.mjs",
     "lint": "bun --bun biome check . --error-on-warnings && uv run --locked ruff check . && uv run --locked ruff format --check .",
     "format": "bun --bun biome check --write . && uv run --locked ruff check --fix . && uv run --locked ruff format .",
     "check": "bun run lint && bun run typecheck",
-    "verify": "bun run build && bun run check && bun test tests",
+    "verify": "bun run build && bun run check && bun run test",
     "test:browser": "uv run --locked python scripts/browser-qa.py",
     "deps:check": "uv run --locked python scripts/check-dependencies.py",
     "data:expand": "uv run --locked python scripts/import-expansion.py"
@@ -32,9 +32,5 @@
     "vite": "8.3.4",
     "typescript": "7.0.2",
     "@biomejs/biome": "2.5.15"
-  },
-  "packageManager": "bun@1.4.3",
-  "engines": {
-    "bun": ">=1.4.3"
   }
 }

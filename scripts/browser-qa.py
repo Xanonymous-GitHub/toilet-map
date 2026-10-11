@@ -12,6 +12,7 @@ from playwright.sync_api import expect, sync_playwright
 BASE_URL = os.environ.get("RELIEF_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURE_ASSETS = os.environ.get("RELIEF_QA_FIXTURE_ASSETS") == "1"
+proxy_url = os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
 CHROMIUM_PATH = os.environ.get("RELIEF_CHROMIUM_PATH")
 if not CHROMIUM_PATH and Path("/usr/bin/chromium").exists():
     CHROMIUM_PATH = "/usr/bin/chromium"
@@ -20,6 +21,16 @@ coverage = json.loads((ROOT / "docs/coverage.json").read_text())
 
 def expected_count(region):
     return f"{coverage['cityCounts'][region]:,}"
+
+
+def wait_for_viewport(page, region):
+    # City data arrives before flyTo finishes; onBounds narrows this count only
+    # once the selected city's flight reaches its destination.
+    page.wait_for_function(
+        "total => { const count = Number(document.querySelector('.list-heading .count')"
+        ".textContent); return count > 0 && count < total; }",
+        arg=coverage["cityCounts"][region],
+    )
 
 
 out = Path(__file__).resolve().parent.parent / "test-results"
@@ -31,12 +42,17 @@ report = {
         "CI uses a committed PNG map-tile fixture and system fonts. Toilet data, API, "
         "map worker and PWA assets come from the actual local production build."
         if FIXTURE_ASSETS
-        else "External map/font assets fetched through the session proxy with CA-verified TLS; "
-        "browser TLS remains enabled."
+        else (
+            "External map/font assets fetched through the session proxy with CA-verified TLS; "
+            "browser TLS remains enabled."
+            if proxy_url
+            else "Public map/font assets loaded directly by the browser with TLS verification."
+        )
     ),
     "checks": [],
     "pageErrors": [],
     "consoleErrors": [],
+    "consoleWarnings": [],
     "tileResponses": 0,
     "mapWorkerResponses": 0,
     "apiRequests": [],
@@ -56,7 +72,13 @@ def check(name, condition=True):
     print("PASS", name, flush=True)
 
 
-proxy_url = os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
+def record_console(message):
+    if message.type == "error":
+        report["consoleErrors"].append(message.text)
+    elif message.type == "warning":
+        report["consoleWarnings"].append(message.text)
+
+
 proxy = None
 if proxy_url:
     parsed = urlparse(proxy_url)
@@ -78,6 +100,8 @@ def verified_asset(route):
     }:
         return route.abort()
     if host not in {"tile.openstreetmap.org", "fonts.googleapis.com", "fonts.gstatic.com"}:
+        return route.continue_()
+    if not FIXTURE_ASSETS and not proxy_url:
         return route.continue_()
     if FIXTURE_ASSETS:
         if host == "tile.openstreetmap.org":
@@ -122,7 +146,8 @@ with sync_playwright() as pw:
         geolocation={"latitude": 37.5665, "longitude": 126.978, "accuracy": 20},
         permissions=["geolocation"],
     )
-    context.route("https://**/*", verified_asset)
+    if FIXTURE_ASSETS or proxy:
+        context.route("https://**/*", verified_asset)
     context.add_init_script("""
         window.__watchStarts=0;window.__watchStops=0;
         const start=navigator.geolocation.watchPosition.bind(navigator.geolocation);
@@ -140,9 +165,7 @@ with sync_playwright() as pw:
         ),
     )
     page.on("pageerror", lambda e: report["pageErrors"].append(str(e)))
-    page.on(
-        "console", lambda m: report["consoleErrors"].append(m.text) if m.type == "error" else None
-    )
+    page.on("console", record_console)
     page.on(
         "response",
         lambda r: (
@@ -202,6 +225,7 @@ with sync_playwright() as pw:
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
     check("Granted GPS moves to Seoul and loads the complete city dataset")
     page.wait_for_function("window.__watchStarts > 0")
+    wait_for_viewport(page, "seoul")
     page.get_by_role("button", name="放大地圖", exact=True).click()
     page.wait_for_function("window.__watchStops > 0")
     check("Manual map zoom stops GPS following and clears its watcher")
@@ -282,6 +306,7 @@ with sync_playwright() as pw:
     check("Switching countries remembers the last selected city")
     page.get_by_role("combobox", name="選擇城市").select_option("osaka")
     expect(page.locator(".footer-meta")).to_contain_text(expected_count("osaka"), timeout=20000)
+    wait_for_viewport(page, "osaka")
     page.get_by_role("button", name="縮小地圖", exact=True).click()
     page.wait_for_timeout(400)
     page.get_by_role("button", name="縮小地圖", exact=True).click()
@@ -297,10 +322,12 @@ with sync_playwright() as pw:
     mobile = browser.new_context(
         viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True
     )
-    mobile.route("https://**/*", verified_asset)
+    if FIXTURE_ASSETS or proxy:
+        mobile.route("https://**/*", verified_asset)
     mobile.add_init_script("localStorage.setItem('saved', '{}')")
     page = mobile.new_page()
     page.on("pageerror", lambda e: report["pageErrors"].append(str(e)))
+    page.on("console", record_console)
     page.goto(f"{BASE_URL}?region=seoul", wait_until="networkidle", timeout=45000)
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
     check(
@@ -334,8 +361,36 @@ with sync_playwright() as pw:
     expect(page.locator(".footer-meta")).to_contain_text(expected_count("tokyo"), timeout=20000)
     check("A late location result cannot undo the user's city selection")
     mobile.close()
+    unavailable_map = browser.new_context()
+    if FIXTURE_ASSETS or proxy:
+        unavailable_map.route("https://**/*", verified_asset)
+    unavailable_map.route("**/assets/maplibre-*.js", lambda route: route.abort())
+    page = unavailable_map.new_page()
+    page.on("pageerror", lambda e: report["pageErrors"].append(str(e)))
+    page.on("console", record_console)
+    page.goto(BASE_URL, wait_until="networkidle", timeout=45000)
+    expect(page.locator(".map-fallback")).to_be_visible(timeout=20000)
+    expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
+    page.locator(".card-main").first.click()
+    expect(page.get_by_role("dialog", name="廁所詳細資訊")).to_be_visible()
+    check("A failed lazy map download keeps the toilet list and details usable")
+    unavailable_map.close()
     browser.close()
 check("No unhandled browser errors", not report["pageErrors"])
+# Chromium's software WebGL driver warns when screenshots read back pixels.
+# Retain these diagnostics in the report; reject every other console warning.
+check(
+    "No application console warnings",
+    all(
+        re.fullmatch(
+            r"\[\.WebGL-0x[0-9a-f]+\]GL Driver Message "
+            r"\(OpenGL, Performance, GL_CLOSE_PATH_NV, High\): GPU stall due to ReadPixels"
+            r"(?: \(this message will no longer repeat\))?",
+            warning,
+        )
+        for warning in report["consoleWarnings"]
+    ),
+)
 check(
     "Map workers load without errors, including offline reload",
     report["mapWorkerResponses"] > 0

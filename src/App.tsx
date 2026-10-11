@@ -19,7 +19,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InformationModal } from "./components/InformationModal";
 import { ToiletDetail } from "./components/ToiletDetail";
 import { ToiletStatus } from "./components/ToiletStatus";
@@ -40,9 +40,22 @@ import {
 } from "./core";
 import { type Position, useGeolocation } from "./hooks/useGeolocation";
 import { useToiletData } from "./hooks/useToiletData";
-import MapView from "./MapView";
 import { isRegion, searchableBounds } from "./regions";
 import { readPreference, savePreference } from "./storage";
+
+const MapView = lazy(() =>
+  import("./MapView").catch(() => ({
+    default: () => (
+      <div className="map-stage">
+        <div className="map-fallback">
+          <MapIcon size={34} />
+          <strong>互動地圖暫時無法載入</strong>
+          <p>仍可用清單搜尋、查看資訊與導航；連線後請重新載入。</p>
+        </div>
+      </div>
+    ),
+  })),
+);
 
 type InstallEvent = Event & {
   prompt: () => Promise<void>;
@@ -595,20 +608,31 @@ export default function App() {
         </footer>
       </aside>
       <main className="map-panel">
-        <MapView
-          items={filtered}
-          center={center}
-          zoom={zoom}
-          selected={selected}
-          position={position}
-          now={now}
-          onSelect={setSelected}
-          onBounds={onBounds}
-          onManual={onManual}
-          onLocate={locate}
-          locating={locating}
-          locateSupported={Boolean(navigator.geolocation)}
-        />
+        <Suspense
+          fallback={
+            <div className="map-stage">
+              <div className="map-loading">
+                <MapPin size={18} />
+                地圖載入中
+              </div>
+            </div>
+          }
+        >
+          <MapView
+            items={filtered}
+            center={center}
+            zoom={zoom}
+            selected={selected}
+            position={position}
+            now={now}
+            onSelect={setSelected}
+            onBounds={onBounds}
+            onManual={onManual}
+            onLocate={locate}
+            locating={locating}
+            locateSupported={Boolean(navigator.geolocation)}
+          />
+        </Suspense>
         <div className="map-top">
           <span className="map-location-pill">
             <span className="flag">{REGIONS[region].country === "JP" ? "🇯🇵" : "🇰🇷"}</span>

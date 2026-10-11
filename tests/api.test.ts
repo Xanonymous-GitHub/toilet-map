@@ -110,6 +110,20 @@ test("The packaged map worker is JavaScript and included in the offline app shel
   assert.match(response.headers.get("content-type") ?? "", /text\/javascript/);
   assert.ok(assets["/sw.js"].body.includes(path), "Offline shell must precache its map worker");
 });
+test("Lazy map chunks stay within their budgets and are included in the offline shell", () => {
+  const chunks = Object.entries(assets).filter(([path]) => /\/assets\/.*\.js$/.test(path));
+  assert.ok(chunks.some(([path]) => /\/maplibre-/.test(path)));
+  assert.ok(chunks.some(([path]) => /\/MapView-/.test(path)));
+  for (const [path, asset] of chunks) {
+    const limit = /\/maplibre-/.test(path) ? 1_100_000 : 500_000;
+    assert.ok(
+      new TextEncoder().encode(asset.body).length <= limit,
+      `${path}: ${limit} byte budget`,
+    );
+    assert.ok(assets["/sw.js"].body.includes(path), `${path} must be available offline`);
+  }
+  assert.doesNotMatch(assets["/index.html"].body, /modulepreload[^>]+maplibre-/);
+});
 test("OSM derivative export includes every source record and its original lineage", async () => {
   const r = await call("/api/v1/osm-export?country=KR");
   assert.equal(r.status, 200);
