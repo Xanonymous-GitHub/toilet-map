@@ -35,7 +35,7 @@ import { ThemeMenu } from "./components/ThemeMenu";
 
 import { ToiletStatus } from "./components/ToiletStatus";
 import { Button } from "./components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "./components/ui/collapsible";
 import { Input } from "./components/ui/input";
 import { NativeSelect, NativeSelectOption } from "./components/ui/native-select";
 import { Toggle } from "./components/ui/toggle";
@@ -68,8 +68,14 @@ const ToiletDetail = lazy(() =>
   import("./components/ToiletDetail").then((module) => ({ default: module.ToiletDetail })),
 );
 
-const MapView = lazy(() =>
-  import("./MapView").catch(() => ({
+const MapView = lazy(async () => {
+  // Let the search controls paint before creating the WebGL context.
+  await new Promise<void>((resolve) => {
+    if (typeof requestIdleCallback === "function")
+      requestIdleCallback(() => resolve(), { timeout: 1000 });
+    else setTimeout(resolve, 0);
+  });
+  return import("./MapView").catch(() => ({
     default: () => (
       <div className="map-stage">
         <div className="map-fallback">
@@ -79,8 +85,8 @@ const MapView = lazy(() =>
         </div>
       </div>
     ),
-  })),
-);
+  }));
+});
 
 type InstallEvent = Event & {
   prompt: () => Promise<void>;
@@ -110,7 +116,7 @@ export default function App() {
   const deferredQuery = useDeferredValue(query);
   const [searchFocus, setSearchFocus] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const [limit, setLimit] = useState(40);
+  const [limit, setLimit] = useState(12);
   const [now, setNow] = useState(() => new Date());
   const [filters, setFilters] = useState<Filters>({
     open: false,
@@ -200,7 +206,7 @@ export default function App() {
       setBounds(null);
       setQuery("");
       setSelected(null);
-      setLimit(40);
+      setLimit(12);
       stopFollowing();
       savePreference("region", next);
       savePreference(`country-${REGIONS[next].country}`, next);
@@ -254,7 +260,7 @@ export default function App() {
   ).slice(0, 6);
   const setFilter = (key: keyof Filters) => {
     setFilters((f) => ({ ...f, [key]: !f[key] }));
-    setLimit(40);
+    setLimit(12);
   };
   const toggleSave = (t: Toilet) => {
     setSaved((old) => {
@@ -309,10 +315,10 @@ export default function App() {
       asChild
     >
       <div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
-        <CollapsibleContent asChild>
-          <aside className="sidebar" aria-label="搜尋與廁所清單">
+        {sidebarOpen && (
+          <aside id="search-sidebar" className="sidebar" aria-label="搜尋與廁所清單">
             <header className="brand-bar">
-              <a className="brand" href="/" aria-label="一點方便首頁">
+              <a className="brand" href="/">
                 <span className="brand-symbol">
                   <MapPin size={23} strokeWidth={2.5} />
                 </span>
@@ -333,7 +339,12 @@ export default function App() {
                 <Info size={21} />
               </Button>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="收起側邊欄">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="收起側邊欄"
+                  aria-controls="search-sidebar"
+                >
                   <PanelLeftClose />
                 </Button>
               </CollapsibleTrigger>
@@ -406,7 +417,6 @@ export default function App() {
                   variant="ghost"
                   type="button"
                   key={country}
-                  aria-label={country === "JP" ? "日本" : "韓國"}
                   className={REGIONS[region].country === country ? "active" : ""}
                   aria-pressed={REGIONS[region].country === country}
                   onClick={() =>
@@ -420,7 +430,9 @@ export default function App() {
                     )
                   }
                 >
-                  <span className="flag">{country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
+                  <span className="flag" aria-hidden="true">
+                    {country === "JP" ? "🇯🇵" : "🇰🇷"}
+                  </span>
                   {country === "JP" ? "日本" : "韓國"}
                   <span className="region-sub">{country === "JP" ? "JAPAN" : "KOREA"}</span>
                 </Button>
@@ -586,9 +598,11 @@ export default function App() {
                       type="button"
                       className="card-main"
                       onClick={() => selectToilet(t)}
-                      aria-label={`查看 ${t.name} 詳情`}
                     >
-                      <span className="wc-icon">WC</span>
+                      <span className="sr-only">查看廁所詳情：</span>
+                      <span className="wc-icon" aria-hidden="true">
+                        WC
+                      </span>
                       <div className="card-content">
                         <div className="card-title-line">
                           <h2>{t.name}</h2>
@@ -638,7 +652,7 @@ export default function App() {
                   variant="ghost"
                   type="button"
                   className="show-more"
-                  onClick={() => setLimit((l) => l + 40)}
+                  onClick={() => setLimit((l) => l + 24)}
                 >
                   顯示更多（目前 {Math.min(limit, visible.length)}／{visible.length}）
                   <ChevronDown size={16} />
@@ -674,7 +688,7 @@ export default function App() {
               </div>
             </footer>
           </aside>
-        </CollapsibleContent>
+        )}
         <main className="map-panel">
           <Suspense
             fallback={
@@ -709,7 +723,12 @@ export default function App() {
             <div className="map-toolbar">
               {!sidebarOpen && (
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="sidebar-trigger" aria-label="展開側邊欄">
+                  <Button
+                    variant="outline"
+                    className="sidebar-trigger"
+                    aria-label="展開側邊欄"
+                    aria-controls="search-sidebar"
+                  >
                     <PanelLeftOpen />
                     <span>搜尋廁所</span>
                   </Button>
@@ -728,6 +747,7 @@ export default function App() {
                 <Button
                   variant="outline"
                   className="map-install"
+                  aria-label="帶著地圖出發"
                   onClick={() => {
                     promotion.dismiss();
                     void triggerInstall();

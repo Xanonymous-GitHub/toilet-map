@@ -4,7 +4,7 @@ import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
 import { scheduleState, type Toilet } from "./core";
 
 maplibregl.setWorkerUrl(mapWorkerUrl);
@@ -207,7 +207,14 @@ export default function MapView(p: Props) {
   }, [p.dark, ready]);
   useEffect(() => {
     const m = map.current;
-    if (ready && m) m.flyTo({ center: p.center, zoom: p.zoom, duration: 800 });
+    if (!ready || !m) return;
+    const current = m.getCenter();
+    if (
+      Math.abs(current.lng - p.center[0]) > 0.000001 ||
+      Math.abs(current.lat - p.center[1]) > 0.000001 ||
+      Math.abs(m.getZoom() - p.zoom) > 0.001
+    )
+      m.flyTo({ center: p.center, zoom: p.zoom, duration: 800 });
   }, [p.center, p.zoom, ready]);
   useEffect(() => {
     const m = map.current;
@@ -229,12 +236,39 @@ export default function MapView(p: Props) {
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
+    const container = holder.current;
+    if (!container) return;
+    let frame = 0;
     const update = () => {
       if (!m.getSource("toilets") || !m.isSourceLoaded("toilets")) return;
       const active = new Set<string>();
-      for (const feature of m.querySourceFeatures("toilets")) {
+      const viewport = container.getBoundingClientRect();
+      const overlays = Array.from(
+        container
+          .closest(".map-panel")
+          ?.querySelectorAll(".map-controls, .map-legend, .map-top, .maplibregl-ctrl-attrib") ?? [],
+        (element) => element.getBoundingClientRect(),
+      );
+      for (const feature of m.queryRenderedFeatures({ layers: ["cluster-circles"] })) {
         const props = feature.properties;
         if (!props?.cluster || feature.geometry.type !== "Point") continue;
+        const point = m.project(feature.geometry.coordinates as [number, number]);
+        const x = point.x + viewport.left;
+        const y = point.y + viewport.top;
+        if (
+          point.x < 22 ||
+          point.y < 22 ||
+          point.x > viewport.width - 22 ||
+          point.y > viewport.height - 22 ||
+          overlays.some(
+            (rect) =>
+              x + 22 > rect.left &&
+              x - 22 < rect.right &&
+              y + 22 > rect.top &&
+              y - 22 < rect.bottom,
+          )
+        )
+          continue;
         const id = String(props.cluster_id);
         if (active.has(id)) continue;
         active.add(id);
@@ -242,7 +276,7 @@ export default function MapView(p: Props) {
           const btn = document.createElement("button");
           btn.className = "cluster-label";
           btn.textContent = String(props.point_count_abbreviated);
-          btn.setAttribute("aria-label", `放大查看 ${props.point_count} 間廁所`);
+          btn.setAttribute("aria-label", `放大查看 ${props.point_count_abbreviated} 間廁所`);
           const coords = feature.geometry.coordinates as [number, number];
           btn.onclick = async () => {
             const zoom = await (
@@ -259,9 +293,16 @@ export default function MapView(p: Props) {
         }
         const marker = clusters.current.get(id);
         if (!marker) continue;
-        marker.setLngLat(feature.geometry.coordinates as [number, number]);
-        marker.getElement().textContent = String(props.point_count_abbreviated);
-        marker.getElement().setAttribute("aria-label", `放大查看 ${props.point_count} 間廁所`);
+        const coordinates = feature.geometry.coordinates as [number, number];
+        const previous = marker.getLngLat();
+        if (previous.lng !== coordinates[0] || previous.lat !== coordinates[1])
+          marker.setLngLat(coordinates);
+        const element = marker.getElement();
+        const count = String(props.point_count_abbreviated);
+        if (element.textContent !== count) {
+          element.textContent = count;
+          element.setAttribute("aria-label", `放大查看 ${count} 間廁所`);
+        }
         marker.getElement().onclick = async () => {
           const zoom = await (
             m.getSource("toilets") as maplibregl.GeoJSONSource
@@ -281,9 +322,22 @@ export default function MapView(p: Props) {
           clusters.current.delete(id);
         }
     };
-    m.on("render", update);
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    const sourceChanged = (event: maplibregl.MapSourceDataEvent) => {
+      if (event.sourceId === "toilets") schedule();
+    };
+    m.on("idle", schedule);
+    m.on("moveend", schedule);
+    m.on("sourcedata", sourceChanged);
+    schedule();
     return () => {
-      m.off("render", update);
+      cancelAnimationFrame(frame);
+      m.off("idle", schedule);
+      m.off("moveend", schedule);
+      m.off("sourcedata", sourceChanged);
     };
   }, [ready]);
   useEffect(() => {
@@ -320,83 +374,85 @@ export default function MapView(p: Props) {
     };
   }, [p.position, ready]);
   return (
-    <div className="map-stage">
-      <section className="map-canvas" ref={holder} aria-label="公廁位置地圖" />
-      {failed && (
-        <div className="map-fallback">
-          <MapIcon size={34} />
-          <strong>這個裝置無法顯示互動地圖</strong>
-          <p>仍可用下方清單搜尋、查看資訊與導航。</p>
-        </div>
-      )}
-      {tileError && !failed && (
-        <div className="map-network-note">底圖暫時無法載入，廁所清單仍可使用。</div>
-      )}
-      <div className="map-controls">
-        <div className="zoom-controls">
+    <TooltipProvider delayDuration={350}>
+      <div className="map-stage">
+        <section className="map-canvas" ref={holder} aria-label="公廁位置地圖" />
+        {failed && (
+          <div className="map-fallback">
+            <MapIcon size={34} />
+            <strong>這個裝置無法顯示互動地圖</strong>
+            <p>仍可用下方清單搜尋、查看資訊與導航。</p>
+          </div>
+        )}
+        {tileError && !failed && (
+          <div className="map-network-note">底圖暫時無法載入，廁所清單仍可使用。</div>
+        )}
+        <div className="map-controls">
+          <div className="zoom-controls">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  aria-label="放大地圖"
+                  onClick={() => {
+                    p.onManual();
+                    map.current?.zoomIn();
+                  }}
+                >
+                  <Plus size={19} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">放大地圖</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  aria-label="縮小地圖"
+                  onClick={() => {
+                    p.onManual();
+                    map.current?.zoomOut();
+                  }}
+                >
+                  <Minus size={19} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">縮小地圖</TooltipContent>
+            </Tooltip>
+          </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
                 size="icon"
                 type="button"
-                aria-label="放大地圖"
-                onClick={() => {
-                  p.onManual();
-                  map.current?.zoomIn();
-                }}
+                className={`locate-control ${p.locating ? "locating" : ""}`}
+                aria-label="定位目前位置"
+                disabled={p.locating || !p.locateSupported}
+                onClick={p.onLocate}
               >
-                <Plus size={19} />
+                <LocateFixed size={22} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">放大地圖</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                aria-label="縮小地圖"
-                onClick={() => {
-                  p.onManual();
-                  map.current?.zoomOut();
-                }}
-              >
-                <Minus size={19} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">縮小地圖</TooltipContent>
+            <TooltipContent side="left">定位目前位置</TooltipContent>
           </Tooltip>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              type="button"
-              className={`locate-control ${p.locating ? "locating" : ""}`}
-              aria-label="定位目前位置"
-              disabled={p.locating || !p.locateSupported}
-              onClick={p.onLocate}
-            >
-              <LocateFixed size={22} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left">定位目前位置</TooltipContent>
-        </Tooltip>
-      </div>
-      <div className="map-legend">
-        <span className="legend-dot open" />
-        時段開放 <span className="legend-dot unknown" />
-        時間未知 <span className="legend-dot closed" />
-        非開放時段
-      </div>
-      {!ready && !failed && (
-        <div className="map-loading">
-          <MapPin size={18} />
-          地圖載入中
+        <div className="map-legend">
+          <span className="legend-dot open" />
+          時段開放 <span className="legend-dot unknown" />
+          時間未知 <span className="legend-dot closed" />
+          非開放時段
         </div>
-      )}
-    </div>
+        {!ready && !failed && (
+          <div className="map-loading">
+            <MapPin size={18} />
+            地圖載入中
+          </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }

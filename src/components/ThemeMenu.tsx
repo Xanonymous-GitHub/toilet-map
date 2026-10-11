@@ -1,47 +1,25 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import type { Theme } from "../theme";
-import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { NativeSelect, NativeSelectOption } from "./ui/native-select";
 
 export function ThemeMenu({ theme, onChange }: { theme: Theme; onChange: (theme: Theme) => void }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" aria-label="切換外觀" className="toolbar-button">
-          {theme === "system" ? <Monitor /> : theme === "dark" ? <Moon /> : <Sun />}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>外觀</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(value) => {
-            if (value === "light" || value === "dark" || value === "system") onChange(value);
-          }}
-        >
-          <DropdownMenuRadioItem value="light">
-            <Sun />
-            淺色
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
-            <Moon />
-            深色
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
-            <Monitor />
-            跟隨系統
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="theme-picker" title="切換外觀">
+      <span className="theme-symbol" aria-hidden="true">
+        {theme === "system" ? <Monitor /> : theme === "dark" ? <Moon /> : <Sun />}
+      </span>
+      <NativeSelect
+        aria-label="切換外觀"
+        value={theme}
+        onChange={(event) => {
+          const value = event.target.value;
+          if (value === "light" || value === "dark" || value === "system") onChange(value);
+        }}
+      >
+        <NativeSelectOption value="light">淺色</NativeSelectOption>
+        <NativeSelectOption value="dark">深色</NativeSelectOption>
+        <NativeSelectOption value="system">跟隨系統</NativeSelectOption>
+      </NativeSelect>
+    </div>
   );
 }

@@ -614,6 +614,32 @@ a {
   pointer-events: auto;
   box-shadow: var(--shadow);
 }
+.theme-picker {
+  position: relative;
+}
+.theme-picker select {
+  width: 64px;
+  height: 42px;
+  font-size: 0;
+  background: var(--card);
+  border-color: var(--border);
+  cursor: pointer;
+}
+.theme-picker option {
+  font-size: 14px;
+}
+.theme-symbol {
+  position: absolute;
+  inset: 0 auto 0 12px;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  pointer-events: none;
+}
+.theme-symbol svg {
+  width: 18px;
+  height: 18px;
+}
 .map-location-pill {
   display: flex;
   align-items: center;

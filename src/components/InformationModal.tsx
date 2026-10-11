@@ -29,9 +29,7 @@ export function InformationModal({ mode, sources, onClose }: Props) {
           <MapPin size={23} />
         </span>
         <DialogTitle asChild>
-          <h2 id="modal-title">
-            {mode === "sources" ? "每一點，都有出處。" : "把方便，帶在身邊。"}
-          </h2>
+          <h2>{mode === "sources" ? "每一點，都有出處。" : "把方便，帶在身邊。"}</h2>
         </DialogTitle>
         {mode === "sources" ? (
           <>

@@ -5,6 +5,7 @@ import {
   distanceMeters,
   type Filters,
   inferRegion,
+  localMinutes,
   matchesFilters,
   navigationUrl,
   parseHours,
@@ -21,6 +22,16 @@ const snapshot = JSON.parse(
 const t = (hoursRaw: string) => ({ hoursRaw, timezone: "Asia/Seoul" }) as const;
 const at = (localHour: number, minute = 0) =>
   new Date(Date.UTC(2026, 9, 11, localHour - 9, minute));
+test("Shared schedule clocks stay correct across timezones and changing dates", () => {
+  const date = at(23, 59);
+  assert.equal(localMinutes(date, "Asia/Tokyo"), 1439);
+  assert.equal(localMinutes(date, "Asia/Seoul"), 1439);
+  assert.equal(localMinutes(date, "UTC"), 899);
+  date.setUTCMinutes(date.getUTCMinutes() + 1);
+  assert.equal(localMinutes(date, "Asia/Tokyo"), 0);
+  assert.equal(localMinutes(date, "Asia/Seoul"), 0);
+  assert.equal(localMinutes(date, "UTC"), 900);
+});
 test("Korean 25:00 schedule includes 00:30 on following day, closes at 01:00", () => {
   assert.equal(scheduleState(t("기타|06:00~25:00|"), at(0, 30)), "open");
   assert.equal(scheduleState(t("기타|06:00~25:00|"), at(1)), "closed");

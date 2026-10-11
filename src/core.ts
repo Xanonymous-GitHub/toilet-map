@@ -175,17 +175,34 @@ export function distanceMeters(a: { lat: number; lon: number }, b: { lat: number
 export function formatDistance(m: number) {
   return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
 }
+const clocks = new Map<
+  string,
+  { formatter: Intl.DateTimeFormat; timestamp: number; minutes: number }
+>();
+
 export function localMinutes(date: Date, timezone: string) {
-  const p = new Intl.DateTimeFormat("en-GB", {
-    timeZone: timezone,
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date);
-  return (
+  let clock = clocks.get(timezone);
+  if (!clock) {
+    clock = {
+      formatter: new Intl.DateTimeFormat("en-GB", {
+        timeZone: timezone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }),
+      timestamp: Number.NaN,
+      minutes: 0,
+    };
+    clocks.set(timezone, clock);
+  }
+  const timestamp = date.getTime();
+  if (clock.timestamp === timestamp) return clock.minutes;
+  const p = clock.formatter.formatToParts(date);
+  clock.minutes =
     Number(p.find((x) => x.type === "hour")?.value) * 60 +
-    Number(p.find((x) => x.type === "minute")?.value)
-  );
+    Number(p.find((x) => x.type === "minute")?.value);
+  clock.timestamp = timestamp;
+  return clock.minutes;
 }
 export function parseHours(raw: string): [number, number][] | null {
   if (!raw?.trim()) return null;

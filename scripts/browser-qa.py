@@ -202,9 +202,8 @@ with sync_playwright() as pw:
     )
     page.get_by_role("button", name="展開側邊欄", exact=True).click()
     expect(page.locator(".sidebar")).to_be_visible()
-    page.get_by_role("button", name="切換外觀", exact=True).click()
-    page.get_by_role("menuitemradio", name="深色", exact=True).click()
-    page.wait_for_function("document.documentElement.classList.contains('dark')")
+    page.get_by_role("combobox", name="切換外觀", exact=True).select_option("dark")
+    page.wait_for_function("() => document.documentElement.classList.contains('dark')")
     check(
         "Dark mode is persisted and applied to the whole app",
         page.evaluate("localStorage.getItem('theme') === JSON.stringify('dark')"),
@@ -215,8 +214,13 @@ with sync_playwright() as pw:
         "Saved dark preference survives reload",
         page.evaluate("document.documentElement.classList.contains('dark')"),
     )
-    page.get_by_role("button", name="切換外觀", exact=True).click()
-    page.get_by_role("menuitemradio", name="淺色", exact=True).click()
+    page.get_by_role("combobox", name="切換外觀", exact=True).select_option("light")
+    page.get_by_role("combobox", name="切換外觀", exact=True).select_option("system")
+    page.emulate_media(color_scheme="dark")
+    page.wait_for_function("() => document.documentElement.classList.contains('dark')")
+    page.emulate_media(color_scheme="light")
+    page.wait_for_function("() => !document.documentElement.classList.contains('dark')")
+    check("System appearance updates without a reload")
     expect(page.locator(".map-loading")).to_have_count(0, timeout=20000)
     check(
         "Desktop map controls sit at the bottom",
@@ -261,10 +265,10 @@ with sync_playwright() as pw:
     expect(page.locator(".footer-meta")).to_contain_text(expected_count("seoul"), timeout=20000)
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
     check("Granted GPS moves to Seoul and loads the complete city dataset")
-    page.wait_for_function("window.__watchStarts > 0")
+    page.wait_for_function("() => window.__watchStarts > 0")
     wait_for_viewport(page, "seoul")
     page.get_by_role("button", name="放大地圖", exact=True).click()
-    page.wait_for_function("window.__watchStops > 0")
+    page.wait_for_function("() => window.__watchStops > 0")
     check("Manual map zoom stops GPS following and clears its watcher")
     with page.expect_response(lambda response: "/api/v1/toilets?region=seoul" in response.url):
         page.get_by_role("button", name="重新取得資料", exact=True).click()
@@ -289,6 +293,8 @@ with sync_playwright() as pw:
     page.get_by_role("button", name="關閉廁所詳細資訊").click()
     page.get_by_role("button", name="資料來源與使用說明").click()
     expect(page.get_by_role("heading", name="每一點，都有出處。")).to_be_visible()
+    expect(page.get_by_role("dialog", name="每一點，都有出處。", exact=True)).to_be_visible()
+    check("Source dialog has an accessible name")
     check("Source attribution and caveats are visible", page.locator(".source-row").count() == 6)
     page.keyboard.press("Shift+Tab")
     check(
@@ -306,7 +312,7 @@ with sync_playwright() as pw:
     page.locator(".search-results button").first.click()
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=10000)
     check("Place search changes the viewport and updates nearby list")
-    page.wait_for_function("navigator.serviceWorker.controller !== null", timeout=20000)
+    page.wait_for_function("() => navigator.serviceWorker.controller !== null", timeout=20000)
     check("Service worker controls the app")
     page.wait_for_timeout(1000)
     cached_count = re.search(r"[\d,]+", page.locator(".footer-meta").inner_text()).group()
@@ -327,7 +333,9 @@ with sync_playwright() as pw:
         ("韓國", "busan"),
         ("韓國", "jeju"),
     ]:
-        page.get_by_role("button", name=country, exact=True).click()
+        page.get_by_role(
+            "button", name=f"{country} {'JAPAN' if country == '日本' else 'KOREA'}", exact=True
+        ).click()
         page.get_by_role("combobox", name="選擇城市").select_option(city)
         expect(page.locator(".footer-meta")).to_contain_text(expected_count(city), timeout=20000)
         expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
@@ -339,7 +347,7 @@ with sync_playwright() as pw:
     expect(page.get_by_role("combobox", name="選擇城市")).to_have_value("busan")
     expect(page.locator(".footer-meta")).to_contain_text(expected_count("busan"), timeout=20000)
     check("GPS in Busan selects Busan instead of the capital")
-    page.get_by_role("button", name="日本", exact=True).click()
+    page.get_by_role("button", name="日本 JAPAN", exact=True).click()
     expect(page.get_by_role("combobox", name="選擇城市")).to_have_value("sapporo")
     check("Switching countries remembers the last selected city")
     page.get_by_role("combobox", name="選擇城市").select_option("osaka")
@@ -373,6 +381,19 @@ with sync_playwright() as pw:
         page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
     )
     page.screenshot(path=str(out / "mobile.png"))
+    page.get_by_role("button", name="收起側邊欄", exact=True).click()
+    expect(page.locator(".sidebar")).to_have_count(0)
+    expect(page.get_by_role("button", name="展開側邊欄", exact=True)).to_be_visible()
+    page.wait_for_timeout(250)
+    check(
+        "Mobile collapsed map fills the viewport without overflow",
+        page.locator(".maplibregl-canvas").bounding_box()["width"] == 390
+        and page.locator(".map-panel").bounding_box()["height"] == 844
+        and page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
+    )
+    page.get_by_role("combobox", name="切換外觀", exact=True).select_option("dark")
+    page.screenshot(path=str(out / "mobile-dark-collapsed.png"))
+    page.get_by_role("button", name="展開側邊欄", exact=True).click()
     page.get_by_role("button", name="定位目前位置", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("定位權限未開啟", timeout=15000)
     check("Denied GPS gives a useful message and keeps the map usable")
