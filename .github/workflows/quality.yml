@@ -47,6 +47,15 @@ jobs:
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
+      - name: Save platform compatibility evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: deployment-checks
+          path: |
+            test-results/deployment-report.json
+            test-results/netlify-package.json
+          retention-days: 14
+          if-no-files-found: error
 
   browser:
     name: Desktop, mobile and offline browser checks

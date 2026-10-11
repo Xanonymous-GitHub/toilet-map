@@ -23,9 +23,15 @@ bun run preview
 
 建置產物 `dist/server/index.js` 是 Cloudflare Worker ESM，內含前端資產及經驗證的資料快照。公廁依國家及 0.25° 空間格分塊壓縮；每個請求只解壓與範圍交集的格子，解壓快取上限為 8,000 筆。前端只載入選定城市與周邊／最近地圖範圍，不預載全國資料。`dist/.openai/hosting.json` 保留 Sites 專案 ID。前端為 React / TypeScript / MapLibre；後端不需要資料庫或私有地圖 API key。
 
+## 外觀與部署
+
+側邊欄可收起並記住偏好；支援淺色、深色與跟隨系統。地圖控制項放在底部，安裝提醒會自動收起，仍可由頁尾加入主畫面。按鈕、篩選、原生選單、說明與詳細資訊使用官方 shadcn UI 元件。
+
+Netlify／Vercel 的設定與 API adapter 已加入並通過官方打包及 Node handler 檢查，可匯入 repository 部署；尚未替使用者在這兩個平台正式發布。完整步驟見 [部署說明](docs/DEPLOYMENT.md)。
+
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、23 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、27 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
 
 | 指令 | 用途 |
 | --- | --- |
@@ -36,15 +42,16 @@ bun run preview
 | `bun run test` | Bun 與 Python 測試；API／PWA 測試須先建置 |
 | `bun run verify` | 建置、check、test 的完整必要關卡 |
 | `bun run test:browser` | 已啟動的正式預覽上執行桌面、手機與離線檢查 |
-| `bun run deps:check` | 查核 15 項直接套件／工具的最新穩定版 |
+| `bun run test:performance` | 已啟動的正式預覽上量測冷啟動 Lighthouse，產生 JSON／HTML 報告 |
+| `bun run deps:check` | 查核 32 項直接套件／工具的最新穩定版 |
 | `bun run format` | 寫入格式與可自動修正的 lint 結果 |
 | `bun run data:expand` | 從已查證快照重現全國資料；不是網路重新下載 |
 
 - Biome：JavaScript／TypeScript／TSX／CSS／JSON 格式與 recommended lint；警告視為失敗。
 - Ruff：Python 的 E／F／I／B／UP／SIM 規則與格式檢查。
 - TypeScript：strict、未使用變數／參數、switch fallthrough；Service Worker 使用獨立 WebWorker 型別設定。
-- 定位與資料載入拆成獨立 hooks，詳細資訊與原生 dialog 拆成 UI 元件。分頁拒絕重複 ID、截斷資料、循環游標與混用版本。
-- 前端由 Vite 建置，Worker 與 Service Worker 由 Bun 原生打包。快取版本依資產內容與資料版本產生，相同輸入可重複建置。
+- 定位與資料載入拆成獨立 hooks，詳細資訊與 shadcn Dialog／Sheet 拆成 UI 元件。分頁拒絕重複 ID、截斷資料、循環游標與混用版本。
+- 前端由 Vite 建置，Worker 與 Service Worker 由 Rolldown 打包。快取版本依資產內容與資料版本產生，相同輸入可重複建置。
 - 地圖元件延後載入，下載失敗仍可操作清單與詳細資訊。每個應用程式 chunk 上限 500,000 bytes，MapLibre 的單一預打包模組上限 1,100,000 bytes；超標會使建置失敗，所有延後載入的 chunks 都加入離線 shell。
 - CSS 的 `noDescendingSpecificity` 在單一 stylesheet 停用：它會將不同元件的 `button`／`span` 規則誤判為衝突，也無法判定預期的響應式覆寫。其他 Biome recommended 規則保持啟用。
 
@@ -91,4 +98,4 @@ bun run test
 
 ## 瀏覽器驗證
 
-先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。36 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖／字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。45 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。

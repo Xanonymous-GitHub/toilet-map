@@ -1,23 +1,36 @@
-# 全國覆蓋版驗證紀錄
+# UI、部署與全國覆蓋驗證紀錄
 
-工具鏈與應用程式重新驗證日期：2026-10-12（Asia/Taipei）。資料快照與來源探勘日期仍為 2026-10-11，未重新下載或改變發布資料；測試報告的機器時間保留 UTC。本版整合日韓全國 OSM 及地方官方來源，提供 181 個城市與周邊快捷範圍。
+本輪驗證日期：2026-10-11（UTC）。從 GitHub 最新 main `84ce447` 開始修正；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
 
-## 已通過
+## 工具鏈與建置
 
-- `bun install --frozen-lockfile` 與 `uv sync --locked`：鎖檔可重複安裝。
-- `bun run verify`：Bun／Vite 正式建置、chunk 大小預算、Biome recommended lint（warnings 視為失敗）、Ruff lint 與 format check、TypeScript strict（含獨立 Service Worker 型別），以及 **23 項 Bun 原生測試與 4 項 Python 回歸測試**通過。`lint`、`typecheck`、`check`、`test` 與 `format` 也分別執行；型別與 API 測試在建置產生 generated modules 後執行。
-- API 逐一查詢全部 181 城市，確認有實際候選、筆數對帳、國家一致與 bounds 內座標。首爾 5,952 筆候選的完整分頁沒有漏頁或重複 ID；以首爾 region 查詢釜山 bbox 也可取得該國其他城市資料。
-- 測試涵蓋非首都及離島定位、開放時間與跨午夜、韓國 `25:00`、星期／假日條件保留未知、資格與設施未知、導航格式，以及拒絕重複／循環／截斷／混用版本或 bounds 的分頁。
-- 非法參數、過大範圍、加上 fetch padding 後的範圍上限、HEAD／405、PWA MIME／快取及完整 OSM 原始／衍生匯出均通過。
-- `bun run deps:check`：15 項直接套件／工具版本均與官方最新穩定版一致，見 `dependency-versions.json`；MapLibre 為 6.14.0。GitHub Actions 維持 2026-10-11 向官方 release 查證並固定的版本。
-- `bun run data:expand` 重跑後，`git diff --exit-code -- data docs/coverage.json` 無差異，仍為 45,867 筆有效來源紀錄與相同資料版本。2026-10-11 的兩個匯入器及獨立乾淨目錄驗證屬歷史紀錄；此次 checkout 缺少 ignored 東京／首爾原始檔，`import-data.py` 因缺少必要檔案而拒絕執行，未使用 `--refresh` 變更資料。公開下載 metadata、SHA-256 與欄位稽核隨研究目錄保存。
-- Chromium **36 項完整檢查**以真實公開圖磚與 CI 固定 PNG 圖磚模式通過，包含相模原、倉敷、大阪、札幌、金浦、釜山、濟州切換；釜山 GPS 正確選擇釜山；國家切換記住上次城市；拖曳超出初始範圍發出新的 bbox 請求。縮放與拖曳前等待目的地 viewport，修正資料載入早於地圖飛行完成的測試競態。
-- 桌面 1440×1000／手機 viewport 390×844，確認地圖及實際聚合標記、詳細資訊、導航、收藏、定位權限、篩選、來源、搜尋、Service Worker、離線清單、手機捲動與安裝說明。手動縮放會停止 watcher，晚到定位不會覆蓋使用者選擇，損壞收藏可復原。
-- 原生 dialog 的鍵盤檢查確認背景控制項不會取得焦點，符合 modal 的 inert 行為。沒有未處理的 JavaScript 或地圖 Worker 載入錯誤。
-- 新增地圖模組下載失敗檢查：刻意阻斷 MapLibre chunk 時顯示 fallback，廁所清單與詳細資訊仍可操作；沒有應用程式 console warnings。
-- 2026-10-11 的底圖警示修正另以 **2 項定向瀏覽器檢查**通過：實際阻斷圖磚請求仍可使用廁所清單；解除阻斷後取得 25 個經 CA 驗證的真實 OSM 圖磚，舊警示會清除。`map-recovery-report.json` 保留當時版本的歷史證據，未將其 hash 當成本次建置。
+- Bun 1.4.3、Python 3.15.0 final、uv 0.13.0、TypeScript 7.0.2、Vite 8.3.4、Biome 2.5.15、Ruff 0.17.0、Playwright 1.63.0、Chromium 154。
+- TypeScript／前端／Worker target 為 ESNext，Python 最低版本 3.15，Ruff target py315。32 項直接套件／工具均向官方查證為最新穩定版，見 `dependency-versions.json`；沒有依賴刷新 workflow。
+- `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、27 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
+- 正式 JS 的 AST 沒有註解，CSS 不含註解，JSON／manifest 等於 compact JSON.stringify；HTML／SVG 亦壓縮。開源聲明另存 `third-party-licenses.json`，可從使用說明開啟。
+- 初始程式約 277 KB（gzip 90 KB），延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
+- 正式建置由 Vite／Rolldown、Lightning CSS、cssnano、SVGO 與 html-minifier-terser 壓縮；Netlify Function 使用 Terser 設定解決官方 route scanner 的字串語法限制。
 
-機器可讀結果：`browser-report.json`（本次真實圖磚）、`browser-fixture-report.json`（本次 CI 模式）、`dependency-versions.json`，以及歷史 `map-recovery-report.json`。完整操作程式為 `scripts/browser-qa.py`；截圖保存於 ignored `test-results/`。正式建置沒有 chunk 大小警告：初始程式 gzip 約 94 KB、延後載入的 MapView 約 3 KB、MapLibre 約 283 KB；地圖 Worker 原始約 508 KB。每個應用程式 chunk 的 500,000 bytes 與 MapLibre 的 1,100,000 bytes 預算由建置強制檢查，所有延後載入 chunks 都納入 PWA precache。尚未量測低速行動網路效能。CI workflow 已配置，並在本地執行相同的必要關卡；未於此次工作觸發遠端 GitHub Actions。
+## 平台與瀏覽器
+
+Netlify 最新官方 packager 實際打包出 API v2 Function 與 `/api/*` 路由，ZIP 約 2.4 MB。兩個平台的 Web handler 在 Node 24 執行通過，包含釜山、HEAD、非法國家、下載 303 與 Vercel rewrite。報告為 `deployment-report.json`。沒有在使用者的 Netlify／Vercel 帳號正式部署；匯入 repository 即可使用已提交的設定，見 [DEPLOYMENT.md](DEPLOYMENT.md)。
+
+Chromium 45 項檢查涵蓋桌面 1440×1000、手機 390×844、深淺色與跟隨系統、偏好重新載入、桌面／手機側邊欄收合後地圖尺寸、底部控制、安裝提醒自動收起、聚合點選、搜尋、來源 modal 的名稱與鍵盤焦點、詳細資訊、導航、收藏、GPS 拒絕／晚到回呼、非首都與離島切換、拖曳新範圍、離線重新開啟與地圖 chunk 失敗回復。
+
+固定圖磚與真實 OSM 模式分別留存 `browser-fixture-report.json`、`browser-report.json`；固定圖磚只替換外部圖像，API、真實資料、MapLibre、Worker、PWA、定位回呼均為正式建置。console 保留預期離線／刻意下載失敗的網路錯誤；只允許精確匹配軟體 WebGL 的 GPU stall 警告，不允許應用程式警告或未處理錯誤。
+
+## Lighthouse
+
+`bun run test:performance` 使用 Lighthouse 13.5.0、冷啟動 browser profiles、固定圖磚、gzip 預覽、Chromium 軟體 WebGL，以及標準手機／桌面模擬節流。可重跑的程式為 `scripts/performance-qa.py`，完整 JSON／HTML 在 `test-results/`，摘要為 `performance-report.json`。
+
+| 模式 | Performance | Accessibility | Best practices | LCP | TBT | CLS |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| mobile | 66 | 100 | 100 | 2.64 s | 2766 ms | 0 |
+| desktop | 66 | 100 | 100 | 0.56 s | 1161 ms | 0 |
+
+首屏移除同步側邊欄量測；地圖在空閒時初始化，清單首批渲染 12 張卡片而保留完整資料。工具提示隨地圖載入，說明與詳細資訊延後載入，外觀使用 shadcn 原生選單。時區時計共用、聚合不再每幀查詢，移除多餘初始 flyTo；沒有為取得分數停用地圖或縮減來源覆蓋。
+
+無障礙與最佳實務通過，但手機 LCP 尚略高於 2.5 秒目標，TBT 也仍超過目標。CPU profile 顯示軟體 WebGL context 建立占用大量同步時間。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
 
 ## 資料驗證
 
@@ -39,12 +52,9 @@
 
 未知的免費、設備、使用資格及複雜時段保持未知。開放狀態依官方或 OSM 時段推估，沒有現場即時查核來源。
 
-## 測試環境與實機範圍
 
-本次使用 macOS、Bun 1.4.3、Python 3.15.0、uv 0.12.23 與 Playwright 管理的 Chromium。沒有 HTTP／HTTPS 代理時由瀏覽器直接載入公開圖磚／字型，保留 TLS 驗證與正常 HTTP 快取；不再以同步 Python 下載逐一阻塞圖磚，避免真實圖磚模式逾時。CI 模式攔截底圖為固定 PNG，使用系統字型。
+## 範圍限制
 
-2026-10-11 的代理環境使用 CA 驗證來源橋接器；程式保留此模式，僅設定代理時啟用，未修改永久 TLS 信任或關閉瀏覽器 TLS 驗證。離線階段停用橋接器並設定 browser offline，API 失敗後由 IndexedDB 恢復最近下載的相同範圍。離線及刻意阻斷地圖模組的網路錯誤為預期行為。Chromium 軟體 WebGL 截圖可能記錄 `GPU stall due to ReadPixels`；報告保留這些驅動診斷，只允許精確匹配的訊息，其他 console warnings 使檢查失敗。
+本輪在 Linux／受信任 CA 代理環境驗證。真實圖磚經 CA 驗證橋接器，不關閉 TLS 驗證；離線測試停用橋接器並使用 browser offline。字型使用裝置系統字型，沒有 Google Fonts 請求。
 
-瀏覽器使用模擬座標及手機 viewport。尚未在真實 iPhone／Android 確認 GPS 精度、主畫面安裝與地圖 App 交接。導航 URL 格式已驗證；OS 是否開啟 App 取決於安裝情況與預設設定。
-
-已瀏覽的最近範圍可離線重開；底圖不預下載、不加入 Service Worker 離線快取。資料更新由匯入器執行後重新部署，本版沒有每日背景排程。
+手機 viewport 與模擬座標不代表已在真實 iPhone／Android 確認 GPS 精度、安裝與外部 App 交接。導航 URL 格式已驗證，OS 如何開啟 App 仍取決於安裝與預設設定。已瀏覽最近範圍可離線重開，底圖與外部導航需要網路。沒有每日背景資料更新排程。

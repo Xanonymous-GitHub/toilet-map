@@ -1,6 +1,6 @@
 # GitHub Actions
 
-[Quality 執行紀錄](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml) · [依賴版本檢查](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/dependencies.yml)
+[Quality 執行紀錄](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml)
 
 ## 每次提交與 Pull Request
 
@@ -8,14 +8,14 @@
 
 | Job | 檢查 |
 | --- | --- |
-| Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置與 chunk 大小預算、Biome、Ruff lint／format、TypeScript strict、23 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
-| Desktop, mobile and offline browser checks | Playwright Chromium 的 36 項檢查，含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、手機排版、離線重開與地圖模組下載失敗 |
+| Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置、大小與壓縮／註解檢查、Netlify 實際打包、Vercel handler、Biome、Ruff lint／format、TypeScript strict、27 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
+| Desktop, mobile and offline browser checks | Playwright Chromium 的 45 項檢查，含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、手機排版、深淺色／系統切換、側邊欄收合、安裝提醒、離線重開與地圖模組下載失敗 |
 
 Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 0.13.0。Actions 固定完整 commit SHA，註解保留已查證的 release 版本標籤。Workflow 僅需要 `contents: read`；新提交會取消同一 ref 的舊執行。
 
-瀏覽器 CI 的底圖使用提交的固定 PNG 圖磚，字型使用系統 fallback。公廁資料、API、MapLibre Worker、定位回呼與 PWA 資產使用真正的本機正式建置，外部導航檢查 URL。這個模式驗證 App 操作與離線流程；一般 `bun run test:browser` 使用真實公開圖磚，沒有代理時由瀏覽器直接以 TLS 驗證載入，有代理時使用 CA 驗證橋接器。驗證範圍見 [VALIDATION.md](VALIDATION.md)。
+瀏覽器 CI 的底圖使用提交的固定 PNG 圖磚，字型使用系統字型。公廁資料、API、MapLibre Worker、定位回呼與 PWA 資產使用真正的本機正式建置，外部導航檢查 URL。這個模式驗證 App 操作與離線流程；一般 `bun run test:browser` 使用真實公開圖磚，沒有代理時由瀏覽器直接以 TLS 驗證載入，有代理時使用 CA 驗證橋接器。驗證範圍見 [VALIDATION.md](VALIDATION.md)。
 
-成功建置保存 `production-build` artifact；瀏覽器 job 無論成功或失敗，都保存報告、截圖及 preview log 到 `browser-results`。Artifacts 保留 14 天。
+成功建置保存 `production-build` 與 `deployment-checks` artifacts；瀏覽器 job 無論成功或失敗，都保存報告、截圖及 preview log 到 `browser-results`。Artifacts 保留 14 天。
 
 ## 依賴版本
 

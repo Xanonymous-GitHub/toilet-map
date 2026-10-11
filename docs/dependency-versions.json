@@ -1,6 +1,20 @@
 {
-  "checkedAt": "2026-10-11T16:17:06.140706+00:00",
+  "checkedAt": "2026-10-11T17:05:00.438507+00:00",
   "dependencies": [
+    {
+      "name": "class-variance-authority",
+      "ecosystem": "javascript",
+      "pinned": "0.7.1",
+      "latestStable": "0.7.1",
+      "current": true
+    },
+    {
+      "name": "cn",
+      "ecosystem": "javascript",
+      "pinned": "0.4.0",
+      "latestStable": "0.4.0",
+      "current": true
+    },
     {
       "name": "lucide-react",
       "ecosystem": "javascript",
@@ -13,6 +27,13 @@
       "ecosystem": "javascript",
       "pinned": "6.14.0",
       "latestStable": "6.14.0",
+      "current": true
+    },
+    {
+      "name": "radix-ui",
+      "ecosystem": "javascript",
+      "pinned": "1.7.0",
+      "latestStable": "1.7.0",
       "current": true
     },
     {
@@ -30,6 +51,48 @@
       "current": true
     },
     {
+      "name": "@biomejs/biome",
+      "ecosystem": "javascript",
+      "pinned": "2.5.15",
+      "latestStable": "2.5.15",
+      "current": true
+    },
+    {
+      "name": "@rollup/plugin-terser",
+      "ecosystem": "javascript",
+      "pinned": "1.0.0",
+      "latestStable": "1.0.0",
+      "current": true
+    },
+    {
+      "name": "@tailwindcss/vite",
+      "ecosystem": "javascript",
+      "pinned": "4.3.3",
+      "latestStable": "4.3.3",
+      "current": true
+    },
+    {
+      "name": "@types/bun",
+      "ecosystem": "javascript",
+      "pinned": "1.4.2",
+      "latestStable": "1.4.2",
+      "current": true
+    },
+    {
+      "name": "@types/html-minifier-terser",
+      "ecosystem": "javascript",
+      "pinned": "7.0.2",
+      "latestStable": "7.0.2",
+      "current": true
+    },
+    {
+      "name": "@types/node",
+      "ecosystem": "javascript",
+      "pinned": "26.6.5",
+      "latestStable": "26.6.5",
+      "current": true
+    },
+    {
       "name": "@types/react",
       "ecosystem": "javascript",
       "pinned": "19.3.0",
@@ -44,20 +107,6 @@
       "current": true
     },
     {
-      "name": "@types/node",
-      "ecosystem": "javascript",
-      "pinned": "26.6.5",
-      "latestStable": "26.6.5",
-      "current": true
-    },
-    {
-      "name": "@types/bun",
-      "ecosystem": "javascript",
-      "pinned": "1.4.2",
-      "latestStable": "1.4.2",
-      "current": true
-    },
-    {
       "name": "@vitejs/plugin-react",
       "ecosystem": "javascript",
       "pinned": "6.1.2",
@@ -65,10 +114,73 @@
       "current": true
     },
     {
-      "name": "vite",
+      "name": "cssnano",
       "ecosystem": "javascript",
-      "pinned": "8.3.4",
-      "latestStable": "8.3.4",
+      "pinned": "9.6.0",
+      "latestStable": "9.6.0",
+      "current": true
+    },
+    {
+      "name": "html-minifier-terser",
+      "ecosystem": "javascript",
+      "pinned": "7.2.0",
+      "latestStable": "7.2.0",
+      "current": true
+    },
+    {
+      "name": "lighthouse",
+      "ecosystem": "javascript",
+      "pinned": "13.5.0",
+      "latestStable": "13.5.0",
+      "current": true
+    },
+    {
+      "name": "lightningcss",
+      "ecosystem": "javascript",
+      "pinned": "1.33.0",
+      "latestStable": "1.33.0",
+      "current": true
+    },
+    {
+      "name": "rolldown",
+      "ecosystem": "javascript",
+      "pinned": "1.2.13",
+      "latestStable": "1.2.13",
+      "current": true
+    },
+    {
+      "name": "rollup-plugin-license",
+      "ecosystem": "javascript",
+      "pinned": "3.7.1",
+      "latestStable": "3.7.1",
+      "current": true
+    },
+    {
+      "name": "shadcn",
+      "ecosystem": "javascript",
+      "pinned": "4.21.4",
+      "latestStable": "4.21.4",
+      "current": true
+    },
+    {
+      "name": "svgo",
+      "ecosystem": "javascript",
+      "pinned": "4.1.0",
+      "latestStable": "4.1.0",
+      "current": true
+    },
+    {
+      "name": "tailwindcss",
+      "ecosystem": "javascript",
+      "pinned": "4.3.3",
+      "latestStable": "4.3.3",
+      "current": true
+    },
+    {
+      "name": "tw-animate-css",
+      "ecosystem": "javascript",
+      "pinned": "1.4.0",
+      "latestStable": "1.4.0",
       "current": true
     },
     {
@@ -79,10 +191,17 @@
       "current": true
     },
     {
-      "name": "@biomejs/biome",
+      "name": "vite",
       "ecosystem": "javascript",
-      "pinned": "2.5.15",
-      "latestStable": "2.5.15",
+      "pinned": "8.3.4",
+      "latestStable": "8.3.4",
+      "current": true
+    },
+    {
+      "name": "@netlify/zip-it-and-ship-it",
+      "ecosystem": "javascript",
+      "pinned": "16.3.0",
+      "latestStable": "16.3.0",
       "current": true
     },
     {
