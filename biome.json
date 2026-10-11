@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -19,6 +19,12 @@
     "enabled": true,
     "rules": {
       "preset": "recommended"
+    },
+    "domains": {
+      "react": "recommended",
+      "playwright": "recommended",
+      "types": "recommended",
+      "test": "recommended"
     }
   },
   "assist": {
