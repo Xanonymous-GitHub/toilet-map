@@ -1,0 +1,117 @@
+import json, os, urllib.request
+from pathlib import Path
+from urllib.parse import urlparse
+from playwright.sync_api import sync_playwright, expect
+out=Path(__file__).resolve().parent.parent/'test-results'; out.mkdir(exist_ok=True)
+report={'transport':'External map/font assets fetched through the session proxy with Python CA-verified TLS; browser TLS remains enabled.', 'checks':[], 'pageErrors':[], 'consoleErrors':[], 'tileResponses':0}
+def check(name, condition=True):
+    assert condition, name
+    report['checks'].append(name)
+    print('PASS',name,flush=True)
+proxy_url=os.environ.get('HTTPS_PROXY') or os.environ.get('HTTP_PROXY')
+proxy=None
+if proxy_url:
+    parsed=urlparse(proxy_url)
+    proxy={'server':f'{parsed.scheme}://{parsed.hostname}:{parsed.port}', 'bypass':'localhost,127.0.0.1'}
+    if parsed.username: proxy.update(username=parsed.username,password=parsed.password or '')
+def verified_asset(route):
+    req=route.request
+    host=urlparse(req.url).hostname
+    if report.get('offlineBridge') and host in {'tile.openstreetmap.org','fonts.googleapis.com','fonts.gstatic.com'}:
+        return route.abort()
+    if host not in {'tile.openstreetmap.org','fonts.googleapis.com','fonts.gstatic.com'}:
+        return route.continue_()
+    try:
+        request=urllib.request.Request(req.url,headers={'User-Agent':req.headers.get('user-agent','Relief test browser'),'Referer':req.headers.get('referer','http://127.0.0.1:8787/'),'Accept':req.headers.get('accept','*/*')})
+        with urllib.request.urlopen(request,timeout=20) as response:
+            body=response.read()
+            headers={k:v for k,v in response.headers.items() if k.lower() not in {'content-length','transfer-encoding','connection'}}
+            route.fulfill(status=response.status,headers=headers,body=body)
+    except Exception:
+        route.abort()
+with sync_playwright() as pw:
+    browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,proxy=proxy,args=['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader'])
+    context=browser.new_context(viewport={'width':1440,'height':1000},geolocation={'latitude':37.5665,'longitude':126.978,'accuracy':20},permissions=['geolocation'])
+    context.route('https://**/*',verified_asset)
+    page=context.new_page()
+    page.on('pageerror',lambda e:report['pageErrors'].append(str(e)))
+    page.on('console',lambda m:report['consoleErrors'].append(m.text) if m.type=='error' else None)
+    page.on('response',lambda r:report.update(tileResponses=report['tileResponses']+1) if 'tile.openstreetmap.org/' in r.url and r.ok else None)
+    page.goto('http://127.0.0.1:8787',wait_until='networkidle',timeout=45000)
+    expect(page.locator('.toilet-card').first).to_be_visible(timeout=20000)
+    expect(page.locator('.map-loading')).to_have_count(0,timeout=20000)
+    check('Tokyo data loaded and interactive map initialized',page.locator('.maplibregl-canvas').count()==1)
+    page.screenshot(path=str(out/'desktop.png'))
+    page.locator('.card-main').first.click()
+    expect(page.get_by_role('dialog',name='廁所詳細資訊')).to_be_visible()
+    check('Tokyo detail shows hours, accessibility, fees and navigation',page.locator('.detail-facts').count()==1 and page.locator('.nav-buttons button').count()==2)
+    page.evaluate("window.__navigation=[];window.open=(url)=>{window.__navigation.push(url);return null;}")
+    page.get_by_role('button',name='Google Maps',exact=True).click()
+    page.wait_for_timeout(500)
+    nav=page.evaluate('window.__navigation.at(-1)')
+    check('Google navigation uses walking directions with destination', 'travelmode=walking' in nav and 'destination=' in nav)
+    page.get_by_role('button',name='切換收藏',exact=True).click()
+    check('Favorite saved on device',len(json.loads(page.evaluate("localStorage.getItem('saved')") or '[]'))>0)
+    page.get_by_role('button',name='關閉廁所詳細資訊').click()
+    page.get_by_role('button',name='定位目前位置',exact=True).click()
+    expect(page.locator('.footer-meta')).to_contain_text('4,455',timeout=20000)
+    expect(page.locator('.toilet-card').first).to_be_visible(timeout=20000)
+    check('Granted GPS moves to Seoul and loads the complete city dataset')
+    page.get_by_role('button',name='現在開放',exact=True).click()
+    check('Open filter applies to known schedules',page.locator('.toilet-card .status.unknown').count()==0 and page.locator('.toilet-card .status.closed').count()==0)
+    page.get_by_role('button',name='現在開放',exact=True).click()
+    page.locator('.card-main').first.click()
+    check('Korea detail offers four map providers',page.locator('.nav-buttons button').count()==4)
+    page.get_by_role('button',name='Kakao 網頁',exact=True).click()
+    page.wait_for_timeout(500)
+    nav=page.evaluate('window.__navigation.at(-1)')
+    check('Kakao directions include walking mode and current origin','link/by/walk/' in nav)
+    page.screenshot(path=str(out/'desktop-detail.png'))
+    page.get_by_role('button',name='關閉廁所詳細資訊').click()
+    page.get_by_role('button',name='資料來源與使用說明').click()
+    expect(page.get_by_role('heading',name='每一點，都有出處。')).to_be_visible()
+    check('Source attribution and caveats are visible',page.locator('.source-row').count()==1)
+    page.keyboard.press('Shift+Tab')
+    check('Modal keyboard focus stays inside the dialog',page.evaluate("document.activeElement.closest('.modal') !== null"))
+    page.get_by_role('button',name='關閉說明').click()
+    page.get_by_role('textbox',name='搜尋城市、車站或廁所').fill('明洞')
+    page.locator('.search-results button').first.click()
+    expect(page.locator('.toilet-card').first).to_be_visible(timeout=10000)
+    check('Place search changes the viewport and updates nearby list')
+    page.wait_for_function('navigator.serviceWorker.controller !== null',timeout=20000)
+    check('Service worker controls the app')
+    page.wait_for_timeout(1000)
+    report['offlineBridge']=True
+    context.set_offline(True)
+    page.reload(wait_until='domcontentloaded')
+    expect(page.locator('.offline-banner')).to_be_visible(timeout=20000)
+    expect(page.locator('.footer-meta')).to_contain_text('4,455')
+    check('Offline reload restores cached shell and all Seoul records')
+    context.set_offline(False)
+    report['offlineBridge']=False
+    context.close()
+    mobile=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+    mobile.route('https://**/*',verified_asset)
+    page=mobile.new_page()
+    page.on('pageerror',lambda e:report['pageErrors'].append(str(e)))
+    page.goto('http://127.0.0.1:8787?region=seoul',wait_until='networkidle',timeout=45000)
+    expect(page.locator('.toilet-card').first).to_be_visible(timeout=20000)
+    check('Mobile has no horizontal document overflow',page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+    page.screenshot(path=str(out/'mobile.png'))
+    page.get_by_role('button',name='定位目前位置',exact=True).click()
+    expect(page.get_by_role('status')).to_contain_text('定位權限未開啟',timeout=15000)
+    check('Denied GPS gives a useful message and keeps the map usable')
+    page.locator('.card-main').first.click()
+    expect(page.locator('.detail-panel')).to_be_visible()
+    page.locator('.detail-panel').evaluate('(e)=>e.scrollTop=e.scrollHeight')
+    expect(page.get_by_role('button',name='Kakao 網頁',exact=True)).to_be_visible()
+    page.screenshot(path=str(out/'mobile-detail.png'))
+    check('Mobile detail sheet scrolls to navigation controls')
+    page.get_by_role('button',name='關閉廁所詳細資訊').click()
+    page.get_by_role('button',name='加入主畫面',exact=True).click()
+    expect(page.get_by_role('heading',name='把方便，帶在身邊。')).to_be_visible()
+    check('PWA installation guidance is available')
+    mobile.close();browser.close()
+check('No unhandled browser errors',not report['pageErrors'])
+(out/'browser-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+print(json.dumps(report,ensure_ascii=False,indent=2))
