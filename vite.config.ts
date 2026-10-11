@@ -1,20 +1,36 @@
+import { glob, readFile } from "node:fs/promises";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import cssnano from "cssnano";
+import { minify } from "html-minifier-terser";
+import license from "rollup-plugin-license";
+import { optimize } from "svgo";
 import { defineConfig } from "vite";
 export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+  publicDir: false,
+  worker: { format: "es", rolldownOptions: { output: { comments: false } } },
+  css: {
+    postcss: {
+      plugins: [cssnano({ preset: ["default", { discardComments: { removeAll: true } }] })],
+    },
+  },
   server: { proxy: { "/api": "http://127.0.0.1:8787" } },
   build: {
     target: "esnext",
     outDir: "dist/client",
     assetsDir: "assets",
     sourcemap: false,
+    minify: true,
+    cssMinify: "lightningcss",
     // MapLibre ships one indivisible ESM module. Keep its measured budget separate
     // from the 500 kB application budget, enforced below rather than silencing logs.
     chunkSizeWarningLimit: 1100,
     rolldownOptions: {
       output: {
+        comments: false,
         codeSplitting: {
           groups: [
             { name: "maplibre", test: /node_modules\/maplibre-gl\/dist\/maplibre-gl\.mjs$/ },
@@ -26,6 +42,52 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    license({
+      thirdParty: {
+        output: {
+          file: "dist/client/third-party-licenses.json",
+          template: (dependencies) =>
+            JSON.stringify(
+              dependencies.map(({ name, version, license, licenseText }) => ({
+                name,
+                version,
+                license,
+                licenseText,
+              })),
+            ),
+        },
+      },
+    }),
+    {
+      name: "minified-html-and-public-assets",
+      apply: "build",
+      transformIndexHtml: {
+        order: "post",
+        handler: (html) =>
+          minify(html, {
+            collapseWhitespace: true,
+            removeComments: true,
+            collapseBooleanAttributes: true,
+            removeRedundantAttributes: true,
+            minifyCSS: true,
+            minifyJS: true,
+          }),
+      },
+      async generateBundle() {
+        for await (const entry of glob("**/*", { cwd: "public", withFileTypes: true })) {
+          if (!entry.isFile()) continue;
+          const path = join(entry.parentPath, entry.name);
+          const fileName = relative("public", path);
+          const body = await readFile(path);
+          const source = /\.(json|webmanifest)$/.test(fileName)
+            ? JSON.stringify(JSON.parse(body.toString()))
+            : fileName.endsWith(".svg")
+              ? optimize(body.toString(), { multipass: true }).data
+              : body;
+          this.emitFile({ type: "asset", fileName, source });
+        }
+      },
+    },
     {
       name: "bundle-size-budget",
       generateBundle(_options, bundle) {

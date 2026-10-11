@@ -1,0 +1,8 @@
+{
+  "name": "toilet-map-netlify-validation",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/zip-it-and-ship-it": "16.3.0"
+  }
+}

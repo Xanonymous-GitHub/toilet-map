@@ -81,6 +81,16 @@ export function InformationModal({ mode, sources, onClose }: Props) {
                 App 自行支援。
               </p>
             </div>
+            <p>
+              <a
+                className="license-link"
+                href="/third-party-licenses.json"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                開源程式庫授權與聲明 ↗
+              </a>
+            </p>
           </>
         ) : (
           <>

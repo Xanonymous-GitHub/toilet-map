@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { extname, relative, resolve } from "node:path";
 import { gzipSync } from "node:zlib";
+import terser from "@rollup/plugin-terser";
+import { build } from "rolldown";
 
 const root = process.cwd(),
   client = resolve(root, "dist/client");
@@ -59,15 +61,21 @@ for (const [key, records] of groups) {
   };
 }
 const exports = {};
+await mkdir("dist/client/downloads", { recursive: true });
 for (const country of ["JP", "KR"]) {
   const original = JSON.parse(await readFile(`data/osm-${country.toLowerCase()}.json`, "utf8"));
-  exports[country] = compress({
+  const sourceExport = {
     license: "ODbL-1.0",
     attribution: "© OpenStreetMap contributors",
     source: dataset.sources.find((source) => source.id === `osm-${country.toLowerCase()}`),
     records: dataset.records.filter((toilet) => toilet.sourceId === `osm-${country.toLowerCase()}`),
     original,
-  });
+  };
+  exports[country] = compress(sourceExport);
+  await writeFile(
+    `dist/client/downloads/${country.toLowerCase()}-osm-toilets.json`,
+    JSON.stringify(sourceExport),
+  );
 }
 const { records: _records, ...metadata } = dataset;
 await writeFile(
@@ -80,19 +88,20 @@ const revision = createHash("sha256")
   .update(dataVersion)
   .digest("hex")
   .slice(0, 16);
-const serviceWorkerBuild = await Bun.build({
-  entrypoints: ["src/service-worker.ts"],
-  format: "iife",
-  target: "browser",
-  minify: true,
-  define: {
-    __PWA_CACHE_NAME__: JSON.stringify(`relief-${revision}`),
-    __PWA_CORE_ASSETS__: JSON.stringify(precache),
+const serviceWorkerBuild = await build({
+  input: "src/service-worker.ts",
+  platform: "browser",
+  transform: {
+    target: "esnext",
+    define: {
+      __PWA_CACHE_NAME__: JSON.stringify(`relief-${revision}`),
+      __PWA_CORE_ASSETS__: JSON.stringify(precache),
+    },
   },
+  output: { format: "iife", minify: true, comments: false },
+  write: false,
 });
-if (!serviceWorkerBuild.success)
-  throw new AggregateError(serviceWorkerBuild.logs, "Service worker build failed");
-const sw = await serviceWorkerBuild.outputs[0].text();
+const sw = serviceWorkerBuild.output.find((entry) => entry.type === "chunk").code;
 assets["/sw.js"] = { body: sw, type: "text/javascript; charset=utf-8" };
 await writeFile(
   "server/assets.generated.ts",
@@ -102,15 +111,35 @@ await writeFile(
 );
 await mkdir("dist/server", { recursive: true });
 await mkdir("dist/.openai", { recursive: true });
-const workerBuild = await Bun.build({
-  entrypoints: ["server/worker.ts"],
-  outdir: "dist/server",
-  naming: "index.js",
-  format: "esm",
-  target: "browser",
-  minify: true,
+await build({
+  input: "server/worker.ts",
+  platform: "browser",
+  transform: { target: "esnext" },
+  output: { file: "dist/server/index.js", format: "esm", minify: true, comments: false },
 });
-if (!workerBuild.success) throw new AggregateError(workerBuild.logs, "Worker build failed");
-await writeFile("dist/.openai/hosting.json", await readFile(".openai/hosting.json"));
+await build({
+  input: "server/api.ts",
+  platform: "node",
+  transform: { target: "esnext" },
+  output: { file: "dist/server/api.js", format: "esm", minify: true, comments: false },
+});
+await build({
+  input: "netlify/functions/api.mjs",
+  platform: "node",
+  transform: { target: "esnext" },
+  // Netlify's static route scanner requires ordinary string literals in config.
+  // Terser's quote policy preserves them while minifying the entire function.
+  output: {
+    file: "dist/netlify/functions/api.mjs",
+    format: "esm",
+    minify: false,
+    comments: false,
+    plugins: [terser({ ecma: 2026, module: true, format: { comments: false, quote_style: 2 } })],
+  },
+});
+await writeFile(
+  "dist/.openai/hosting.json",
+  JSON.stringify(JSON.parse(await readFile(".openai/hosting.json", "utf8"))),
+);
 await writeFile("dist/client/sw.js", sw);
 console.log("Built Worker ESM with", files.length, "embedded PWA assets.");

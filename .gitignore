@@ -3,6 +3,8 @@ dist/
 .cache/
 test-results/
 .wrangler/
+.netlify/
+.vercel/
 *.log
 server/assets.generated.ts
 server/data.generated.ts

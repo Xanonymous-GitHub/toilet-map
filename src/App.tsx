@@ -20,7 +20,16 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { ThemeMenu } from "./components/ThemeMenu";
 
@@ -98,6 +107,7 @@ export default function App() {
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>(center);
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [searchFocus, setSearchFocus] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [limit, setLimit] = useState(40);
@@ -218,13 +228,13 @@ export default function App() {
     stopFollowing();
   }, [stopFollowing]);
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     return (data?.items ?? []).filter(
       (t) =>
         matchesFilters(t, filters, saved, now) &&
         (!q || `${t.name} ${t.nameEn ?? ""} ${t.address}`.toLowerCase().includes(q)),
     );
-  }, [data, filters, saved, now, query]);
+  }, [data, filters, saved, now, deferredQuery]);
   const anchorLat = position?.lat ?? mapCenter[1];
   const anchorLon = position?.lon ?? mapCenter[0];
   const visible = useMemo(

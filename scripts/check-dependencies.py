@@ -43,6 +43,8 @@ def dependency_items(root):
     lock = tomllib.loads((root / "uv.lock").read_text())
     project = next(entry for entry in lock["package"] if entry["name"] == python["project"]["name"])
     dependencies = package["dependencies"] | package["devDependencies"]
+    for manifest in (root / "tooling").glob("*/package.json"):
+        dependencies |= json.loads(manifest.read_text()).get("dependencies", {})
     items = [(name, version, "javascript") for name, version in dependencies.items()]
     for dependency in project["dev-dependencies"]["dev"]:
         name = dependency["name"]

@@ -9,7 +9,10 @@ let cacheRecords = 0;
 const maxCacheRecords = 8_000;
 
 function uncompressed(payload: string) {
-  const bytes = Uint8Array.from(atob(payload), (character) => character.charCodeAt(0));
+  const bytes =
+    typeof Uint8Array.fromBase64 === "function"
+      ? Uint8Array.fromBase64(payload)
+      : Uint8Array.from(atob(payload), (character) => character.charCodeAt(0));
   return new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
 }
 async function readTile(key: string): Promise<Toilet[]> {
@@ -43,17 +46,13 @@ async function readTile(key: string): Promise<Toilet[]> {
 }
 export async function queryToilets(country: Country, bounds: Bbox) {
   const result: Toilet[] = [];
-  for (const [key, tile] of Object.entries(tiles)) {
-    if (
-      tile.country !== country ||
-      tile.bounds[0] > bounds[2] ||
-      tile.bounds[2] < bounds[0] ||
-      tile.bounds[1] > bounds[3] ||
-      tile.bounds[3] < bounds[1]
-    )
-      continue;
-    const rows = await readTile(key);
-    for (const row of rows) if (canRecommend(row) && inBounds(row, bounds)) result.push(row);
+  for (let lon = Math.floor(bounds[0] * 4); lon <= Math.floor(bounds[2] * 4); lon++) {
+    for (let lat = Math.floor(bounds[1] * 4); lat <= Math.floor(bounds[3] * 4); lat++) {
+      const key = `${country}:${lon}:${lat}`;
+      if (!Object.hasOwn(tiles, key)) continue;
+      const rows = await readTile(key);
+      for (const row of rows) if (canRecommend(row) && inBounds(row, bounds)) result.push(row);
+    }
   }
   return result.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }

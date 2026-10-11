@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!data", "!docs", "!bun.lock", "!uv.lock"],
+    "includes": ["**", "!data", "!docs", "!**/bun.lock", "!uv.lock"],
     "maxSize": 1000000
   },
   "formatter": {
