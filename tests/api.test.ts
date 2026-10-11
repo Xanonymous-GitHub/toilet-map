@@ -103,7 +103,7 @@ test("PWA assets and cache behavior have correct MIME and status", async () => {
   assert.equal((await call("/missing.js")).status, 404);
 });
 test("The packaged map worker is JavaScript and included in the offline app shell", async () => {
-  const path = Object.keys(assets).find((path) => /maplibre-gl-worker-.*\.mjs$/.test(path));
+  const path = Object.keys(assets).find((path) => /maplibre-gl-worker-.*\.m?js$/.test(path));
   assert.ok(path, "Vite must emit the map worker");
   const response = await call(path);
   assert.equal(response.status, 200);
