@@ -727,10 +727,10 @@ export default function App() {
                     variant="outline"
                     className="sidebar-trigger"
                     aria-label="展開側邊欄"
-                    aria-controls="search-sidebar"
+                    aria-controls={undefined}
                   >
                     <PanelLeftOpen />
-                    <span>搜尋廁所</span>
+                    <span>展開側邊欄</span>
                   </Button>
                 </CollapsibleTrigger>
               )}
