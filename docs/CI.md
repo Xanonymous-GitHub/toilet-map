@@ -11,7 +11,7 @@
 | Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置與 chunk 大小預算、Biome、Ruff lint／format、TypeScript strict、23 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
 | Desktop, mobile and offline browser checks | Playwright Chromium 的 36 項檢查，含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、手機排版、離線重開與地圖模組下載失敗 |
 
-Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 0.12.23。Actions 固定完整 commit SHA，註解保留已查證的 release 版本標籤。Workflow 僅需要 `contents: read`；新提交會取消同一 ref 的舊執行。
+Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 0.13.0。Actions 固定完整 commit SHA，註解保留已查證的 release 版本標籤。Workflow 僅需要 `contents: read`；新提交會取消同一 ref 的舊執行。
 
 瀏覽器 CI 的底圖使用提交的固定 PNG 圖磚，字型使用系統 fallback。公廁資料、API、MapLibre Worker、定位回呼與 PWA 資產使用真正的本機正式建置，外部導航檢查 URL。這個模式驗證 App 操作與離線流程；一般 `bun run test:browser` 使用真實公開圖磚，沒有代理時由瀏覽器直接以 TLS 驗證載入，有代理時使用 CA 驗證橋接器。驗證範圍見 [VALIDATION.md](VALIDATION.md)。
 
@@ -19,7 +19,7 @@ Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 
 
 ## 依賴版本
 
-`dependencies.yml` 每週一 03:00 UTC（Asia/Taipei 11:00）或手動執行 `bun run deps:check`，查詢官方套件庫的最新穩定版。JavaScript 版本取自 `package.json`，Python 直接開發依賴版本取自 `uv.lock`，Bun 取自 `.bun-version`，不把 Python 的 `>=` 範圍當成實際版本。出現新版時檢查失敗，版本比較 JSON 保存為 `dependency-versions` artifact，供更新時審查。
+不設依賴刷新 workflow。實作或更新時執行 `bun run deps:check`，查詢官方 registry／PyPI／Bun releases；結果寫入 `.cache/dependency-versions.json`，供當次更新審查。
 
 ## 本機執行
 

@@ -1,10 +1,10 @@
 # 工程品質與工具鏈
 
-專案以 Bun 管理 JavaScript 安裝、執行、原生打包及測試。Python 工具由 uv 管理，Ruff 負責 lint 與格式。原有 npm lockfile、Node 測試轉接器、tsx 與額外 bundler 已移除。
+專案以 Bun 管理 JavaScript 安裝、執行、原生打包及測試。Python 工具由 uv 管理，Ruff 負責 lint 與格式。前端使用 Vite／Rolldown；shadcn UI 官方 CLI 產生的元件採用 Radix、Tailwind 4 與官方 cn 合併引擎。
 
 ## 版本策略
 
-JavaScript 直接依賴寫入精確版本；Python 開發依賴在 `pyproject.toml` 宣告相容範圍，實際版本由 `uv.lock` 鎖定。Bun 1.4.3 保存在 `.bun-version`，Python 最低版本為 3.15，uv 為 0.12.23。提交 `bun.lock`／`uv.lock`，CI 使用 frozen／locked 安裝。
+JavaScript 直接依賴寫入精確版本；Python 開發依賴在 `pyproject.toml` 宣告相容範圍，實際版本由 `uv.lock` 鎖定。Bun 1.4.3 保存在 `.bun-version`，Python 最低版本為 3.15，uv 為 0.13.0。提交 `bun.lock`／`uv.lock`，CI 使用 frozen／locked 安裝。
 
 `bun run deps:check` 比對 JavaScript registry 的 `latest`、PyPI 穩定版及 Bun GitHub 最新 release；Python 比較的是鎖檔中的直接開發依賴版本，不解析版本範圍為版本號，也不檢查間接依賴。結果寫入 `.cache/dependency-versions.json`，查證紀錄複製至 `docs/dependency-versions.json`。報告的 `pinned` 欄位表示此次比較的宣告／鎖定版本。
 

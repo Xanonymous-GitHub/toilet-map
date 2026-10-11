@@ -10,7 +10,7 @@
 
 ## 開發與驗證
 
-需要 Bun 1.4.3、Python 3.15 以上與 uv 0.12.23。Bun 版本保存在 `.bun-version`；使用 `bun.lock`、`uv.lock` 鎖定套件版本，Python 宣告的版本範圍不會取代鎖檔。直接依賴的最新穩定版查證日期與結果見 `docs/dependency-versions.json`。
+需要 Bun 1.4.3、Python 3.15 以上與 uv 0.13.0。Bun 版本保存在 `.bun-version`；使用 `bun.lock`、`uv.lock` 鎖定套件版本，Python 宣告的版本範圍不會取代鎖檔。直接依賴的最新穩定版查證日期與結果見 `docs/dependency-versions.json`。
 
 ```bash
 bun install --frozen-lockfile
@@ -25,7 +25,7 @@ bun run preview
 
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、23 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；每週另查核依賴版本。產物與使用方式見 [CI 說明](docs/CI.md)。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、23 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
 
 | 指令 | 用途 |
 | --- | --- |
