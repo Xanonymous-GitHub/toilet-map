@@ -1,10 +1,21 @@
 {
-  "compilerOptions":{
-    "target":"ES2022","lib":["ES2022","DOM","DOM.Iterable"],
-    "module":"ESNext","moduleResolution":"Bundler","jsx":"react-jsx",
-    "strict":true,"skipLibCheck":true,"resolveJsonModule":true,
-    "allowImportingTsExtensions":true,"noEmit":true,"esModuleInterop":true,
-    "types":["vite/client","node"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "types": ["vite/client", "bun"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
-  "include":["src","server","tests","vite.config.ts"]
+  "include": ["src", "server", "tests", "vite.config.ts"],
+  "exclude": ["src/service-worker.ts"]
 }

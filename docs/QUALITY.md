@@ -1,0 +1,35 @@
+# 工程品質與工具鏈
+
+專案以 Bun 管理 JavaScript 安裝、執行、原生打包及測試。Python 工具由 uv 管理，Ruff 負責 lint 與格式。原有 npm lockfile、Node 測試轉接器、tsx 與額外 bundler 已移除。
+
+## 版本策略
+
+直接依賴使用官方最新穩定版，寫入精確版本並提交 `bun.lock`／`uv.lock`。`bun run deps:check` 比對 JavaScript registry 的 `latest`、PyPI 穩定版及 Bun GitHub 最新 release；結果寫入 `.cache/dependency-versions.json`。版本查證紀錄複製至 `docs/dependency-versions.json`。
+
+間接依賴由上游套件的相容範圍解析與鎖定，避免以全域 overrides 強行替換不相容的大版。CI 與部署使用 frozen／locked 安裝，讓「最新版」與「可重現」在查證當下同時成立。
+
+## 必要關卡
+
+```bash
+bun install --frozen-lockfile
+uv sync --locked
+bun run verify
+```
+
+`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後執行 Bun 原生測試。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
+
+Biome recommended 規則保留啟用，warnings 會使檢查失敗。僅 CSS 檔案的 `noDescendingSpecificity` 例外：該規則不理解不同元件的 DOM 邊界，會將無法同時匹配同一元素的 selector 視為衝突。元件語意、按鈕 type、事件操作與 hook dependencies 均修正後通過，沒有以整體關閉 lint 取代修正。
+
+## 本輪整理
+
+- `useGeolocation` 管理定位請求與 watcher：晚到的請求結果、手動切換城市、手動縮放及元件卸載會使舊回呼失效；頁面背景時停止 watcher。
+- `useToiletData` 管理載入、重新查詢、取消、逾時及 IndexedDB fallback；快取讀取完成後也檢查請求是否仍有效。
+- `fetchRegion` 保證資料版本、筆數、游標與 ID 一致；拒絕截斷、重複與循環分頁。
+- `ToiletDetail`、`InformationModal`、`ToiletStatus` 分離 UI；說明使用原生 dialog 處理焦點與 Escape。
+- 收藏偏好先驗證形狀，損壞的 localStorage 回到預設值。偏好寫入移到 effect，保持 React state updater 無副作用。
+- API 明確拒絕空字串／非標準分頁參數，HEAD 不回傳 body，405 回應提供 Allow。
+- MapLibre 6 的 Worker 明確作為 Vite 資產打包、使用正確 JavaScript MIME 並納入離線 shell；驗證實際廁所聚合標記可顯示與點選。
+- Service Worker 改為可 lint、可 typecheck 的獨立原始碼；Bun 打包時注入資產清單，快取名稱依內容 hash 產生。
+- Python importer 不再依賴其他專案的絕對路徑；保留原始資料擷取時間，重新下載時不沿用未確認的來源更新日期。
+
+本輪驗證結果見 `VALIDATION.md`。

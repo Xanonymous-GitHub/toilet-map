@@ -1,24 +1,32 @@
 {
-  "transport": "External map/font assets fetched through the session proxy with Python CA-verified TLS; browser TLS remains enabled.",
+  "startedAt": "2026-10-11T11:22:13.801263+00:00",
+  "passed": true,
+  "transport": "External map/font assets fetched through the session proxy with CA-verified TLS; browser TLS remains enabled.",
   "checks": [
     "Tokyo data loaded and interactive map initialized",
+    "Toilet clusters render through the packaged map worker and can be selected",
     "Tokyo detail shows hours, accessibility, fees and navigation",
     "Google navigation uses walking directions with destination",
     "Favorite saved on device",
     "Granted GPS moves to Seoul and loads the complete city dataset",
+    "Manual map zoom stops GPS following and clears its watcher",
+    "Refresh control starts a new city-data request",
     "Open filter applies to known schedules",
     "Korea detail offers four map providers",
     "Kakao directions include walking mode and current origin",
     "Source attribution and caveats are visible",
-    "Modal keyboard focus stays inside the dialog",
+    "Native modal prevents background controls from receiving keyboard focus",
     "Place search changes the viewport and updates nearby list",
     "Service worker controls the app",
     "Offline reload restores cached shell and all Seoul records",
     "Mobile has no horizontal document overflow",
     "Denied GPS gives a useful message and keeps the map usable",
+    "Malformed saved preferences recover without blocking the app",
     "Mobile detail sheet scrolls to navigation controls",
     "PWA installation guidance is available",
-    "No unhandled browser errors"
+    "A late location result cannot undo the user's city selection",
+    "No unhandled browser errors",
+    "Map workers load without errors, including offline reload"
   ],
   "pageErrors": [],
   "consoleErrors": [
@@ -63,10 +71,9 @@
     "Failed to load resource: net::ERR_FAILED",
     "Failed to load resource: net::ERR_FAILED",
     "Failed to load resource: net::ERR_FAILED",
-    "Failed to load resource: net::ERR_FAILED",
-    "Failed to load resource: net::ERR_FAILED",
     "Failed to load resource: net::ERR_FAILED"
   ],
-  "tileResponses": 115,
+  "tileResponses": 148,
+  "mapWorkerResponses": 2,
   "offlineBridge": false
 }

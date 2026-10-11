@@ -1,0 +1,110 @@
+{
+  "checkedAt": "2026-10-11T11:05:48.638615+00:00",
+  "dependencies": [
+    {
+      "name": "react",
+      "ecosystem": "javascript",
+      "pinned": "19.3.0",
+      "latestStable": "19.3.0",
+      "current": true
+    },
+    {
+      "name": "react-dom",
+      "ecosystem": "javascript",
+      "pinned": "19.3.0",
+      "latestStable": "19.3.0",
+      "current": true
+    },
+    {
+      "name": "maplibre-gl",
+      "ecosystem": "javascript",
+      "pinned": "6.13.0",
+      "latestStable": "6.13.0",
+      "current": true
+    },
+    {
+      "name": "lucide-react",
+      "ecosystem": "javascript",
+      "pinned": "1.55.0",
+      "latestStable": "1.55.0",
+      "current": true
+    },
+    {
+      "name": "@types/react",
+      "ecosystem": "javascript",
+      "pinned": "19.3.0",
+      "latestStable": "19.3.0",
+      "current": true
+    },
+    {
+      "name": "@types/react-dom",
+      "ecosystem": "javascript",
+      "pinned": "19.3.0",
+      "latestStable": "19.3.0",
+      "current": true
+    },
+    {
+      "name": "@types/node",
+      "ecosystem": "javascript",
+      "pinned": "26.6.5",
+      "latestStable": "26.6.5",
+      "current": true
+    },
+    {
+      "name": "@types/bun",
+      "ecosystem": "javascript",
+      "pinned": "1.4.2",
+      "latestStable": "1.4.2",
+      "current": true
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "ecosystem": "javascript",
+      "pinned": "6.1.2",
+      "latestStable": "6.1.2",
+      "current": true
+    },
+    {
+      "name": "vite",
+      "ecosystem": "javascript",
+      "pinned": "8.3.4",
+      "latestStable": "8.3.4",
+      "current": true
+    },
+    {
+      "name": "typescript",
+      "ecosystem": "javascript",
+      "pinned": "7.0.2",
+      "latestStable": "7.0.2",
+      "current": true
+    },
+    {
+      "name": "@biomejs/biome",
+      "ecosystem": "javascript",
+      "pinned": "2.5.15",
+      "latestStable": "2.5.15",
+      "current": true
+    },
+    {
+      "name": "ruff",
+      "ecosystem": "python",
+      "pinned": "0.17.0",
+      "latestStable": "0.17.0",
+      "current": true
+    },
+    {
+      "name": "playwright",
+      "ecosystem": "python",
+      "pinned": "1.63.0",
+      "latestStable": "1.63.0",
+      "current": true
+    },
+    {
+      "name": "bun",
+      "ecosystem": "runtime",
+      "pinned": "1.4.3",
+      "latestStable": "1.4.3",
+      "current": true
+    }
+  ]
+}

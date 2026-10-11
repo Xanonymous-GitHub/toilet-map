@@ -6,16 +6,30 @@
 
 ## 開發與驗證
 
+需要 Bun 1.4.3、Python 3.12 以上與 uv。使用 `bun.lock`、`uv.lock` 鎖定版本；所有直接套件依賴已向官方套件庫查證為最新穩定版。版本紀錄見 `docs/dependency-versions.json`。
+
 ```bash
-npm ci
-npm run build
-npm test
-npm run preview
+bun install --frozen-lockfile
+uv sync --locked
+bun run build
+bun test tests
+bun run preview
 ```
 
-預覽：http://127.0.0.1:8787。Vite 開發前端可另執行 `npm run dev`，API 使用已啟動的預覽伺服器。定位、Service Worker 在正式環境需要 HTTPS；localhost 可測試。
+預覽：http://127.0.0.1:8787。Vite 開發前端可另執行 `bun run dev`，API 使用已啟動的預覽伺服器。定位、Service Worker 在正式環境需要 HTTPS；localhost 可測試。
 
 建置產物 `dist/server/index.js` 是 Cloudflare Worker ESM，內含前端資產及經驗證的資料快照。`dist/.openai/hosting.json` 保留 Sites 專案 ID。前端為 React / TypeScript / MapLibre；後端不需要資料庫或私有地圖 API key。
+
+## 程式碼品質
+
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript 與 Bun 原生測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核是否有新的穩定版。`.github/workflows/quality.yml` 提供相同的 CI 檢查。
+
+- Biome：JavaScript／TypeScript／TSX／CSS／JSON 格式與 recommended lint；警告視為失敗。
+- Ruff：Python 的 E／F／I／B／UP／SIM 規則與格式檢查。
+- TypeScript：strict、未使用變數／參數、switch fallthrough；Service Worker 使用獨立 WebWorker 型別設定。
+- 定位與資料載入拆成獨立 hooks，詳細資訊與原生 dialog 拆成 UI 元件。分頁拒絕重複 ID、截斷資料、循環游標與混用版本。
+- 前端由 Vite 建置，Worker 與 Service Worker 由 Bun 原生打包。快取版本依資產內容與資料版本產生，相同輸入可重複建置。
+- CSS 的 `noDescendingSpecificity` 在單一 stylesheet 停用：它會將不同元件的 `button`／`span` 規則誤判為衝突，也無法判定預期的響應式覆寫。其他 Biome recommended 規則保持啟用。
 
 ## API
 
@@ -33,9 +47,9 @@ npm run preview
 ## 資料更新
 
 ```bash
-python scripts/import-data.py --refresh
-npm run build
-npm test
+uv run --locked python scripts/import-data.py --refresh
+bun run build
+bun test tests
 ```
 
 更新器使用東京都公開 CSV 與首爾一般公開 HTTPS 下載表單，不使用 API 私鑰。座標、名稱、來源 ID、重複值與最低資料量驗證成功後才取代快照。新宿 OSM 為保存的探勘範圍，不會在每次使用者移動地圖時呼叫 Overpass。更新來源後需要重新部署；本版未設定背景排程。若來源資料量變化，請同步審查測試中的基準數量。
@@ -54,4 +68,4 @@ npm test
 
 ## 瀏覽器驗證
 
-可另外使用已安裝的 Python Playwright 與 Chromium 執行 `python scripts/browser-qa.py`。先啟動建置後的預覽伺服器；結果與截圖寫入 `test-results/`。雲端代理憑證環境中，測試橋接器用受信任 CA 驗證 HTTPS 後提供公開底圖／字型回應，保留瀏覽器的 TLS 驗證；離線階段關閉橋接器。完整驗證紀錄見 `docs/VALIDATION.md`。
+可另外使用已安裝的 Python Playwright 與 Chromium 執行 `bun run test:browser`。先啟動建置後的預覽伺服器；結果與截圖寫入 `test-results/`。雲端代理憑證環境中，測試橋接器用受信任 CA 驗證 HTTPS 後提供公開底圖／字型回應，保留瀏覽器的 TLS 驗證；離線階段關閉橋接器。完整驗證紀錄見 `docs/VALIDATION.md`。
