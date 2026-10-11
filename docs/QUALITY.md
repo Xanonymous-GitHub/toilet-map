@@ -24,7 +24,7 @@ Biome recommended 規則與 React／Playwright／types／test domains 保留啟�
 
 ## 建置大小與瀏覽器回歸
 
-地圖元件使用 React lazy／Suspense，初始程式約 277 KB（gzip 90 KB），MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB）。MapLibre 發布的是單一預打包 ESM 模組，不能用模組層級的 code splitting 再切小；Vite 的一般提示門檻配合此模組調整為 1,100 KB，另由建置 plugin 強制每個應用程式 chunk 不超過 500,000 bytes、MapLibre 不超過 1,100,000 bytes，超標直接失敗，並非整體忽略大小問題。Bun 測試另確認所有延後載入 chunks 都包含在離線 shell。
+地圖元件使用 React lazy／Suspense，入口 chunk 約 277 KB（gzip 90 KB），共用 chunk 約 53 KB（gzip 21 KB），首屏 JavaScript 合計約 330 KB（gzip 110 KB）；MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB）。MapLibre 發布的是單一預打包 ESM 模組，不能用模組層級的 code splitting 再切小；Vite 的一般提示門檻配合此模組調整為 1,100 KB，另由建置 plugin 強制每個應用程式 chunk 不超過 500,000 bytes、MapLibre 不超過 1,100,000 bytes，超標直接失敗，並非整體忽略大小問題。Bun 測試另確認所有延後載入 chunks 都包含在離線 shell。
 
 地圖模組下載失敗時顯示 fallback，不會使清單與詳細資訊失效。瀏覽器測試等待城市飛行完成後，才操作手動縮放或拖曳，避免把中途的跨國 viewport 誤當成目的地。45 項檢查記錄 console warnings；只允許 Chromium 軟體 WebGL 截圖讀回像素的 `GPU stall due to ReadPixels` 驅動診斷，其他警告使測試失敗。離線與刻意阻斷模組的網路錯誤保留在報告中。
 

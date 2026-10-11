@@ -8,7 +8,7 @@
 - TypeScript／前端／Worker target 為 ESNext，Python 最低版本 3.15，Ruff target py315。32 項直接套件／工具均向官方查證為最新穩定版，見 `dependency-versions.json`；沒有依賴刷新 workflow。
 - `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、27 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
 - 正式 JS 的 AST 沒有註解，CSS 不含註解，JSON／manifest 等於 compact JSON.stringify；HTML／SVG 亦壓縮。開源聲明另存 `third-party-licenses.json`，可從使用說明開啟。
-- 初始程式約 277 KB（gzip 90 KB），延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
+- 入口 chunk 約 277 KB（gzip 90 KB），另有首屏共用 chunk 約 53 KB（gzip 21 KB）；首屏 JavaScript 合計約 330 KB（gzip 110 KB）。延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
 - 正式建置由 Vite／Rolldown、Lightning CSS、cssnano、SVGO 與 html-minifier-terser 壓縮；Netlify Function 使用 Terser 設定解決官方 route scanner 的字串語法限制。
 
 ## 平台與瀏覽器
