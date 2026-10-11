@@ -1,5 +1,7 @@
 # 一點方便 — 日韓公廁地圖 PWA
 
+[![Quality](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml/badge.svg)](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml)
+
 繁體中文、手機優先的公廁地圖。定位、地圖範圍清單、開放時段推估、無障礙／免費篩選、裝置收藏、外部步行導航，以及已瀏覽城市的離線清單。
 
 目前整合日本／韓國全國範圍的 OSM 快照，以及江東區、首爾、釜山、仁川、濟州市、全北的官方資料。45,867 筆有效來源紀錄中，API 排除 1,250 筆明示使用限制，提供 44,617 筆候選紀錄（日本 31,238、韓國 13,379）。181 個城市與周邊查詢範圍均有實際點位，包含日本全部 20 個政令指定都市、北海道、沖繩、濟州及離島。
@@ -24,7 +26,7 @@ bun run preview
 
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript 與 Bun 原生測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核是否有新的穩定版。`.github/workflows/quality.yml` 提供相同的 CI 檢查。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript 與 Bun 原生測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；每週另查核依賴版本。產物與使用方式見 [CI 說明](docs/CI.md)。
 
 - Biome：JavaScript／TypeScript／TSX／CSS／JSON 格式與 recommended lint；警告視為失敗。
 - Ruff：Python 的 E／F／I／B／UP／SIM 規則與格式檢查。

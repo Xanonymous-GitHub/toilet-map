@@ -1,20 +1,98 @@
 name: Quality
+
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
+    name: Build, lint, types, tests and data integrity
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          bun-version: 1.4.3
-      - uses: astral-sh/setup-uv@v10.3.0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
+          bun-version-file: package.json
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
           enable-cache: true
-      - run: bun install --frozen-lockfile
-      - run: uv sync --locked
-      - run: bun run verify
+      - name: Install locked dependencies
+        run: |
+          bun install --frozen-lockfile
+          uv sync --locked
+      - name: Verify production build and code quality
+        run: bun run verify
+      - name: Reproduce the published data from committed snapshots
+        run: |
+          bun run data:expand
+          git diff --exit-code -- data docs/coverage.json
+      - name: Save production build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: production-build
+          path: dist/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
+  browser:
+    name: Desktop, mobile and offline browser checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dependencies and Chromium
+        run: |
+          bun install --frozen-lockfile
+          uv sync --locked
+          uv run --locked playwright install --with-deps chromium
+      - name: Build production app
+        run: bun run build
+      - name: Check desktop, mobile and offline flows
+        env:
+          RELIEF_QA_FIXTURE_ASSETS: "1"
+          RELIEF_BASE_URL: http://127.0.0.1:8787
+        run: |
+          mkdir -p test-results
+          bun scripts/serve.mjs > test-results/preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent "$RELIEF_BASE_URL/api/v1/regions" > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent "$RELIEF_BASE_URL/api/v1/regions" > /dev/null
+          bun run test:browser
+      - name: Save browser report and screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-results
+          path: test-results/
+          retention-days: 14
+          if-no-files-found: warn

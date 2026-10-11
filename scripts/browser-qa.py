@@ -11,6 +11,10 @@ from playwright.sync_api import expect, sync_playwright
 
 BASE_URL = os.environ.get("RELIEF_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
 ROOT = Path(__file__).resolve().parent.parent
+FIXTURE_ASSETS = os.environ.get("RELIEF_QA_FIXTURE_ASSETS") == "1"
+CHROMIUM_PATH = os.environ.get("RELIEF_CHROMIUM_PATH")
+if not CHROMIUM_PATH and Path("/usr/bin/chromium").exists():
+    CHROMIUM_PATH = "/usr/bin/chromium"
 coverage = json.loads((ROOT / "docs/coverage.json").read_text())
 
 
@@ -24,7 +28,10 @@ report = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
     "transport": (
-        "External map/font assets fetched through the session proxy with CA-verified TLS; "
+        "CI uses a committed PNG map-tile fixture and system fonts. Toilet data, API, "
+        "map worker and PWA assets come from the actual local production build."
+        if FIXTURE_ASSETS
+        else "External map/font assets fetched through the session proxy with CA-verified TLS; "
         "browser TLS remains enabled."
     ),
     "checks": [],
@@ -72,6 +79,16 @@ def verified_asset(route):
         return route.abort()
     if host not in {"tile.openstreetmap.org", "fonts.googleapis.com", "fonts.gstatic.com"}:
         return route.continue_()
+    if FIXTURE_ASSETS:
+        if host == "tile.openstreetmap.org":
+            return route.fulfill(
+                status=200,
+                content_type="image/png",
+                body=(ROOT / "tests/fixtures/basemap.png").read_bytes(),
+            )
+        if host == "fonts.googleapis.com":
+            return route.fulfill(status=200, content_type="text/css", body="")
+        return route.abort()
     try:
         request = urllib.request.Request(
             req.url,
@@ -95,7 +112,7 @@ def verified_asset(route):
 
 with sync_playwright() as pw:
     browser = pw.chromium.launch(
-        executable_path="/usr/bin/chromium",
+        executable_path=CHROMIUM_PATH,
         headless=True,
         proxy=proxy,
         args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
