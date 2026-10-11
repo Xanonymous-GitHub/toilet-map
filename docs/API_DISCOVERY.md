@@ -4,6 +4,8 @@
 
 調查日期：2026-10-11。區分「官方文件已確認」「HTTP／樣本已實測」「待帳號或裝置驗證」。本次沒有使用任何私有 API key，沒有申請帳號、付費或部署。
 
+本文件保留初次探勘時的 sample／HTTP／逾時紀錄，並非目前匯入限制。現行首爾來源已使用免 key 的官方 HTTPS 完整檔案取得 4,455 筆；OSM 已取得日本／韓國全國快照。現行 API 與操作指令見 [README.md](../README.md)，實際測試見 [VALIDATION.md](VALIDATION.md)。
+
 ## 1. 主要發現
 
 | 來源／功能 | 調查結果 | 建議角色 |
@@ -153,7 +155,7 @@ Kakao 地址轉座標格式為 `GET https://dapi.kakao.com/v2/local/search/addre
 
 ## 6. 導航 URL 與環境處理
 
-導航轉導无需先建路線 API。以下是本地產生的 URL 範本；並未實測 App 啟動或現場路線。
+導航轉導無需先建路線 API。以下是本地產生的 URL 範本；並未實測 App 啟動或現場路線。
 
 **Google Maps**
 
@@ -195,11 +197,11 @@ https://map.kakao.com/link/by/walk/{encodedFromName},{fromLat},{fromLon}/{encode
 
 ## 7. 正式實作前的具體待辦
 
-1. 首爾 key、實際配額與完整資料匯入；確認官方 HTTPS 或完整檔案入口。已验证 sample，只代表串接格式可行。
+1. 初次探勘待辦已完成：首爾改用免 key 的官方 HTTPS 完整檔案匯入；若未來改走需 key 的 API，仍須確認正式配額與 TLS 入口。
 2. 東京更多自治體來源（優先旅遊區）與各來源授權版本；江東區本次是成功樣本，不是全東京。
 3. 圖磚供應商帳號、日韓文字與道路細節、手機效能、使用／快取政策與月成本；公共圖磚不做離線預抓。
 4. 日韓 Google／Apple／NAVER／Kakao 真機導航矩陣；本次只查官方 URL 規格。
-5. 日本／韓國 OSM 區域匯入，實際量化座標、時間與 access 完整率；Overpass 失敗時保留上次成功資料。
+5. 日本／韓國全國 OSM 快照匯入與欄位稽核已完成，見 `research/expansion-osm/`；更新時仍須保留失敗前的成功資料。
 6. 若全國地址 geocoding，另確認儲存與授權權限、預算與定位誤差；先把無座標記錄留待處理。
 
 ## 8. 證據檔案

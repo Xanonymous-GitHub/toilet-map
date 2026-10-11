@@ -20,17 +20,19 @@
 設備未知維持未知。濟州市的無障礙便器數只寫入備註，無障礙入口未提供，不能直接推論 wheelchair=yes。公眾開放類別保留 public_by_agreement；開放時間原文保留，收費未提供。
 
 ```bash
-python research/expansion-korea/normalize.py
+uv run --locked python research/expansion-korea/normalize.py
 uv run --locked ruff check research/expansion-korea
 uv run --locked ruff format --check research/expansion-korea
 ```
 
 原始下載及 normalization 輸出在 ignored `data/raw/expansion-korea/`。本研究目錄另保存 `evidence.json` 與 `busan-point-fields.json`，提供公開來源／下載網址、時間、SHA256、編碼、排除明細與 SHP 欄位對照，讓來源證據隨程式碼保留。
 
+上述 normalize 指令需要這些原始檔與目錄證據；乾淨 checkout 若只要重現已提交的發布資料，請執行 `bun run data:expand`，它會保留已發布的地方官方紀錄。
+
 `refresh.py` 提供普通官方下載流程範例，執行前需重新查核目錄的版次、日期、欄位與授權；目前 normalize 的版次日期明確固定在已驗證快照，不可把新快照沿用舊日期。擴充 importer 可改從目錄取得日期後再驗證更新。
 
 ```bash
-python research/expansion-korea/refresh.py
+uv run --locked python research/expansion-korea/refresh.py
 ```
 
-[韓國全國公廁標準資料](https://www.data.go.kr/data/15012892/standard.do)目前目錄列 52,255 行，但官方聲明 2025-02 起移除 WGS84 位經度；下載入口是 `https://file.localdata.go.kr/file/public_restroom_info/info`，本環境普通 HTTPS 請求收到 403。沒有用其他路徑繞過，也没有列入地圖覆蓋筆數。全國地圖可用 OpenStreetMap 真實點位補足，官方地方快照提供較完整設施資訊。
+[韓國全國公廁標準資料](https://www.data.go.kr/data/15012892/standard.do)於 2026-10-11 查證時目錄列 52,255 行，但官方聲明 2025-02 起移除 WGS84 經緯度；下載入口是 `https://file.localdata.go.kr/file/public_restroom_info/info`，當時環境普通 HTTPS 請求收到 403。沒有用其他路徑繞過，也沒有列入地圖覆蓋筆數。全國地圖可用 OpenStreetMap 真實點位補足，官方地方快照提供較完整設施資訊。

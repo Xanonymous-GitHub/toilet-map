@@ -4,7 +4,9 @@
 
 ## 版本策略
 
-直接依賴使用官方最新穩定版，寫入精確版本並提交 `bun.lock`／`uv.lock`。`bun run deps:check` 比對 JavaScript registry 的 `latest`、PyPI 穩定版及 Bun GitHub 最新 release；結果寫入 `.cache/dependency-versions.json`。版本查證紀錄複製至 `docs/dependency-versions.json`。
+JavaScript 直接依賴寫入精確版本；Python 開發依賴在 `pyproject.toml` 宣告相容範圍，實際版本由 `uv.lock` 鎖定。Bun 1.4.3 保存在 `.bun-version`，Python 最低版本為 3.15，uv 為 0.12.23。提交 `bun.lock`／`uv.lock`，CI 使用 frozen／locked 安裝。
+
+`bun run deps:check` 比對 JavaScript registry 的 `latest`、PyPI 穩定版及 Bun GitHub 最新 release；Python 比較的是鎖檔中的直接開發依賴版本，不解析版本範圍為版本號，也不檢查間接依賴。結果寫入 `.cache/dependency-versions.json`，查證紀錄複製至 `docs/dependency-versions.json`。報告的 `pinned` 欄位表示此次比較的宣告／鎖定版本。
 
 間接依賴由上游套件的相容範圍解析與鎖定，避免以全域 overrides 強行替換不相容的大版。CI 與部署使用 frozen／locked 安裝，讓「最新版」與「可重現」在查證當下同時成立。
 
@@ -16,9 +18,15 @@ uv sync --locked
 bun run verify
 ```
 
-`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後執行 Bun 原生測試。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
+`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後以 `bun run test` 執行 23 項 Bun 與 4 項 Python 標準庫 unittest 測試。獨立 `typecheck`、`check`、`test` 需要先產生 ignored `server/*.generated.ts`，乾淨 checkout 先執行 `build` 或直接使用 `verify`。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
 
-Biome recommended 規則保留啟用，warnings 會使檢查失敗。僅 CSS 檔案的 `noDescendingSpecificity` 例外：該規則不理解不同元件的 DOM 邊界，會將無法同時匹配同一元素的 selector 視為衝突。元件語意、按鈕 type、事件操作與 hook dependencies 均修正後通過，沒有以整體關閉 lint 取代修正。
+Biome recommended 規則與 React／Playwright／types／test domains 保留啟用，warnings 會使檢查失敗。僅 CSS 檔案的 `noDescendingSpecificity` 例外：該規則不理解不同元件的 DOM 邊界，會將無法同時匹配同一元素的 selector 視為衝突。元件語意、按鈕 type、事件操作與 hook dependencies 均修正後通過，沒有以整體關閉 lint 取代修正。
+
+## 建置大小與瀏覽器回歸
+
+地圖元件使用 React lazy／Suspense，初始程式約 291 KB（gzip 94 KB），MapView 約 7 KB（gzip 3 KB），MapLibre 約 1,040 KB（gzip 283 KB）。MapLibre 發布的是單一預打包 ESM 模組，不能用模組層級的 code splitting 再切小；Vite 的一般提示門檻配合此模組調整為 1,100 KB，另由建置 plugin 強制每個應用程式 chunk 不超過 500,000 bytes、MapLibre 不超過 1,100,000 bytes，超標直接失敗，並非整體忽略大小問題。Bun 測試另確認所有延後載入 chunks 都包含在離線 shell。
+
+地圖模組下載失敗時顯示 fallback，不會使清單與詳細資訊失效。瀏覽器測試等待城市飛行完成後，才操作手動縮放或拖曳，避免把中途的跨國 viewport 誤當成目的地。36 項檢查記錄 console warnings；只允許 Chromium 軟體 WebGL 截圖讀回像素的 `GPU stall due to ReadPixels` 驅動診斷，其他警告使測試失敗。離線與刻意阻斷模組的網路錯誤保留在報告中。
 
 ## 本輪整理
 

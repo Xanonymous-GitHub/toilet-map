@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-11T14:42:24.015111+00:00",
+  "checkedAt": "2026-10-11T16:17:06.140706+00:00",
   "dependencies": [
     {
       "name": "lucide-react",
@@ -86,17 +86,17 @@
       "current": true
     },
     {
-      "name": "ruff",
-      "ecosystem": "python",
-      "pinned": "0.17.0",
-      "latestStable": "0.17.0",
-      "current": true
-    },
-    {
       "name": "playwright",
       "ecosystem": "python",
       "pinned": "1.63.0",
       "latestStable": "1.63.0",
+      "current": true
+    },
+    {
+      "name": "ruff",
+      "ecosystem": "python",
+      "pinned": "0.17.0",
+      "latestStable": "0.17.0",
       "current": true
     },
     {

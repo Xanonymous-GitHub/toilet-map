@@ -10,13 +10,12 @@
 
 ## 開發與驗證
 
-需要 Bun 1.4.3、Python 3.12 以上與 uv。使用 `bun.lock`、`uv.lock` 鎖定版本；所有直接套件依賴已向官方套件庫查證為最新穩定版。版本紀錄見 `docs/dependency-versions.json`。
+需要 Bun 1.4.3、Python 3.15 以上與 uv 0.12.23。Bun 版本保存在 `.bun-version`；使用 `bun.lock`、`uv.lock` 鎖定套件版本，Python 宣告的版本範圍不會取代鎖檔。直接依賴的最新穩定版查證日期與結果見 `docs/dependency-versions.json`。
 
 ```bash
 bun install --frozen-lockfile
 uv sync --locked
-bun run build
-bun test tests
+bun run verify
 bun run preview
 ```
 
@@ -26,13 +25,27 @@ bun run preview
 
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript 與 Bun 原生測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；每週另查核依賴版本。產物與使用方式見 [CI 說明](docs/CI.md)。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、23 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；每週另查核依賴版本。產物與使用方式見 [CI 說明](docs/CI.md)。
+
+| 指令 | 用途 |
+| --- | --- |
+| `bun run build` | 建置前端、Worker、Service Worker，產生 `server/*.generated.ts` 並檢查型別 |
+| `bun run lint` | Biome、Ruff lint 與格式檢查 |
+| `bun run typecheck` | 前後端及 Service Worker 型別檢查；乾淨 checkout 須先建置 |
+| `bun run check` | lint 與 typecheck；乾淨 checkout 須先建置 |
+| `bun run test` | Bun 與 Python 測試；API／PWA 測試須先建置 |
+| `bun run verify` | 建置、check、test 的完整必要關卡 |
+| `bun run test:browser` | 已啟動的正式預覽上執行桌面、手機與離線檢查 |
+| `bun run deps:check` | 查核 15 項直接套件／工具的最新穩定版 |
+| `bun run format` | 寫入格式與可自動修正的 lint 結果 |
+| `bun run data:expand` | 從已查證快照重現全國資料；不是網路重新下載 |
 
 - Biome：JavaScript／TypeScript／TSX／CSS／JSON 格式與 recommended lint；警告視為失敗。
 - Ruff：Python 的 E／F／I／B／UP／SIM 規則與格式檢查。
 - TypeScript：strict、未使用變數／參數、switch fallthrough；Service Worker 使用獨立 WebWorker 型別設定。
 - 定位與資料載入拆成獨立 hooks，詳細資訊與原生 dialog 拆成 UI 元件。分頁拒絕重複 ID、截斷資料、循環游標與混用版本。
 - 前端由 Vite 建置，Worker 與 Service Worker 由 Bun 原生打包。快取版本依資產內容與資料版本產生，相同輸入可重複建置。
+- 地圖元件延後載入，下載失敗仍可操作清單與詳細資訊。每個應用程式 chunk 上限 500,000 bytes，MapLibre 的單一預打包模組上限 1,100,000 bytes；超標會使建置失敗，所有延後載入的 chunks 都加入離線 shell。
 - CSS 的 `noDescendingSpecificity` 在單一 stylesheet 停用：它會將不同元件的 `button`／`span` 規則誤判為衝突，也無法判定預期的響應式覆寫。其他 Biome recommended 規則保持啟用。
 
 ## API
@@ -56,10 +69,12 @@ bun run preview
 bun run data:expand
 uv run --locked python scripts/import-data.py --refresh
 bun run build
-bun test tests
+bun run test
 ```
 
 `import-data.py --refresh` 使用東京都公開 CSV 與首爾一般公開 HTTPS 下載表單，不使用 API 私鑰，並保留全國擴充資料。座標、名稱、來源 ID、重複值與最低資料量驗證成功後才取代快照。全國 OSM 為已保存的來源快照，不會在每次使用者移動地圖時呼叫 Overpass。新版 snapshot、metadata 與資料版本需一併更新後重建部署；本版未設定背景排程。若來源資料量變化，請同步審查測試中的基準數量。
+
+不加 `--refresh` 的 `import-data.py` 需要 ignored `data/raw/tokyo.csv` 與 `data/raw/seoul.json`；乾淨 checkout 沒有這些原始檔時會明確拒絕執行。只驗證已提交資料的重現性時使用 `bun run data:expand`，不要為了執行測試重新下載並改變發布資料。
 
 ## 使用與來源限制
 
@@ -76,4 +91,4 @@ bun test tests
 
 ## 瀏覽器驗證
 
-可另外使用已安裝的 Python Playwright 與 Chromium 執行 `bun run test:browser`。先啟動建置後的預覽伺服器；結果與截圖寫入 `test-results/`。雲端代理憑證環境中，測試橋接器用受信任 CA 驗證 HTTPS 後提供公開底圖／字型回應，保留瀏覽器的 TLS 驗證；離線階段關閉橋接器。完整驗證紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。36 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖／字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。

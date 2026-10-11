@@ -46,12 +46,18 @@ Raw snapshots are intentionally ignored by Git:
 `data/raw/expansion-osm/kr.json` (1,107,281 bytes). They preserve original OSM IDs,
 tags, node/way/relation types, geometry centers and response snapshot timestamps.
 
+The published copies are committed as `data/osm-jp.json` and `data/osm-kr.json`.
+Use `bun run data:expand` to reproduce the application dataset in a clean checkout
+without downloading or needing ignored raw files. The research commands below
+operate on `data/raw/expansion-osm/`; the offline radius analysis requires those
+raw copies. Run Python through uv (Python 3.15 or newer).
+
 ```sh
 # Network refresh: only when a new snapshot is intentionally required.
-python research/expansion-osm/download.py JP KR
+uv run --locked python research/expansion-osm/download.py JP KR
 
 # Offline repeat of city-radius counts; no Overpass requests.
-python research/expansion-osm/coverage.py
+uv run --locked python research/expansion-osm/coverage.py
 ```
 
 Missing access, fee, opening hours or accessibility must remain unknown.
