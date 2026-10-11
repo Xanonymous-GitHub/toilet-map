@@ -1,0 +1,31 @@
+{
+  "validation": "Finite coordinates, OSM identity uniqueness, amenity tags, snapshot digest, coarse national extent, cross-country identity disjointness.",
+  "limitations": "The bounds check is only a coarse geographic sanity check. Country selection itself is performed by the Overpass ISO3166-1/admin_level=2 administrative area. OSM way/relation centers are approximate and can fall outside a municipal boundary; no polygon intersection check was performed.",
+  "JP": {
+    "rawCount": 32264,
+    "uniqueIds": 32264,
+    "invalidCoordinates": [],
+    "outsideCoarseNationalExtent": [],
+    "conflictingExplicitCountryTags": [],
+    "invalidAmenity": 0,
+    "sha256Matches": true,
+    "osmBase": "2026-10-11T12:39:16Z",
+    "areaBase": "2026-10-09T22:12:50Z",
+    "excludedRestrictedAccess": 1218,
+    "eligibleIncludingUnknownAccess": 31046
+  },
+  "KR": {
+    "rawCount": 5406,
+    "uniqueIds": 5406,
+    "invalidCoordinates": [],
+    "outsideCoarseNationalExtent": [],
+    "conflictingExplicitCountryTags": [],
+    "invalidAmenity": 0,
+    "sha256Matches": true,
+    "osmBase": "2026-10-11T12:41:21Z",
+    "areaBase": "2026-10-09T22:12:50Z",
+    "excludedRestrictedAccess": 32,
+    "eligibleIncludingUnknownAccess": 5374
+  },
+  "crossCountrySharedIds": []
+}

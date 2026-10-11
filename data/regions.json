@@ -1,0 +1,3079 @@
+{
+  "tokyo": {
+    "label": "東京",
+    "alias": "Tokyo 東京",
+    "local": "Tokyo, Japan",
+    "country": "JP",
+    "center": [
+      139.767,
+      35.681
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.467,
+      35.381,
+      140.067,
+      35.981
+    ]
+  },
+  "osaka": {
+    "label": "大阪",
+    "alias": "Osaka 大阪",
+    "local": "Osaka, Japan",
+    "country": "JP",
+    "center": [
+      135.502,
+      34.693
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.202,
+      34.393,
+      135.802,
+      34.993
+    ]
+  },
+  "kyoto": {
+    "label": "京都",
+    "alias": "Kyoto 京都",
+    "local": "Kyoto, Japan",
+    "country": "JP",
+    "center": [
+      135.768,
+      35.011
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.548,
+      34.791,
+      135.988,
+      35.231
+    ]
+  },
+  "yokohama": {
+    "label": "橫濱",
+    "alias": "Yokohama 横浜",
+    "local": "Yokohama, Japan",
+    "country": "JP",
+    "center": [
+      139.638,
+      35.444
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.418,
+      35.224,
+      139.858,
+      35.664
+    ]
+  },
+  "nagoya": {
+    "label": "名古屋",
+    "alias": "Nagoya 名古屋",
+    "local": "Nagoya, Japan",
+    "country": "JP",
+    "center": [
+      136.907,
+      35.181
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.687,
+      34.961,
+      137.127,
+      35.401
+    ]
+  },
+  "sapporo": {
+    "label": "札幌",
+    "alias": "Sapporo 札幌",
+    "local": "Sapporo, Japan",
+    "country": "JP",
+    "center": [
+      141.354,
+      43.062
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      141.134,
+      42.842,
+      141.574,
+      43.282
+    ]
+  },
+  "fukuoka": {
+    "label": "福岡",
+    "alias": "Fukuoka 博多 Hakata",
+    "local": "Fukuoka, Japan",
+    "country": "JP",
+    "center": [
+      130.402,
+      33.59
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.182,
+      33.37,
+      130.622,
+      33.81
+    ]
+  },
+  "kobe": {
+    "label": "神戶",
+    "alias": "Kobe 神戸",
+    "local": "Kobe, Japan",
+    "country": "JP",
+    "center": [
+      135.195,
+      34.69
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.975,
+      34.47,
+      135.415,
+      34.91
+    ]
+  },
+  "hiroshima": {
+    "label": "廣島",
+    "alias": "Hiroshima 広島",
+    "local": "Hiroshima, Japan",
+    "country": "JP",
+    "center": [
+      132.455,
+      34.385
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      132.235,
+      34.165,
+      132.675,
+      34.605
+    ]
+  },
+  "sendai": {
+    "label": "仙台",
+    "alias": "Sendai 仙台",
+    "local": "Sendai, Japan",
+    "country": "JP",
+    "center": [
+      140.872,
+      38.268
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.652,
+      38.048,
+      141.092,
+      38.488
+    ]
+  },
+  "saitama": {
+    "label": "埼玉",
+    "alias": "Saitama さいたま 大宮 Omiya",
+    "local": "Saitama, Japan",
+    "country": "JP",
+    "center": [
+      139.65,
+      35.862
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.43,
+      35.642,
+      139.87,
+      36.082
+    ]
+  },
+  "chiba": {
+    "label": "千葉",
+    "alias": "Chiba 千葉",
+    "local": "Chiba, Japan",
+    "country": "JP",
+    "center": [
+      140.106,
+      35.607
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.886,
+      35.387,
+      140.326,
+      35.827
+    ]
+  },
+  "kawasaki": {
+    "label": "川崎",
+    "alias": "Kawasaki 川崎",
+    "local": "Kawasaki, Japan",
+    "country": "JP",
+    "center": [
+      139.703,
+      35.531
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.483,
+      35.311,
+      139.923,
+      35.751
+    ]
+  },
+  "kitakyushu": {
+    "label": "北九州",
+    "alias": "Kitakyushu 小倉 Kokura",
+    "local": "Kitakyushu, Japan",
+    "country": "JP",
+    "center": [
+      130.875,
+      33.884
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.655,
+      33.664,
+      131.095,
+      34.104
+    ]
+  },
+  "sakai": {
+    "label": "堺",
+    "alias": "Sakai 堺",
+    "local": "Sakai, Japan",
+    "country": "JP",
+    "center": [
+      135.483,
+      34.573
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.263,
+      34.353,
+      135.703,
+      34.793
+    ]
+  },
+  "niigata": {
+    "label": "新潟",
+    "alias": "Niigata 新潟",
+    "local": "Niigata, Japan",
+    "country": "JP",
+    "center": [
+      139.024,
+      37.916
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.804,
+      37.696,
+      139.244,
+      38.136
+    ]
+  },
+  "hamamatsu": {
+    "label": "濱松",
+    "alias": "Hamamatsu 浜松",
+    "local": "Hamamatsu, Japan",
+    "country": "JP",
+    "center": [
+      137.727,
+      34.711
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      137.507,
+      34.491,
+      137.947,
+      34.931
+    ]
+  },
+  "kumamoto": {
+    "label": "熊本",
+    "alias": "Kumamoto 熊本",
+    "local": "Kumamoto, Japan",
+    "country": "JP",
+    "center": [
+      130.708,
+      32.803
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.488,
+      32.583,
+      130.928,
+      33.023
+    ]
+  },
+  "shizuoka": {
+    "label": "靜岡",
+    "alias": "Shizuoka 静岡",
+    "local": "Shizuoka, Japan",
+    "country": "JP",
+    "center": [
+      138.383,
+      34.975
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.163,
+      34.755,
+      138.603,
+      35.195
+    ]
+  },
+  "okayama": {
+    "label": "岡山",
+    "alias": "Okayama 岡山",
+    "local": "Okayama, Japan",
+    "country": "JP",
+    "center": [
+      133.935,
+      34.655
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      133.715,
+      34.435,
+      134.155,
+      34.875
+    ]
+  },
+  "kagoshima": {
+    "label": "鹿兒島",
+    "alias": "Kagoshima 鹿児島",
+    "local": "Kagoshima, Japan",
+    "country": "JP",
+    "center": [
+      130.557,
+      31.596
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.337,
+      31.376,
+      130.777,
+      31.816
+    ]
+  },
+  "naha": {
+    "label": "那霸・沖繩",
+    "alias": "Naha Okinawa 那覇 沖縄",
+    "local": "Naha, Japan",
+    "country": "JP",
+    "center": [
+      127.681,
+      26.212
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.461,
+      25.992,
+      127.901,
+      26.432
+    ]
+  },
+  "kanazawa": {
+    "label": "金澤",
+    "alias": "Kanazawa 金沢",
+    "local": "Kanazawa, Japan",
+    "country": "JP",
+    "center": [
+      136.657,
+      36.562
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.437,
+      36.342,
+      136.877,
+      36.782
+    ]
+  },
+  "nagasaki": {
+    "label": "長崎",
+    "alias": "Nagasaki 長崎",
+    "local": "Nagasaki, Japan",
+    "country": "JP",
+    "center": [
+      129.878,
+      32.75
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.658,
+      32.53,
+      130.098,
+      32.97
+    ]
+  },
+  "nara": {
+    "label": "奈良",
+    "alias": "Nara 奈良",
+    "local": "Nara, Japan",
+    "country": "JP",
+    "center": [
+      135.805,
+      34.685
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.585,
+      34.465,
+      136.025,
+      34.905
+    ]
+  },
+  "matsuyama": {
+    "label": "松山",
+    "alias": "Matsuyama 松山",
+    "local": "Matsuyama, Japan",
+    "country": "JP",
+    "center": [
+      132.765,
+      33.839
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      132.545,
+      33.619,
+      132.985,
+      34.059
+    ]
+  },
+  "hakodate": {
+    "label": "函館",
+    "alias": "Hakodate 函館",
+    "local": "Hakodate, Japan",
+    "country": "JP",
+    "center": [
+      140.728,
+      41.768
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.508,
+      41.548,
+      140.948,
+      41.988
+    ]
+  },
+  "takayama": {
+    "label": "高山",
+    "alias": "Takayama 飛驒 飛騨",
+    "local": "Takayama, Japan",
+    "country": "JP",
+    "center": [
+      137.253,
+      36.146
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      137.033,
+      35.926,
+      137.473,
+      36.366
+    ]
+  },
+  "beppu": {
+    "label": "別府",
+    "alias": "Beppu 別府",
+    "local": "Beppu, Japan",
+    "country": "JP",
+    "center": [
+      131.491,
+      33.284
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      131.271,
+      33.064,
+      131.711,
+      33.504
+    ]
+  },
+  "nikko": {
+    "label": "日光",
+    "alias": "Nikko 日光",
+    "local": "Nikko, Japan",
+    "country": "JP",
+    "center": [
+      139.599,
+      36.75
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.379,
+      36.53,
+      139.819,
+      36.97
+    ]
+  },
+  "kawaguchiko": {
+    "label": "河口湖・富士",
+    "alias": "Kawaguchiko Fuji 富士山 河口湖",
+    "local": "Kawaguchiko, Japan",
+    "country": "JP",
+    "center": [
+      138.754,
+      35.503
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.534,
+      35.283,
+      138.974,
+      35.723
+    ]
+  },
+  "aomori": {
+    "label": "青森",
+    "alias": "Aomori 青森",
+    "local": "Aomori, Japan",
+    "country": "JP",
+    "center": [
+      140.74,
+      40.823
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.52,
+      40.603,
+      140.96,
+      41.043
+    ]
+  },
+  "morioka": {
+    "label": "盛岡",
+    "alias": "Morioka 盛岡",
+    "local": "Morioka, Japan",
+    "country": "JP",
+    "center": [
+      141.154,
+      39.702
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.934,
+      39.482,
+      141.374,
+      39.922
+    ]
+  },
+  "akita": {
+    "label": "秋田",
+    "alias": "Akita 秋田",
+    "local": "Akita, Japan",
+    "country": "JP",
+    "center": [
+      140.103,
+      39.72
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.883,
+      39.5,
+      140.323,
+      39.94
+    ]
+  },
+  "yamagata": {
+    "label": "山形",
+    "alias": "Yamagata 山形",
+    "local": "Yamagata, Japan",
+    "country": "JP",
+    "center": [
+      140.339,
+      38.255
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.119,
+      38.035,
+      140.559,
+      38.475
+    ]
+  },
+  "fukushima": {
+    "label": "福島",
+    "alias": "Fukushima 福島",
+    "local": "Fukushima, Japan",
+    "country": "JP",
+    "center": [
+      140.475,
+      37.76
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.255,
+      37.54,
+      140.695,
+      37.98
+    ]
+  },
+  "mito": {
+    "label": "水戶",
+    "alias": "Mito 水戸",
+    "local": "Mito, Japan",
+    "country": "JP",
+    "center": [
+      140.471,
+      36.365
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.251,
+      36.145,
+      140.691,
+      36.585
+    ]
+  },
+  "utsunomiya": {
+    "label": "宇都宮",
+    "alias": "Utsunomiya 宇都宮",
+    "local": "Utsunomiya, Japan",
+    "country": "JP",
+    "center": [
+      139.883,
+      36.555
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.663,
+      36.335,
+      140.103,
+      36.775
+    ]
+  },
+  "maebashi": {
+    "label": "前橋",
+    "alias": "Maebashi 前橋",
+    "local": "Maebashi, Japan",
+    "country": "JP",
+    "center": [
+      139.06,
+      36.389
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.84,
+      36.169,
+      139.28,
+      36.609
+    ]
+  },
+  "kofu": {
+    "label": "甲府",
+    "alias": "Kofu 甲府",
+    "local": "Kofu, Japan",
+    "country": "JP",
+    "center": [
+      138.568,
+      35.663
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.348,
+      35.443,
+      138.788,
+      35.883
+    ]
+  },
+  "nagano": {
+    "label": "長野",
+    "alias": "Nagano 長野",
+    "local": "Nagano, Japan",
+    "country": "JP",
+    "center": [
+      138.181,
+      36.651
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      137.961,
+      36.431,
+      138.401,
+      36.871
+    ]
+  },
+  "toyama": {
+    "label": "富山",
+    "alias": "Toyama 富山",
+    "local": "Toyama, Japan",
+    "country": "JP",
+    "center": [
+      137.213,
+      36.696
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.993,
+      36.476,
+      137.433,
+      36.916
+    ]
+  },
+  "fukui": {
+    "label": "福井",
+    "alias": "Fukui 福井",
+    "local": "Fukui, Japan",
+    "country": "JP",
+    "center": [
+      136.222,
+      36.065
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.002,
+      35.845,
+      136.442,
+      36.285
+    ]
+  },
+  "gifu": {
+    "label": "岐阜",
+    "alias": "Gifu 岐阜",
+    "local": "Gifu, Japan",
+    "country": "JP",
+    "center": [
+      136.76,
+      35.424
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.54,
+      35.204,
+      136.98,
+      35.644
+    ]
+  },
+  "otsu": {
+    "label": "大津",
+    "alias": "Otsu 滋賀 琵琶湖",
+    "local": "Otsu, Japan",
+    "country": "JP",
+    "center": [
+      135.855,
+      35.018
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.635,
+      34.798,
+      136.075,
+      35.238
+    ]
+  },
+  "tsu": {
+    "label": "津・三重",
+    "alias": "Tsu Mie 三重 津",
+    "local": "Tsu, Japan",
+    "country": "JP",
+    "center": [
+      136.509,
+      34.718
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.289,
+      34.498,
+      136.729,
+      34.938
+    ]
+  },
+  "wakayama": {
+    "label": "和歌山",
+    "alias": "Wakayama 和歌山",
+    "local": "Wakayama, Japan",
+    "country": "JP",
+    "center": [
+      135.17,
+      34.231
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.95,
+      34.011,
+      135.39,
+      34.451
+    ]
+  },
+  "tottori": {
+    "label": "鳥取",
+    "alias": "Tottori 鳥取",
+    "local": "Tottori, Japan",
+    "country": "JP",
+    "center": [
+      134.238,
+      35.501
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.018,
+      35.281,
+      134.458,
+      35.721
+    ]
+  },
+  "matsue": {
+    "label": "松江",
+    "alias": "Matsue 島根 松江",
+    "local": "Matsue, Japan",
+    "country": "JP",
+    "center": [
+      133.051,
+      35.468
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      132.831,
+      35.248,
+      133.271,
+      35.688
+    ]
+  },
+  "yamaguchi": {
+    "label": "山口",
+    "alias": "Yamaguchi 山口",
+    "local": "Yamaguchi, Japan",
+    "country": "JP",
+    "center": [
+      131.474,
+      34.178
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      131.254,
+      33.958,
+      131.694,
+      34.398
+    ]
+  },
+  "tokushima": {
+    "label": "德島",
+    "alias": "Tokushima 徳島",
+    "local": "Tokushima, Japan",
+    "country": "JP",
+    "center": [
+      134.555,
+      34.07
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.335,
+      33.85,
+      134.775,
+      34.29
+    ]
+  },
+  "takamatsu": {
+    "label": "高松",
+    "alias": "Takamatsu 香川",
+    "local": "Takamatsu, Japan",
+    "country": "JP",
+    "center": [
+      134.043,
+      34.342
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      133.823,
+      34.122,
+      134.263,
+      34.562
+    ]
+  },
+  "kochi": {
+    "label": "高知",
+    "alias": "Kochi 高知",
+    "local": "Kochi, Japan",
+    "country": "JP",
+    "center": [
+      133.531,
+      33.559
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      133.311,
+      33.339,
+      133.751,
+      33.779
+    ]
+  },
+  "saga": {
+    "label": "佐賀",
+    "alias": "Saga 佐賀",
+    "local": "Saga, Japan",
+    "country": "JP",
+    "center": [
+      130.3,
+      33.249
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.08,
+      33.029,
+      130.52,
+      33.469
+    ]
+  },
+  "oita": {
+    "label": "大分",
+    "alias": "Oita 大分",
+    "local": "Oita, Japan",
+    "country": "JP",
+    "center": [
+      131.606,
+      33.239
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      131.386,
+      33.019,
+      131.826,
+      33.459
+    ]
+  },
+  "miyazaki": {
+    "label": "宮崎",
+    "alias": "Miyazaki 宮崎",
+    "local": "Miyazaki, Japan",
+    "country": "JP",
+    "center": [
+      131.423,
+      31.911
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      131.203,
+      31.691,
+      131.643,
+      32.131
+    ]
+  },
+  "asahikawa": {
+    "label": "旭川",
+    "alias": "Asahikawa 旭川",
+    "local": "Asahikawa, Japan",
+    "country": "JP",
+    "center": [
+      142.365,
+      43.77
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      142.145,
+      43.55,
+      142.585,
+      43.99
+    ]
+  },
+  "kushiro": {
+    "label": "釧路",
+    "alias": "Kushiro 釧路",
+    "local": "Kushiro, Japan",
+    "country": "JP",
+    "center": [
+      144.381,
+      42.985
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      144.161,
+      42.765,
+      144.601,
+      43.205
+    ]
+  },
+  "obihiro": {
+    "label": "帶廣",
+    "alias": "Obihiro 帯広",
+    "local": "Obihiro, Japan",
+    "country": "JP",
+    "center": [
+      143.196,
+      42.923
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      142.976,
+      42.703,
+      143.416,
+      43.143
+    ]
+  },
+  "otaru": {
+    "label": "小樽",
+    "alias": "Otaru 小樽",
+    "local": "Otaru, Japan",
+    "country": "JP",
+    "center": [
+      140.994,
+      43.19
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.774,
+      42.97,
+      141.214,
+      43.41
+    ]
+  },
+  "himeji": {
+    "label": "姬路",
+    "alias": "Himeji 姫路",
+    "local": "Himeji, Japan",
+    "country": "JP",
+    "center": [
+      134.69,
+      34.815
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.47,
+      34.595,
+      134.91,
+      35.035
+    ]
+  },
+  "ise": {
+    "label": "伊勢",
+    "alias": "Ise 伊勢",
+    "local": "Ise, Japan",
+    "country": "JP",
+    "center": [
+      136.71,
+      34.488
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.49,
+      34.268,
+      136.93,
+      34.708
+    ]
+  },
+  "kamakura": {
+    "label": "鎌倉",
+    "alias": "Kamakura 鎌倉",
+    "local": "Kamakura, Japan",
+    "country": "JP",
+    "center": [
+      139.546,
+      35.319
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.326,
+      35.099,
+      139.766,
+      35.539
+    ]
+  },
+  "hakone": {
+    "label": "箱根",
+    "alias": "Hakone 箱根",
+    "local": "Hakone, Japan",
+    "country": "JP",
+    "center": [
+      139.03,
+      35.233
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.81,
+      35.013,
+      139.25,
+      35.453
+    ]
+  },
+  "matsumoto": {
+    "label": "松本",
+    "alias": "Matsumoto 松本",
+    "local": "Matsumoto, Japan",
+    "country": "JP",
+    "center": [
+      137.971,
+      36.239
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      137.751,
+      36.019,
+      138.191,
+      36.459
+    ]
+  },
+  "karuizawa": {
+    "label": "輕井澤",
+    "alias": "Karuizawa 軽井沢",
+    "local": "Karuizawa, Japan",
+    "country": "JP",
+    "center": [
+      138.632,
+      36.343
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.412,
+      36.123,
+      138.852,
+      36.563
+    ]
+  },
+  "fujisawa": {
+    "label": "藤澤・江之島",
+    "alias": "Fujisawa Enoshima 藤沢 江ノ島",
+    "local": "Fujisawa, Japan",
+    "country": "JP",
+    "center": [
+      139.487,
+      35.339
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.267,
+      35.119,
+      139.707,
+      35.559
+    ]
+  },
+  "fukuyama": {
+    "label": "福山",
+    "alias": "Fukuyama 福山",
+    "local": "Fukuyama, Japan",
+    "country": "JP",
+    "center": [
+      133.363,
+      34.486
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      133.143,
+      34.266,
+      133.583,
+      34.706
+    ]
+  },
+  "shimonoseki": {
+    "label": "下關",
+    "alias": "Shimonoseki 下関",
+    "local": "Shimonoseki, Japan",
+    "country": "JP",
+    "center": [
+      130.941,
+      33.957
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.721,
+      33.737,
+      131.161,
+      34.177
+    ]
+  },
+  "ishigaki": {
+    "label": "石垣島",
+    "alias": "Ishigaki 石垣島",
+    "local": "Ishigaki, Japan",
+    "country": "JP",
+    "center": [
+      124.157,
+      24.34
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      123.937,
+      24.12,
+      124.377,
+      24.56
+    ]
+  },
+  "miyakojima": {
+    "label": "宮古島",
+    "alias": "Miyakojima 宮古島",
+    "local": "Miyakojima, Japan",
+    "country": "JP",
+    "center": [
+      125.282,
+      24.806
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      125.062,
+      24.586,
+      125.502,
+      25.026
+    ]
+  },
+  "tsushima": {
+    "label": "對馬",
+    "alias": "Tsushima 対馬",
+    "local": "Tsushima, Japan",
+    "country": "JP",
+    "center": [
+      129.287,
+      34.203
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.067,
+      33.983,
+      129.507,
+      34.423
+    ]
+  },
+  "ogasawara": {
+    "label": "小笠原",
+    "alias": "Ogasawara 小笠原",
+    "local": "Ogasawara, Japan",
+    "country": "JP",
+    "center": [
+      142.191,
+      27.094
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      141.971,
+      26.874,
+      142.411,
+      27.314
+    ]
+  },
+  "seoul": {
+    "label": "首爾",
+    "alias": "Seoul 서울 市廳 City Hall",
+    "local": "Seoul, South Korea",
+    "country": "KR",
+    "center": [
+      126.978,
+      37.567
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.678,
+      37.267,
+      127.278,
+      37.867
+    ]
+  },
+  "busan": {
+    "label": "釜山",
+    "alias": "Busan 부산",
+    "local": "Busan, South Korea",
+    "country": "KR",
+    "center": [
+      129.075,
+      35.18
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.775,
+      34.88,
+      129.375,
+      35.48
+    ]
+  },
+  "incheon": {
+    "label": "仁川",
+    "alias": "Incheon 인천",
+    "local": "Incheon, South Korea",
+    "country": "KR",
+    "center": [
+      126.705,
+      37.457
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.485,
+      37.237,
+      126.925,
+      37.677
+    ]
+  },
+  "daegu": {
+    "label": "大邱",
+    "alias": "Daegu 대구",
+    "local": "Daegu, South Korea",
+    "country": "KR",
+    "center": [
+      128.601,
+      35.871
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.381,
+      35.651,
+      128.821,
+      36.091
+    ]
+  },
+  "daejeon": {
+    "label": "大田",
+    "alias": "Daejeon 대전",
+    "local": "Daejeon, South Korea",
+    "country": "KR",
+    "center": [
+      127.385,
+      36.35
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.165,
+      36.13,
+      127.605,
+      36.57
+    ]
+  },
+  "gwangju": {
+    "label": "光州",
+    "alias": "Gwangju 광주",
+    "local": "Gwangju, South Korea",
+    "country": "KR",
+    "center": [
+      126.853,
+      35.16
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.633,
+      34.94,
+      127.073,
+      35.38
+    ]
+  },
+  "ulsan": {
+    "label": "蔚山",
+    "alias": "Ulsan 울산",
+    "local": "Ulsan, South Korea",
+    "country": "KR",
+    "center": [
+      129.311,
+      35.539
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.091,
+      35.319,
+      129.531,
+      35.759
+    ]
+  },
+  "jeju": {
+    "label": "濟州",
+    "alias": "Jeju 제주",
+    "local": "Jeju, South Korea",
+    "country": "KR",
+    "center": [
+      126.531,
+      33.5
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.311,
+      33.28,
+      126.751,
+      33.72
+    ]
+  },
+  "seogwipo": {
+    "label": "西歸浦",
+    "alias": "Seogwipo 서귀포",
+    "local": "Seogwipo, South Korea",
+    "country": "KR",
+    "center": [
+      126.56,
+      33.254
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.34,
+      33.034,
+      126.78,
+      33.474
+    ]
+  },
+  "suwon": {
+    "label": "水原",
+    "alias": "Suwon 수원",
+    "local": "Suwon, South Korea",
+    "country": "KR",
+    "center": [
+      127.028,
+      37.263
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.808,
+      37.043,
+      127.248,
+      37.483
+    ]
+  },
+  "seongnam": {
+    "label": "城南",
+    "alias": "Seongnam 성남 盆唐 Bundang",
+    "local": "Seongnam, South Korea",
+    "country": "KR",
+    "center": [
+      127.127,
+      37.42
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.907,
+      37.2,
+      127.347,
+      37.64
+    ]
+  },
+  "goyang": {
+    "label": "高陽",
+    "alias": "Goyang 고양 一山 Ilsan",
+    "local": "Goyang, South Korea",
+    "country": "KR",
+    "center": [
+      126.832,
+      37.658
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.612,
+      37.438,
+      127.052,
+      37.878
+    ]
+  },
+  "yongin": {
+    "label": "龍仁",
+    "alias": "Yongin 용인",
+    "local": "Yongin, South Korea",
+    "country": "KR",
+    "center": [
+      127.177,
+      37.241
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.957,
+      37.021,
+      127.397,
+      37.461
+    ]
+  },
+  "bucheon": {
+    "label": "富川",
+    "alias": "Bucheon 부천",
+    "local": "Bucheon, South Korea",
+    "country": "KR",
+    "center": [
+      126.766,
+      37.503
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.546,
+      37.283,
+      126.986,
+      37.723
+    ]
+  },
+  "hwaseong": {
+    "label": "華城",
+    "alias": "Hwaseong 화성 東灘 Dongtan",
+    "local": "Hwaseong, South Korea",
+    "country": "KR",
+    "center": [
+      126.832,
+      37.199
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.612,
+      36.979,
+      127.052,
+      37.419
+    ]
+  },
+  "ansan": {
+    "label": "安山",
+    "alias": "Ansan 안산",
+    "local": "Ansan, South Korea",
+    "country": "KR",
+    "center": [
+      126.83,
+      37.322
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.61,
+      37.102,
+      127.05,
+      37.542
+    ]
+  },
+  "anyang": {
+    "label": "安養",
+    "alias": "Anyang 안양",
+    "local": "Anyang, South Korea",
+    "country": "KR",
+    "center": [
+      126.957,
+      37.394
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.737,
+      37.174,
+      127.177,
+      37.614
+    ]
+  },
+  "namyangju": {
+    "label": "南楊州",
+    "alias": "Namyangju 남양주",
+    "local": "Namyangju, South Korea",
+    "country": "KR",
+    "center": [
+      127.217,
+      37.636
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.997,
+      37.416,
+      127.437,
+      37.856
+    ]
+  },
+  "uijeongbu": {
+    "label": "議政府",
+    "alias": "Uijeongbu 의정부",
+    "local": "Uijeongbu, South Korea",
+    "country": "KR",
+    "center": [
+      127.034,
+      37.738
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.814,
+      37.518,
+      127.254,
+      37.958
+    ]
+  },
+  "pyeongtaek": {
+    "label": "平澤",
+    "alias": "Pyeongtaek 평택",
+    "local": "Pyeongtaek, South Korea",
+    "country": "KR",
+    "center": [
+      127.112,
+      36.992
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.892,
+      36.772,
+      127.332,
+      37.212
+    ]
+  },
+  "paju": {
+    "label": "坡州",
+    "alias": "Paju 파주",
+    "local": "Paju, South Korea",
+    "country": "KR",
+    "center": [
+      126.78,
+      37.76
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.56,
+      37.54,
+      127.0,
+      37.98
+    ]
+  },
+  "cheonan": {
+    "label": "天安",
+    "alias": "Cheonan 천안",
+    "local": "Cheonan, South Korea",
+    "country": "KR",
+    "center": [
+      127.148,
+      36.815
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.928,
+      36.595,
+      127.368,
+      37.035
+    ]
+  },
+  "cheongju": {
+    "label": "清州",
+    "alias": "Cheongju 청주",
+    "local": "Cheongju, South Korea",
+    "country": "KR",
+    "center": [
+      127.49,
+      36.642
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.27,
+      36.422,
+      127.71,
+      36.862
+    ]
+  },
+  "sejong": {
+    "label": "世宗",
+    "alias": "Sejong 세종",
+    "local": "Sejong, South Korea",
+    "country": "KR",
+    "center": [
+      127.29,
+      36.48
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.07,
+      36.26,
+      127.51,
+      36.7
+    ]
+  },
+  "jeonju": {
+    "label": "全州",
+    "alias": "Jeonju 전주",
+    "local": "Jeonju, South Korea",
+    "country": "KR",
+    "center": [
+      127.148,
+      35.824
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.928,
+      35.604,
+      127.368,
+      36.044
+    ]
+  },
+  "pohang": {
+    "label": "浦項",
+    "alias": "Pohang 포항",
+    "local": "Pohang, South Korea",
+    "country": "KR",
+    "center": [
+      129.343,
+      36.019
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.123,
+      35.799,
+      129.563,
+      36.239
+    ]
+  },
+  "changwon": {
+    "label": "昌原",
+    "alias": "Changwon 창원 馬山 Masan",
+    "local": "Changwon, South Korea",
+    "country": "KR",
+    "center": [
+      128.681,
+      35.228
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.461,
+      35.008,
+      128.901,
+      35.448
+    ]
+  },
+  "gimhae": {
+    "label": "金海",
+    "alias": "Gimhae 김해",
+    "local": "Gimhae, South Korea",
+    "country": "KR",
+    "center": [
+      128.89,
+      35.228
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.67,
+      35.008,
+      129.11,
+      35.448
+    ]
+  },
+  "gangneung": {
+    "label": "江陵",
+    "alias": "Gangneung 강릉",
+    "local": "Gangneung, South Korea",
+    "country": "KR",
+    "center": [
+      128.877,
+      37.751
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.657,
+      37.531,
+      129.097,
+      37.971
+    ]
+  },
+  "chuncheon": {
+    "label": "春川",
+    "alias": "Chuncheon 춘천",
+    "local": "Chuncheon, South Korea",
+    "country": "KR",
+    "center": [
+      127.73,
+      37.881
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.51,
+      37.661,
+      127.95,
+      38.101
+    ]
+  },
+  "wonju": {
+    "label": "原州",
+    "alias": "Wonju 원주",
+    "local": "Wonju, South Korea",
+    "country": "KR",
+    "center": [
+      127.92,
+      37.342
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.7,
+      37.122,
+      128.14,
+      37.562
+    ]
+  },
+  "gyeongju": {
+    "label": "慶州",
+    "alias": "Gyeongju 경주",
+    "local": "Gyeongju, South Korea",
+    "country": "KR",
+    "center": [
+      129.224,
+      35.856
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.004,
+      35.636,
+      129.444,
+      36.076
+    ]
+  },
+  "yeosu": {
+    "label": "麗水",
+    "alias": "Yeosu 여수",
+    "local": "Yeosu, South Korea",
+    "country": "KR",
+    "center": [
+      127.662,
+      34.761
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.442,
+      34.541,
+      127.882,
+      34.981
+    ]
+  },
+  "suncheon": {
+    "label": "順天",
+    "alias": "Suncheon 순천",
+    "local": "Suncheon, South Korea",
+    "country": "KR",
+    "center": [
+      127.488,
+      34.95
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.268,
+      34.73,
+      127.708,
+      35.17
+    ]
+  },
+  "andong": {
+    "label": "安東",
+    "alias": "Andong 안동",
+    "local": "Andong, South Korea",
+    "country": "KR",
+    "center": [
+      128.729,
+      36.568
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.509,
+      36.348,
+      128.949,
+      36.788
+    ]
+  },
+  "gyeongsan": {
+    "label": "慶山",
+    "alias": "Gyeongsan 경산",
+    "local": "Gyeongsan, South Korea",
+    "country": "KR",
+    "center": [
+      128.738,
+      35.825
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.518,
+      35.605,
+      128.958,
+      36.045
+    ]
+  },
+  "gunsan": {
+    "label": "群山",
+    "alias": "Gunsan 군산",
+    "local": "Gunsan, South Korea",
+    "country": "KR",
+    "center": [
+      126.736,
+      35.968
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.516,
+      35.748,
+      126.956,
+      36.188
+    ]
+  },
+  "iksan": {
+    "label": "益山",
+    "alias": "Iksan 익산",
+    "local": "Iksan, South Korea",
+    "country": "KR",
+    "center": [
+      126.957,
+      35.948
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.737,
+      35.728,
+      127.177,
+      36.168
+    ]
+  },
+  "mokpo": {
+    "label": "木浦",
+    "alias": "Mokpo 목포",
+    "local": "Mokpo, South Korea",
+    "country": "KR",
+    "center": [
+      126.392,
+      34.812
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.172,
+      34.592,
+      126.612,
+      35.032
+    ]
+  },
+  "geoje": {
+    "label": "巨濟",
+    "alias": "Geoje 거제",
+    "local": "Geoje, South Korea",
+    "country": "KR",
+    "center": [
+      128.622,
+      34.88
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.402,
+      34.66,
+      128.842,
+      35.1
+    ]
+  },
+  "yangsan": {
+    "label": "梁山",
+    "alias": "Yangsan 양산",
+    "local": "Yangsan, South Korea",
+    "country": "KR",
+    "center": [
+      129.037,
+      35.336
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.817,
+      35.116,
+      129.257,
+      35.556
+    ]
+  },
+  "sokcho": {
+    "label": "束草",
+    "alias": "Sokcho 속초",
+    "local": "Sokcho, South Korea",
+    "country": "KR",
+    "center": [
+      128.591,
+      38.207
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.371,
+      37.987,
+      128.811,
+      38.427
+    ]
+  },
+  "chungju": {
+    "label": "忠州",
+    "alias": "Chungju 충주",
+    "local": "Chungju, South Korea",
+    "country": "KR",
+    "center": [
+      127.926,
+      36.991
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.706,
+      36.771,
+      128.146,
+      37.211
+    ]
+  },
+  "jinju": {
+    "label": "晉州",
+    "alias": "Jinju 진주",
+    "local": "Jinju, South Korea",
+    "country": "KR",
+    "center": [
+      128.108,
+      35.18
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.888,
+      34.96,
+      128.328,
+      35.4
+    ]
+  },
+  "uljin": {
+    "label": "蔚珍",
+    "alias": "Uljin 울진",
+    "local": "Uljin, South Korea",
+    "country": "KR",
+    "center": [
+      129.4,
+      36.994
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.18,
+      36.774,
+      129.62,
+      37.214
+    ]
+  },
+  "ulleung": {
+    "label": "鬱陵島",
+    "alias": "Ulleung 울릉도",
+    "local": "Ulleung, South Korea",
+    "country": "KR",
+    "center": [
+      130.904,
+      37.484
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.684,
+      37.264,
+      131.124,
+      37.704
+    ]
+  },
+  "sagamihara": {
+    "label": "相模原",
+    "alias": "Sagamihara 相模原",
+    "local": "Sagamihara, Japan",
+    "country": "JP",
+    "center": [
+      139.372,
+      35.571
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.152,
+      35.351,
+      139.592,
+      35.791
+    ]
+  },
+  "hachioji": {
+    "label": "八王子",
+    "alias": "Hachioji 八王子",
+    "local": "Hachioji, Japan",
+    "country": "JP",
+    "center": [
+      139.316,
+      35.655
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.096,
+      35.435,
+      139.536,
+      35.875
+    ]
+  },
+  "machida": {
+    "label": "町田",
+    "alias": "Machida 町田",
+    "local": "Machida, Japan",
+    "country": "JP",
+    "center": [
+      139.438,
+      35.547
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.218,
+      35.327,
+      139.658,
+      35.767
+    ]
+  },
+  "funabashi": {
+    "label": "船橋",
+    "alias": "Funabashi 船橋",
+    "local": "Funabashi, Japan",
+    "country": "JP",
+    "center": [
+      139.982,
+      35.694
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.762,
+      35.474,
+      140.202,
+      35.914
+    ]
+  },
+  "matsudo": {
+    "label": "松戶",
+    "alias": "Matsudo 松戸",
+    "local": "Matsudo, Japan",
+    "country": "JP",
+    "center": [
+      139.903,
+      35.788
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.683,
+      35.568,
+      140.123,
+      36.008
+    ]
+  },
+  "kashiwa": {
+    "label": "柏",
+    "alias": "Kashiwa 柏",
+    "local": "Kashiwa, Japan",
+    "country": "JP",
+    "center": [
+      139.976,
+      35.868
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.756,
+      35.648,
+      140.196,
+      36.088
+    ]
+  },
+  "kawaguchi": {
+    "label": "川口",
+    "alias": "Kawaguchi 川口",
+    "local": "Kawaguchi, Japan",
+    "country": "JP",
+    "center": [
+      139.724,
+      35.807
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.504,
+      35.587,
+      139.944,
+      36.027
+    ]
+  },
+  "kawagoe": {
+    "label": "川越",
+    "alias": "Kawagoe 川越",
+    "local": "Kawagoe, Japan",
+    "country": "JP",
+    "center": [
+      139.486,
+      35.926
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.266,
+      35.706,
+      139.706,
+      36.146
+    ]
+  },
+  "koshigaya": {
+    "label": "越谷",
+    "alias": "Koshigaya 越谷",
+    "local": "Koshigaya, Japan",
+    "country": "JP",
+    "center": [
+      139.79,
+      35.892
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.57,
+      35.672,
+      140.01,
+      36.112
+    ]
+  },
+  "takasaki": {
+    "label": "高崎",
+    "alias": "Takasaki 高崎",
+    "local": "Takasaki, Japan",
+    "country": "JP",
+    "center": [
+      139.005,
+      36.322
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.785,
+      36.102,
+      139.225,
+      36.542
+    ]
+  },
+  "koriyama": {
+    "label": "郡山",
+    "alias": "Koriyama 郡山",
+    "local": "Koriyama, Japan",
+    "country": "JP",
+    "center": [
+      140.381,
+      37.4
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.161,
+      37.18,
+      140.601,
+      37.62
+    ]
+  },
+  "iwaki": {
+    "label": "磐城",
+    "alias": "Iwaki いわき 磐城",
+    "local": "Iwaki, Japan",
+    "country": "JP",
+    "center": [
+      140.888,
+      37.051
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      140.668,
+      36.831,
+      141.108,
+      37.271
+    ]
+  },
+  "toyota": {
+    "label": "豐田",
+    "alias": "Toyota 豊田",
+    "local": "Toyota, Japan",
+    "country": "JP",
+    "center": [
+      137.156,
+      35.083
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.936,
+      34.863,
+      137.376,
+      35.303
+    ]
+  },
+  "toyohashi": {
+    "label": "豐橋",
+    "alias": "Toyohashi 豊橋",
+    "local": "Toyohashi, Japan",
+    "country": "JP",
+    "center": [
+      137.391,
+      34.77
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      137.171,
+      34.55,
+      137.611,
+      34.99
+    ]
+  },
+  "okazaki": {
+    "label": "岡崎",
+    "alias": "Okazaki 岡崎",
+    "local": "Okazaki, Japan",
+    "country": "JP",
+    "center": [
+      137.174,
+      34.955
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.954,
+      34.735,
+      137.394,
+      35.175
+    ]
+  },
+  "ichinomiya": {
+    "label": "一宮",
+    "alias": "Ichinomiya 一宮",
+    "local": "Ichinomiya, Japan",
+    "country": "JP",
+    "center": [
+      136.802,
+      35.304
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.582,
+      35.084,
+      137.022,
+      35.524
+    ]
+  },
+  "yokkaichi": {
+    "label": "四日市",
+    "alias": "Yokkaichi 四日市",
+    "local": "Yokkaichi, Japan",
+    "country": "JP",
+    "center": [
+      136.624,
+      34.965
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.404,
+      34.745,
+      136.844,
+      35.185
+    ]
+  },
+  "hirakata": {
+    "label": "枚方",
+    "alias": "Hirakata 枚方",
+    "local": "Hirakata, Japan",
+    "country": "JP",
+    "center": [
+      135.65,
+      34.814
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.43,
+      34.594,
+      135.87,
+      35.034
+    ]
+  },
+  "higashiosaka": {
+    "label": "東大阪",
+    "alias": "Higashiosaka 東大阪",
+    "local": "Higashiosaka, Japan",
+    "country": "JP",
+    "center": [
+      135.601,
+      34.679
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.381,
+      34.459,
+      135.821,
+      34.899
+    ]
+  },
+  "amagasaki": {
+    "label": "尼崎",
+    "alias": "Amagasaki 尼崎",
+    "local": "Amagasaki, Japan",
+    "country": "JP",
+    "center": [
+      135.405,
+      34.733
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.185,
+      34.513,
+      135.625,
+      34.953
+    ]
+  },
+  "nishinomiya": {
+    "label": "西宮",
+    "alias": "Nishinomiya 西宮",
+    "local": "Nishinomiya, Japan",
+    "country": "JP",
+    "center": [
+      135.342,
+      34.738
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.122,
+      34.518,
+      135.562,
+      34.958
+    ]
+  },
+  "akashi": {
+    "label": "明石",
+    "alias": "Akashi 明石",
+    "local": "Akashi, Japan",
+    "country": "JP",
+    "center": [
+      134.992,
+      34.643
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      134.772,
+      34.423,
+      135.212,
+      34.863
+    ]
+  },
+  "kurume": {
+    "label": "久留米",
+    "alias": "Kurume 久留米",
+    "local": "Kurume, Japan",
+    "country": "JP",
+    "center": [
+      130.508,
+      33.319
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      130.288,
+      33.099,
+      130.728,
+      33.539
+    ]
+  },
+  "toyonaka": {
+    "label": "豐中",
+    "alias": "Toyonaka 豊中",
+    "local": "Toyonaka, Japan",
+    "country": "JP",
+    "center": [
+      135.469,
+      34.781
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.249,
+      34.561,
+      135.689,
+      35.001
+    ]
+  },
+  "suita": {
+    "label": "吹田",
+    "alias": "Suita 吹田",
+    "local": "Suita, Japan",
+    "country": "JP",
+    "center": [
+      135.516,
+      34.761
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.296,
+      34.541,
+      135.736,
+      34.981
+    ]
+  },
+  "ichikawa": {
+    "label": "市川",
+    "alias": "Ichikawa 市川",
+    "local": "Ichikawa, Japan",
+    "country": "JP",
+    "center": [
+      139.925,
+      35.722
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.705,
+      35.502,
+      140.145,
+      35.942
+    ]
+  },
+  "tokorozawa": {
+    "label": "所澤",
+    "alias": "Tokorozawa 所沢",
+    "local": "Tokorozawa, Japan",
+    "country": "JP",
+    "center": [
+      139.469,
+      35.799
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.249,
+      35.579,
+      139.689,
+      36.019
+    ]
+  },
+  "yokosuka": {
+    "label": "橫須賀",
+    "alias": "Yokosuka 横須賀",
+    "local": "Yokosuka, Japan",
+    "country": "JP",
+    "center": [
+      139.673,
+      35.282
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.453,
+      35.062,
+      139.893,
+      35.502
+    ]
+  },
+  "kasugai": {
+    "label": "春日井",
+    "alias": "Kasugai 春日井",
+    "local": "Kasugai, Japan",
+    "country": "JP",
+    "center": [
+      136.972,
+      35.248
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      136.752,
+      35.028,
+      137.192,
+      35.468
+    ]
+  },
+  "ibaraki": {
+    "label": "茨木",
+    "alias": "Ibaraki 茨木",
+    "local": "Ibaraki, Japan",
+    "country": "JP",
+    "center": [
+      135.568,
+      34.816
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.348,
+      34.596,
+      135.788,
+      35.036
+    ]
+  },
+  "takatsuki": {
+    "label": "高槻",
+    "alias": "Takatsuki 高槻",
+    "local": "Takatsuki, Japan",
+    "country": "JP",
+    "center": [
+      135.617,
+      34.846
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      135.397,
+      34.626,
+      135.837,
+      35.066
+    ]
+  },
+  "fuji": {
+    "label": "富士市",
+    "alias": "Fuji 富士市",
+    "local": "Fuji, Japan",
+    "country": "JP",
+    "center": [
+      138.676,
+      35.161
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      138.456,
+      34.941,
+      138.896,
+      35.381
+    ]
+  },
+  "atsugi": {
+    "label": "厚木",
+    "alias": "Atsugi 厚木",
+    "local": "Atsugi, Japan",
+    "country": "JP",
+    "center": [
+      139.362,
+      35.443
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.142,
+      35.223,
+      139.582,
+      35.663
+    ]
+  },
+  "yamato": {
+    "label": "大和",
+    "alias": "Yamato 大和",
+    "local": "Yamato, Japan",
+    "country": "JP",
+    "center": [
+      139.458,
+      35.487
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.238,
+      35.267,
+      139.678,
+      35.707
+    ]
+  },
+  "sasebo": {
+    "label": "佐世保",
+    "alias": "Sasebo 佐世保",
+    "local": "Sasebo, Japan",
+    "country": "JP",
+    "center": [
+      129.715,
+      33.18
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      129.495,
+      32.96,
+      129.935,
+      33.4
+    ]
+  },
+  "tsukuba": {
+    "label": "筑波",
+    "alias": "Tsukuba つくば 筑波",
+    "local": "Tsukuba, Japan",
+    "country": "JP",
+    "center": [
+      140.082,
+      36.083
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.862,
+      35.863,
+      140.302,
+      36.303
+    ]
+  },
+  "hachinohe": {
+    "label": "八戶",
+    "alias": "Hachinohe 八戸",
+    "local": "Hachinohe, Japan",
+    "country": "JP",
+    "center": [
+      141.488,
+      40.512
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      141.268,
+      40.292,
+      141.708,
+      40.732
+    ]
+  },
+  "fuchu": {
+    "label": "府中",
+    "alias": "Fuchu 府中",
+    "local": "Fuchu, Japan",
+    "country": "JP",
+    "center": [
+      139.477,
+      35.668
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.257,
+      35.448,
+      139.697,
+      35.888
+    ]
+  },
+  "chofu": {
+    "label": "調布",
+    "alias": "Chofu 調布",
+    "local": "Chofu, Japan",
+    "country": "JP",
+    "center": [
+      139.553,
+      35.651
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      139.333,
+      35.431,
+      139.773,
+      35.871
+    ]
+  },
+  "asan": {
+    "label": "牙山",
+    "alias": "Asan 아산",
+    "local": "Asan, South Korea",
+    "country": "KR",
+    "center": [
+      127.004,
+      36.789
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.784,
+      36.569,
+      127.224,
+      37.009
+    ]
+  },
+  "gumi": {
+    "label": "龜尾",
+    "alias": "Gumi 구미",
+    "local": "Gumi, South Korea",
+    "country": "KR",
+    "center": [
+      128.344,
+      36.119
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.124,
+      35.899,
+      128.564,
+      36.339
+    ]
+  },
+  "icheon": {
+    "label": "利川",
+    "alias": "Icheon 이천",
+    "local": "Icheon, South Korea",
+    "country": "KR",
+    "center": [
+      127.436,
+      37.272
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.216,
+      37.052,
+      127.656,
+      37.492
+    ]
+  },
+  "siheung": {
+    "label": "始興",
+    "alias": "Siheung 시흥",
+    "local": "Siheung, South Korea",
+    "country": "KR",
+    "center": [
+      126.803,
+      37.38
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.583,
+      37.16,
+      127.023,
+      37.6
+    ]
+  },
+  "gwangmyeong": {
+    "label": "光明",
+    "alias": "Gwangmyeong 광명",
+    "local": "Gwangmyeong, South Korea",
+    "country": "KR",
+    "center": [
+      126.864,
+      37.479
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.644,
+      37.259,
+      127.084,
+      37.699
+    ]
+  },
+  "gunpo": {
+    "label": "軍浦",
+    "alias": "Gunpo 군포",
+    "local": "Gunpo, South Korea",
+    "country": "KR",
+    "center": [
+      126.936,
+      37.361
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.716,
+      37.141,
+      127.156,
+      37.581
+    ]
+  },
+  "guri": {
+    "label": "九里",
+    "alias": "Guri 구리",
+    "local": "Guri, South Korea",
+    "country": "KR",
+    "center": [
+      127.129,
+      37.594
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.909,
+      37.374,
+      127.349,
+      37.814
+    ]
+  },
+  "gwangju-gyeonggi": {
+    "label": "廣州・京畿",
+    "alias": "Gwangju Gyeonggi 경기 광주",
+    "local": "Gwangju, South Korea",
+    "country": "KR",
+    "center": [
+      127.255,
+      37.429
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.035,
+      37.209,
+      127.475,
+      37.649
+    ]
+  },
+  "osan": {
+    "label": "烏山",
+    "alias": "Osan 오산",
+    "local": "Osan, South Korea",
+    "country": "KR",
+    "center": [
+      127.077,
+      37.15
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.857,
+      36.93,
+      127.297,
+      37.37
+    ]
+  },
+  "miryang": {
+    "label": "密陽",
+    "alias": "Miryang 밀양",
+    "local": "Miryang, South Korea",
+    "country": "KR",
+    "center": [
+      128.746,
+      35.503
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      128.526,
+      35.283,
+      128.966,
+      35.723
+    ]
+  },
+  "hanam": {
+    "label": "河南",
+    "alias": "Hanam 하남",
+    "local": "Hanam, South Korea",
+    "country": "KR",
+    "center": [
+      127.214,
+      37.539
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.994,
+      37.319,
+      127.434,
+      37.759
+    ]
+  },
+  "gimpo": {
+    "label": "金浦",
+    "alias": "Gimpo 김포",
+    "local": "Gimpo, South Korea",
+    "country": "KR",
+    "center": [
+      126.715,
+      37.616
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.495,
+      37.396,
+      126.935,
+      37.836
+    ]
+  },
+  "gwangyang": {
+    "label": "光陽",
+    "alias": "Gwangyang 광양",
+    "local": "Gwangyang, South Korea",
+    "country": "KR",
+    "center": [
+      127.696,
+      34.941
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.476,
+      34.721,
+      127.916,
+      35.161
+    ]
+  },
+  "seosan": {
+    "label": "瑞山",
+    "alias": "Seosan 서산",
+    "local": "Seosan, South Korea",
+    "country": "KR",
+    "center": [
+      126.452,
+      36.784
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.232,
+      36.564,
+      126.672,
+      37.004
+    ]
+  },
+  "anseong": {
+    "label": "安城",
+    "alias": "Anseong 안성",
+    "local": "Anseong, South Korea",
+    "country": "KR",
+    "center": [
+      127.28,
+      37.008
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.06,
+      36.788,
+      127.5,
+      37.228
+    ]
+  },
+  "dangjin": {
+    "label": "唐津",
+    "alias": "Dangjin 당진",
+    "local": "Dangjin, South Korea",
+    "country": "KR",
+    "center": [
+      126.628,
+      36.893
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.408,
+      36.673,
+      126.848,
+      37.113
+    ]
+  },
+  "yeoju": {
+    "label": "驪州",
+    "alias": "Yeoju 여주",
+    "local": "Yeoju, South Korea",
+    "country": "KR",
+    "center": [
+      127.638,
+      37.298
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      127.418,
+      37.078,
+      127.858,
+      37.518
+    ]
+  },
+  "pocheon": {
+    "label": "抱川",
+    "alias": "Pocheon 포천",
+    "local": "Pocheon, South Korea",
+    "country": "KR",
+    "center": [
+      127.2,
+      37.895
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.98,
+      37.675,
+      127.42,
+      38.115
+    ]
+  },
+  "uiwang": {
+    "label": "義王",
+    "alias": "Uiwang 의왕",
+    "local": "Uiwang, South Korea",
+    "country": "KR",
+    "center": [
+      126.968,
+      37.344
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.748,
+      37.124,
+      127.188,
+      37.564
+    ]
+  },
+  "nonsan": {
+    "label": "論山",
+    "alias": "Nonsan 논산",
+    "local": "Nonsan, South Korea",
+    "country": "KR",
+    "center": [
+      127.099,
+      36.187
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.879,
+      35.967,
+      127.319,
+      36.407
+    ]
+  },
+  "yangju": {
+    "label": "楊州",
+    "alias": "Yangju 양주",
+    "local": "Yangju, South Korea",
+    "country": "KR",
+    "center": [
+      127.045,
+      37.785
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      126.825,
+      37.565,
+      127.265,
+      38.005
+    ]
+  },
+  "wakkanai": {
+    "label": "稚內",
+    "alias": "Wakkanai 稚内",
+    "local": "Wakkanai, Japan",
+    "country": "JP",
+    "center": [
+      141.674,
+      45.415
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      141.454,
+      45.195,
+      141.894,
+      45.635
+    ]
+  },
+  "kurashiki": {
+    "label": "倉敷",
+    "alias": "Kurashiki 倉敷",
+    "local": "Kurashiki, Japan",
+    "country": "JP",
+    "center": [
+      133.771,
+      34.585
+    ],
+    "zoom": 13.5,
+    "bounds": [
+      133.551,
+      34.365,
+      133.991,
+      34.805
+    ]
+  }
+}

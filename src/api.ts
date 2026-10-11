@@ -1,4 +1,5 @@
-import type { Envelope, Region } from "./core";
+import type { Bbox, Envelope, Region } from "./core";
+import { validBbox } from "./core";
 
 type FetchPage = (url: string, options: RequestInit) => Promise<Response>;
 
@@ -7,6 +8,7 @@ export async function fetchRegion(
   signal: AbortSignal,
   fetchPage: FetchPage = fetch,
   cache: RequestCache = "default",
+  bounds?: Bbox,
 ): Promise<Envelope> {
   let cursor: number | null = 0;
   let combined: Envelope | null = null;
@@ -14,7 +16,7 @@ export async function fetchRegion(
 
   while (cursor !== null) {
     const response = await fetchPage(
-      `/api/v1/toilets?region=${region}&limit=1000&cursor=${cursor}`,
+      `/api/v1/toilets?region=${region}&limit=1000&cursor=${cursor}${bounds ? `&bbox=${bounds.join(",")}` : ""}`,
       { signal, cache },
     );
     if (!response.ok) throw new Error(`Toilet API returned ${response.status}`);
@@ -29,16 +31,35 @@ export async function fetchRegion(
       page.total < 0 ||
       typeof page.dataVersion !== "string" ||
       typeof page.fetchedAt !== "string" ||
+      !Array.isArray(page.bounds) ||
+      !validBbox(page.bounds.join(",")) ||
+      (page.country !== "JP" && page.country !== "KR") ||
+      !Number.isInteger(page.countryTotal) ||
+      page.countryTotal < 0 ||
+      !page.cityCounts ||
+      typeof page.cityCounts !== "object" ||
       (page.nextCursor !== null &&
         (!Number.isInteger(page.nextCursor) || page.nextCursor <= cursor))
     ) {
       throw new Error("Toilet API returned an invalid page");
     }
-    if (combined && (combined.dataVersion !== page.dataVersion || combined.total !== page.total)) {
+    if (
+      combined &&
+      (combined.dataVersion !== page.dataVersion ||
+        combined.total !== page.total ||
+        combined.bounds.join(",") !== page.bounds.join(","))
+    ) {
       throw new Error("Toilet dataset changed during pagination; retry the request");
     }
     for (const item of page.items) {
-      if (!item || typeof item.id !== "string" || seen.has(item.id)) {
+      if (
+        !item ||
+        typeof item.id !== "string" ||
+        seen.has(item.id) ||
+        item.country !== page.country ||
+        !Number.isFinite(item.lat) ||
+        !Number.isFinite(item.lon)
+      ) {
         throw new Error("Toilet API returned missing or duplicate IDs");
       }
       seen.add(item.id);

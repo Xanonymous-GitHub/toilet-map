@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-11T14:53:43.230747+00:00",
+  "regionsSha256": "1dad10aed96b5439dd76c4f7b2573b1aec05be88cf4ad6ff057493c8238bc330",
+  "menuCityCount": 181,
+  "byCountry": {
+    "JP": 114,
+    "KR": 67
+  },
+  "designatedJapanExpected": [
+    "sapporo",
+    "sendai",
+    "saitama",
+    "chiba",
+    "yokohama",
+    "kawasaki",
+    "sagamihara",
+    "niigata",
+    "shizuoka",
+    "hamamatsu",
+    "nagoya",
+    "kyoto",
+    "osaka",
+    "sakai",
+    "kobe",
+    "okayama",
+    "hiroshima",
+    "kitakyushu",
+    "fukuoka",
+    "kumamoto"
+  ],
+  "designatedJapanMissing": [],
+  "obviousMissingJapan": [],
+  "secondaryMissingJapan": [
+    {
+      "id": "yao",
+      "label": "八尾"
+    }
+  ],
+  "obviousMissingKorea": [],
+  "note": "Menu shortcut audit, not absent nationwide toilet coverage. Not a complete population ranking. Gwangju in Gyeonggi must be distinct from the existing southwestern Gwangju city.",
+  "otherOptionalCoreCitiesAbsent": [
+    {
+      "id": "yao",
+      "label": "八尾"
+    },
+    {
+      "id": "neyagawa",
+      "label": "寢屋川"
+    },
+    {
+      "id": "kure",
+      "label": "吳"
+    }
+  ]
+}

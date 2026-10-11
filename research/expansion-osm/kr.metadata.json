@@ -1,0 +1,57 @@
+{
+  "country": "KR",
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "startedAt": "2026-10-11T12:42:15.673912+00:00",
+  "querySha256": "e5063a9b0917a8e1c49c143da4599a4de49ec67296e4ebbb764b9ab4c3f21c01",
+  "httpStatus": 200,
+  "status": "success",
+  "fetchedAt": "2026-10-11T12:42:29.408094+00:00",
+  "bytes": 1107281,
+  "sha256": "74013628e321715b89cd1461c62e3028a060ef5954fe0ea1a878d4c8c29418f4",
+  "rawPath": "data/raw/expansion-osm/kr.json",
+  "count": 5406,
+  "elementTypes": {
+    "node": 3651,
+    "way": 1755
+  },
+  "accessTags": {
+    "unknown": 4682,
+    "no": 1,
+    "customers": 26,
+    "yes": 675,
+    "permissive": 17,
+    "restricted": 1,
+    "private": 4
+  },
+  "feeTags": {
+    "unknown": 4744,
+    "no": 658,
+    "yes": 4
+  },
+  "excludedExplicitAccess": 32,
+  "recommendedWithoutExplicitRestrictions": 5374,
+  "timestampOsmBase": "2026-10-11T12:41:21Z",
+  "timestampAreasBase": "2026-10-09T22:12:50Z",
+  "bbox": {
+    "south": 33.1139814,
+    "north": 38.5866799,
+    "west": 124.7433159,
+    "east": 130.912898
+  },
+  "license": "Open Database License (ODbL) 1.0",
+  "attribution": "© OpenStreetMap contributors",
+  "licenseUrl": "https://www.openstreetmap.org/copyright",
+  "note": "Country administrative-area query, not limited to capitals. OSM completeness varies locally; amenity does not prove present access or free entry. Retain unknown access/fee and exclude explicitly restricted access.",
+  "elapsedSeconds": 13.74,
+  "restrictedAccessTags": [
+    "customers",
+    "delivery",
+    "destination",
+    "emergency",
+    "members",
+    "no",
+    "permit",
+    "private",
+    "restricted"
+  ]
+}

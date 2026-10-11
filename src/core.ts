@@ -1,4 +1,6 @@
-export type Region = "tokyo" | "seoul";
+import { type Bbox, type Country, REGION_IDS, REGIONS, type Region } from "./regions";
+
+export { type Bbox, type Country, REGION_IDS, REGIONS, type Region } from "./regions";
 export type Known = "yes" | "no" | "limited" | "unknown";
 export type Access =
   | "public"
@@ -52,6 +54,10 @@ export type Envelope = {
   total: number;
   region: Region;
   coverage: string;
+  bounds: Bbox;
+  country: Country;
+  countryTotal: number;
+  cityCounts: Record<Region, number>;
   offline?: boolean;
 };
 export type Filters = {
@@ -61,25 +67,7 @@ export type Filters = {
   includeUnknown: boolean;
   saved: boolean;
 };
-export const REGIONS = {
-  tokyo: {
-    label: "東京",
-    local: "Tokyo, Japan",
-    center: [139.798, 35.682] as [number, number],
-    zoom: 13.6,
-    country: "JP",
-    coverage: "江東區・新宿周邊",
-  },
-  seoul: {
-    label: "首爾",
-    local: "Seoul, South Korea",
-    center: [126.978, 37.5665] as [number, number],
-    zoom: 13.5,
-    country: "KR",
-    coverage: "首爾官方公廁資料",
-  },
-};
-export const PLACES: {
+const LANDMARKS: {
   name: string;
   alias: string;
   region: Region;
@@ -144,6 +132,38 @@ export const PLACES: {
     zoom: 15,
   },
 ];
+export const PLACES = [
+  ...REGION_IDS.map((region) => ({
+    name: REGIONS[region].label,
+    alias: REGIONS[region].alias,
+    region,
+    center: REGIONS[region].center,
+    zoom: REGIONS[region].zoom,
+  })),
+  ...LANDMARKS,
+];
+export function inferRegion(lat: number, lon: number): Region | null {
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon) ||
+    lat < 20 ||
+    lat > 46.5 ||
+    lon < 122 ||
+    lon > 146.5
+  )
+    return null;
+  let closest: Region | null = null;
+  let distance = 220000;
+  for (const id of REGION_IDS) {
+    const city = REGIONS[id];
+    const meters = distanceMeters({ lat, lon }, { lat: city.center[1], lon: city.center[0] });
+    if (meters < distance) {
+      closest = id;
+      distance = meters;
+    }
+  }
+  return closest;
+}
 export function distanceMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   const rad = (v: number) => (v * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat),
@@ -170,12 +190,13 @@ export function localMinutes(date: Date, timezone: string) {
 export function parseHours(raw: string): [number, number][] | null {
   if (!raw?.trim()) return null;
   if (
-    /平日|休日|祝日|曜日|週末|月曜|火曜|土曜|日曜|공휴일|주말|평일|요일|월\s*[~～-]\s*금|영업|營業|不定|季節|시간미상/.test(
+    /\b(?:Mo|Tu|We|Th|Fr|Sa|Su|PH|SH|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|off|closed|sunrise|sunset)\b|平日|休日|祝日|曜日|週末|月曜|火曜|土曜|日曜|공휴일|주말|평일|요일|월\s*[~～-]\s*금|영업|營業|不定|季節|시간미상|휴관|하절기|동절기|하계|동계|매주/.test(
       raw,
     )
   )
     return null;
-  if (/24\s*(時間|시간)|24\/7|全天/.test(raw)) return [[0, 1440]];
+  if (/24\s*(時間|시간)|24\/7|全天/.test(raw) || /^(24시|상시)$/.test(raw.trim()))
+    return [[0, 1440]];
   const matches = [
     ...raw.matchAll(/(\d{1,2}):(\d{2})(?::\d{2})?\s*[~～〜–—-]\s*(\d{1,2}):(\d{2})(?::\d{2})?/g),
   ];

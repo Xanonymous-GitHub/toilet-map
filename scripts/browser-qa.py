@@ -1,6 +1,7 @@
 import atexit
 import json
 import os
+import re
 import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
@@ -9,6 +10,13 @@ from urllib.parse import urlparse
 from playwright.sync_api import expect, sync_playwright
 
 BASE_URL = os.environ.get("RELIEF_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
+ROOT = Path(__file__).resolve().parent.parent
+coverage = json.loads((ROOT / "docs/coverage.json").read_text())
+
+
+def expected_count(region):
+    return f"{coverage['cityCounts'][region]:,}"
+
 
 out = Path(__file__).resolve().parent.parent / "test-results"
 out.mkdir(exist_ok=True)
@@ -24,6 +32,7 @@ report = {
     "consoleErrors": [],
     "tileResponses": 0,
     "mapWorkerResponses": 0,
+    "apiRequests": [],
 }
 
 
@@ -107,6 +116,12 @@ with sync_playwright() as pw:
         navigator.geolocation.clearWatch=(...args)=>{window.__watchStops++;return stop(...args);};
     """)
     page = context.new_page()
+    page.on(
+        "request",
+        lambda request: (
+            report["apiRequests"].append(request.url) if "/api/v1/toilets?" in request.url else None
+        ),
+    )
     page.on("pageerror", lambda e: report["pageErrors"].append(str(e)))
     page.on(
         "console", lambda m: report["consoleErrors"].append(m.text) if m.type == "error" else None
@@ -166,7 +181,7 @@ with sync_playwright() as pw:
     )
     page.get_by_role("button", name="關閉廁所詳細資訊").click()
     page.get_by_role("button", name="定位目前位置", exact=True).click()
-    expect(page.locator(".footer-meta")).to_contain_text("4,455", timeout=20000)
+    expect(page.locator(".footer-meta")).to_contain_text(expected_count("seoul"), timeout=20000)
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
     check("Granted GPS moves to Seoul and loads the complete city dataset")
     page.wait_for_function("window.__watchStarts > 0")
@@ -196,7 +211,7 @@ with sync_playwright() as pw:
     page.get_by_role("button", name="關閉廁所詳細資訊").click()
     page.get_by_role("button", name="資料來源與使用說明").click()
     expect(page.get_by_role("heading", name="每一點，都有出處。")).to_be_visible()
-    check("Source attribution and caveats are visible", page.locator(".source-row").count() == 1)
+    check("Source attribution and caveats are visible", page.locator(".source-row").count() == 6)
     page.keyboard.press("Shift+Tab")
     check(
         "Native modal prevents background controls from receiving keyboard focus",
@@ -215,14 +230,52 @@ with sync_playwright() as pw:
     page.wait_for_function("navigator.serviceWorker.controller !== null", timeout=20000)
     check("Service worker controls the app")
     page.wait_for_timeout(1000)
+    cached_count = re.search(r"[\d,]+", page.locator(".footer-meta").inner_text()).group()
     report["offlineBridge"] = True
     context.set_offline(True)
     page.reload(wait_until="domcontentloaded")
     expect(page.locator(".offline-banner")).to_be_visible(timeout=20000)
-    expect(page.locator(".footer-meta")).to_contain_text("4,455")
-    check("Offline reload restores cached shell and all Seoul records")
+    expect(page.locator(".footer-meta")).to_contain_text(cached_count)
+    check("Offline reload restores cached shell and the last downloaded scope without data loss")
     context.set_offline(False)
     report["offlineBridge"] = False
+    for country, city in [
+        ("日本", "sagamihara"),
+        ("日本", "kurashiki"),
+        ("日本", "osaka"),
+        ("日本", "sapporo"),
+        ("韓國", "gimpo"),
+        ("韓國", "busan"),
+        ("韓國", "jeju"),
+    ]:
+        page.get_by_role("button", name=country, exact=True).click()
+        page.get_by_role("combobox", name="選擇城市").select_option(city)
+        expect(page.locator(".footer-meta")).to_contain_text(expected_count(city), timeout=20000)
+        expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
+        check(f"Non-capital city {city} loads real toilets through the city picker")
+        if city in {"osaka", "busan"}:
+            page.screenshot(path=str(out / f"desktop-{city}.png"))
+    context.set_geolocation({"latitude": 35.18, "longitude": 129.075, "accuracy": 20})
+    page.get_by_role("button", name="定位目前位置", exact=True).click()
+    expect(page.get_by_role("combobox", name="選擇城市")).to_have_value("busan")
+    expect(page.locator(".footer-meta")).to_contain_text(expected_count("busan"), timeout=20000)
+    check("GPS in Busan selects Busan instead of the capital")
+    page.get_by_role("button", name="日本", exact=True).click()
+    expect(page.get_by_role("combobox", name="選擇城市")).to_have_value("sapporo")
+    check("Switching countries remembers the last selected city")
+    page.get_by_role("combobox", name="選擇城市").select_option("osaka")
+    expect(page.locator(".footer-meta")).to_contain_text(expected_count("osaka"), timeout=20000)
+    page.get_by_role("button", name="縮小地圖", exact=True).click()
+    page.wait_for_timeout(400)
+    page.get_by_role("button", name="縮小地圖", exact=True).click()
+    page.wait_for_timeout(400)
+    canvas = page.locator(".maplibregl-canvas").bounding_box()
+    with page.expect_response(lambda response: "/api/v1/toilets?region=osaka" in response.url):
+        page.mouse.move(canvas["x"] + canvas["width"] - 80, canvas["y"] + canvas["height"] / 2)
+        page.mouse.down()
+        page.mouse.move(canvas["x"] + 80, canvas["y"] + canvas["height"] / 2, steps=12)
+        page.mouse.up()
+    check("Panning beyond a city's initial area requests another country-wide bbox")
     context.close()
     mobile = browser.new_context(
         viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True
@@ -261,7 +314,7 @@ with sync_playwright() as pw:
     page.locator(".region-tabs button").first.click()
     page.evaluate("window.__lateGPS({coords:{latitude:37.5665,longitude:126.978,accuracy:20}})")
     expect(page.locator(".region-tabs button").first).to_have_attribute("aria-pressed", "true")
-    expect(page.locator(".footer-meta")).to_contain_text("234", timeout=20000)
+    expect(page.locator(".footer-meta")).to_contain_text(expected_count("tokyo"), timeout=20000)
     check("A late location result cannot undo the user's city selection")
     mobile.close()
     browser.close()

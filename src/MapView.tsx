@@ -178,6 +178,9 @@ export default function MapView(p: Props) {
     m.on("error", (e) => {
       if (/tile|fetch|network|ajax/i.test(e.error?.message ?? "")) setTileError(true);
     });
+    m.on("sourcedata", (e) => {
+      if (e.sourceId === "osm" && e.tile?.state === "loaded") setTileError(false);
+    });
     return () => {
       markers.forEach((marker) => {
         marker.remove();

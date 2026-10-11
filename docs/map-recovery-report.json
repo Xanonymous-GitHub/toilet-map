@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-11T15:09:10.668039+00:00",
+  "passed": true,
+  "transport": "External map/font assets fetched through the session proxy with CA-verified TLS; browser TLS remains enabled.",
+  "checks": [
+    "A real tile-request failure displays a notice while toilet data remains usable",
+    "CA-verified real OSM tiles recover and clear the stale outage notice"
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "tileResponses": 25,
+  "mapWorkerResponses": 0,
+  "apiRequests": [],
+  "frontendSHA256": "4f7849a67807c6c42428353f2e18ac2a61bacbde994b5bc790e7337501005f98"
+}

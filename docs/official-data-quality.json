@@ -1,0 +1,108 @@
+{
+  "kr-busan-galmatgil": {
+    "rawRows": 197,
+    "missingCoordinates": 0,
+    "invalidCoordinates": 0,
+    "duplicateFeaturesCollapsed": 0,
+    "conflictingHours": 0,
+    "conflictingAccess": 0,
+    "acceptedRecords": 197,
+    "excludedRows": []
+  },
+  "kr-incheon-michuhol": {
+    "rawRows": 72,
+    "missingCoordinates": 0,
+    "invalidCoordinates": 0,
+    "duplicateFeaturesCollapsed": 0,
+    "conflictingHours": 0,
+    "conflictingAccess": 0,
+    "acceptedRecords": 72,
+    "excludedRows": []
+  },
+  "kr-jeju-city": {
+    "rawRows": 503,
+    "missingCoordinates": 12,
+    "invalidCoordinates": 1,
+    "duplicateFeaturesCollapsed": 0,
+    "conflictingHours": 0,
+    "conflictingAccess": 0,
+    "acceptedRecords": 490,
+    "excludedRows": [
+      {
+        "row": 56,
+        "id": "PT0056",
+        "reason": "invalidCoordinates"
+      },
+      {
+        "row": 453,
+        "id": "PT0453",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 457,
+        "id": "PT0457",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 461,
+        "id": "PT0461",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 462,
+        "id": "PT0462",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 473,
+        "id": "PT0473",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 475,
+        "id": "PT0475",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 479,
+        "id": "PT0479",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 480,
+        "id": "PT0480",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 483,
+        "id": "PT0483",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 484,
+        "id": "PT0484",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 490,
+        "id": "PT0490",
+        "reason": "missingCoordinates"
+      },
+      {
+        "row": 498,
+        "id": "PT0498",
+        "reason": "missingCoordinates"
+      }
+    ]
+  },
+  "kr-jeonbuk": {
+    "rawRows": 2839,
+    "missingCoordinates": 0,
+    "invalidCoordinates": 0,
+    "duplicateFeaturesCollapsed": 48,
+    "conflictingHours": 32,
+    "conflictingAccess": 5,
+    "acceptedRecords": 2791,
+    "excludedRows": []
+  }
+}

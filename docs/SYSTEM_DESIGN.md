@@ -1,5 +1,7 @@
 # 日韓公廁地圖 PWA：系統與產品設計
 
+目前實作已擴大為日本／韓國全國 OSM、地方官方來源，以及 181 城市與周邊選單。實際來源筆數、API 空間分塊及限制以 [COVERAGE.md](COVERAGE.md) 為準；下列內容保留初次探勘與後續進階架構設計。首爾完整 HTTPS 下載及全國 Overpass 已驗證成功，不再依賴 sample 或 private key。
+
 版本：規劃草案 v0.1；2026-10-11。API 依據與實測限制見 [API_DISCOVERY.md](API_DISCOVERY.md)。
 
 ## 1. 建議方向

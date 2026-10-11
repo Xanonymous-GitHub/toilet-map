@@ -1,6 +1,20 @@
 {
-  "checkedAt": "2026-10-11T11:05:48.638615+00:00",
+  "checkedAt": "2026-10-11T14:42:24.015111+00:00",
   "dependencies": [
+    {
+      "name": "lucide-react",
+      "ecosystem": "javascript",
+      "pinned": "1.55.0",
+      "latestStable": "1.55.0",
+      "current": true
+    },
+    {
+      "name": "maplibre-gl",
+      "ecosystem": "javascript",
+      "pinned": "6.14.0",
+      "latestStable": "6.14.0",
+      "current": true
+    },
     {
       "name": "react",
       "ecosystem": "javascript",
@@ -13,20 +27,6 @@
       "ecosystem": "javascript",
       "pinned": "19.3.0",
       "latestStable": "19.3.0",
-      "current": true
-    },
-    {
-      "name": "maplibre-gl",
-      "ecosystem": "javascript",
-      "pinned": "6.13.0",
-      "latestStable": "6.13.0",
-      "current": true
-    },
-    {
-      "name": "lucide-react",
-      "ecosystem": "javascript",
-      "pinned": "1.55.0",
-      "latestStable": "1.55.0",
       "current": true
     },
     {

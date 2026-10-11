@@ -14,13 +14,14 @@
     "check": "bun run lint && bun run typecheck",
     "verify": "bun run build && bun run check && bun test tests",
     "test:browser": "uv run --locked python scripts/browser-qa.py",
-    "deps:check": "uv run --locked python scripts/check-dependencies.py"
+    "deps:check": "uv run --locked python scripts/check-dependencies.py",
+    "data:expand": "uv run --locked python scripts/import-expansion.py"
   },
   "dependencies": {
+    "lucide-react": "1.55.0",
+    "maplibre-gl": "6.14.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "maplibre-gl": "6.13.0",
-    "lucide-react": "1.55.0"
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@types/react": "19.3.0",

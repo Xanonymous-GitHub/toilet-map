@@ -8,6 +8,7 @@ import argparse
 import csv
 import hashlib
 import http.cookiejar
+import importlib.util
 import io
 import json
 import math
@@ -301,6 +302,24 @@ if __name__ == "__main__":
         (osm_path if osm_path.exists() else ROOT / "data/osm-shinjuku.json").read_text()
     )
     dataset = normalize(tokyo, seoul, osm, tokyo_fetched, seoul_fetched, tokyo_updated)
+    published_path = ROOT / "data/dataset.json"
+    if published_path.exists():
+        published = json.loads(published_path.read_text())
+        if any(source["id"] == "osm-jp" for source in published["sources"]):
+            # Refreshing the original official sources must retain nationwide coverage.
+            spec = importlib.util.spec_from_file_location(
+                "expansion", ROOT / "scripts/import-expansion.py"
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            updated_ids = {"koto", "seoul", "osm-shinjuku"}
+            records = [row for row in dataset["records"] if row["sourceId"] != "osm-shinjuku"]
+            records += [row for row in published["records"] if row["sourceId"] not in updated_ids]
+            sources = [source for source in dataset["sources"] if source["id"] != "osm-shinjuku"]
+            sources += [
+                source for source in published["sources"] if source["id"] not in updated_ids
+            ]
+            dataset = module.finalize(records, sources)
     for name, blob in [
         ("tokyo.csv", tokyo),
         ("seoul.json", seoul),

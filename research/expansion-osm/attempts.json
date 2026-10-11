@@ -1,0 +1,126 @@
+[
+  {
+    "country": "JP",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "startedAt": "2026-10-11T12:40:49.280791+00:00",
+    "querySha256": "4dd22ab64ef4b1828a8ba28bc5456caf978971db3c2463e05d29933ba6b30a14",
+    "httpStatus": 200,
+    "status": "success",
+    "fetchedAt": "2026-10-11T12:42:15.648111+00:00",
+    "bytes": 6024140,
+    "sha256": "24893c755a558a27ecff04773d316bcd23b3c89071656ae1540cc59878bf912b",
+    "rawPath": "data/raw/expansion-osm/jp.json",
+    "count": 32264,
+    "elementTypes": {
+      "node": 19817,
+      "way": 12400,
+      "relation": 47
+    },
+    "accessTags": {
+      "unknown": 26705,
+      "yes": 4221,
+      "customers": 1060,
+      "permissive": 117,
+      "no": 82,
+      "private": 69,
+      "destination": 1,
+      "permit": 5,
+      "emergency": 1,
+      "publicq": 2,
+      "冬季利用不可": 1
+    },
+    "feeTags": {
+      "unknown": 26717,
+      "no": 5452,
+      "yes": 82,
+      "100yen": 1,
+      "donation": 9,
+      "無し": 1,
+      "無料": 1,
+      "50 JPY": 1
+    },
+    "excludedExplicitAccess": 1218,
+    "recommendedWithoutExplicitRestrictions": 31046,
+    "timestampOsmBase": "2026-10-11T12:39:16Z",
+    "timestampAreasBase": "2026-10-09T22:12:50Z",
+    "bbox": {
+      "south": 24.0499765,
+      "north": 45.5224877,
+      "west": 122.9355287,
+      "east": 145.8117656
+    },
+    "license": "Open Database License (ODbL) 1.0",
+    "attribution": "© OpenStreetMap contributors",
+    "licenseUrl": "https://www.openstreetmap.org/copyright",
+    "note": "Country administrative-area query, not limited to capitals. OSM completeness varies locally; amenity does not prove present access or free entry. Retain unknown access/fee and exclude explicitly restricted access.",
+    "elapsedSeconds": 86.39,
+    "restrictedAccessTags": [
+      "customers",
+      "delivery",
+      "destination",
+      "emergency",
+      "members",
+      "no",
+      "permit",
+      "private",
+      "restricted"
+    ]
+  },
+  {
+    "country": "KR",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "startedAt": "2026-10-11T12:42:15.673912+00:00",
+    "querySha256": "e5063a9b0917a8e1c49c143da4599a4de49ec67296e4ebbb764b9ab4c3f21c01",
+    "httpStatus": 200,
+    "status": "success",
+    "fetchedAt": "2026-10-11T12:42:29.408094+00:00",
+    "bytes": 1107281,
+    "sha256": "74013628e321715b89cd1461c62e3028a060ef5954fe0ea1a878d4c8c29418f4",
+    "rawPath": "data/raw/expansion-osm/kr.json",
+    "count": 5406,
+    "elementTypes": {
+      "node": 3651,
+      "way": 1755
+    },
+    "accessTags": {
+      "unknown": 4682,
+      "no": 1,
+      "customers": 26,
+      "yes": 675,
+      "permissive": 17,
+      "restricted": 1,
+      "private": 4
+    },
+    "feeTags": {
+      "unknown": 4744,
+      "no": 658,
+      "yes": 4
+    },
+    "excludedExplicitAccess": 32,
+    "recommendedWithoutExplicitRestrictions": 5374,
+    "timestampOsmBase": "2026-10-11T12:41:21Z",
+    "timestampAreasBase": "2026-10-09T22:12:50Z",
+    "bbox": {
+      "south": 33.1139814,
+      "north": 38.5866799,
+      "west": 124.7433159,
+      "east": 130.912898
+    },
+    "license": "Open Database License (ODbL) 1.0",
+    "attribution": "© OpenStreetMap contributors",
+    "licenseUrl": "https://www.openstreetmap.org/copyright",
+    "note": "Country administrative-area query, not limited to capitals. OSM completeness varies locally; amenity does not prove present access or free entry. Retain unknown access/fee and exclude explicitly restricted access.",
+    "elapsedSeconds": 13.74,
+    "restrictedAccessTags": [
+      "customers",
+      "delivery",
+      "destination",
+      "emergency",
+      "members",
+      "no",
+      "permit",
+      "private",
+      "restricted"
+    ]
+  }
+]

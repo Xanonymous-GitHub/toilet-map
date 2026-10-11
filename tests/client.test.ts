@@ -9,9 +9,9 @@ const serverFetch = (path: string) => worker.fetch(new Request(`https://relief.e
 
 test("Client loads the complete Seoul dataset across every page", async () => {
   const data = await fetchRegion("seoul", signal, serverFetch);
-  assert.equal(data.items.length, 4455);
+  assert.equal(data.items.length, 5952);
   assert.equal(data.nextCursor, null);
-  assert.equal(new Set(data.items.map((item) => item.id)).size, 4455);
+  assert.equal(new Set(data.items.map((item) => item.id)).size, 5952);
 });
 
 test("Client rejects cyclic, duplicated, truncated and mixed-version pagination", async () => {
@@ -25,6 +25,7 @@ test("Client rejects cyclic, duplicated, truncated and mixed-version pagination"
     [first, { ...last, items: first.items }],
     [first, { ...last, items: [] }],
     [first, { ...last, dataVersion: "other-version" }],
+    [first, { ...last, bounds: [126, 35, 127, 36] }],
   ];
   for (const pages of cases) {
     let index = 0;

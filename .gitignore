@@ -5,6 +5,7 @@ test-results/
 .wrangler/
 *.log
 server/assets.generated.ts
+server/data.generated.ts
 data/raw/
 .tools/
 .venv/

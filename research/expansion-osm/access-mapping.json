@@ -1,0 +1,20 @@
+{
+  "access": {
+    "public": ["yes", "public", "permissive"],
+    "private": ["private", "no"],
+    "customers": ["customers"],
+    "permit": ["permit", "members", "delivery", "restricted", "emergency", "destination"],
+    "unknown": ["missing", "unknown", "all other values"]
+  },
+  "recommendation": "Exclude private, customers and permit. Unknown access stays explicitly unknown; amenity=toilets alone does not assert public permission, free entry or current availability.",
+  "fee": {
+    "no": ["no"],
+    "yes": ["yes"],
+    "unknown": ["missing", "unrecognized or ambiguous values"]
+  },
+  "feeNotes": "Preserve nonstandard raw values such as donation, 100yen, 50 JPY, 無料 and 無し in a source note unless a reviewed normalization explicitly handles them. Never turn missing fee into no.",
+  "coordinates": "node lat/lon is a source position; way/relation center is an approximate OSM geometry center. All fetched entries have finite coordinates; no centroid-to-entrance accuracy claim.",
+  "dates": "fetchedAt is response retrieval time. timestamp_osm_base and timestamp_areas_base describe the Overpass database snapshots, not each toilet's last verification or editing date. Individual modification timestamps are unavailable in out center tags output.",
+  "identity": "Keep osm:{type}:{id}; nationwide snapshots supersede the old overlapping Shinjuku OSM subset by source ID. JP and KR snapshots have no shared OSM IDs.",
+  "sourceLicense": "© OpenStreetMap contributors, Open Database License (ODbL) 1.0. Keep provenance and the applicable OSM database export/attribution requirements."
+}

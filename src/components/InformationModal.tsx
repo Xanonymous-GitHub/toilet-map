@@ -45,7 +45,19 @@ export function InformationModal({ mode, sources, onClose }: Props) {
       <h2 id="modal-title">{mode === "sources" ? "每一點，都有出處。" : "把方便，帶在身邊。"}</h2>
       {mode === "sources" ? (
         <>
-          <p>這是一張日本、韓國的公廁地圖。首爾使用官方完整資料；東京目前涵蓋江東區與新宿周邊。</p>
+          <p>
+            收錄日本與韓國全國範圍的 OpenStreetMap
+            點位，並補入地方官方資料。城市選單可快速前往，拖曳地圖會載入新範圍；各城市仍可能缺漏，收錄筆數不代表已包含所有公廁。同一設施的不同來源紀錄可能重複。
+          </p>
+          <p>
+            <a className="license-link" href="/api/v1/osm-export?country=JP">
+              日本 OSM 原始與整理資料 ↗
+            </a>
+            {" · "}
+            <a className="license-link" href="/api/v1/osm-export?country=KR">
+              韓國 OSM 原始與整理資料 ↗
+            </a>
+          </p>
           {sources.map((s) => (
             <div className="source-row" key={s.id}>
               <a href={s.url} target="_blank" rel="noopener noreferrer">
@@ -75,7 +87,7 @@ export function InformationModal({ mode, sources, onClose }: Props) {
             </p>
             <strong>定位與離線</strong>
             <p>
-              精確位置只在裝置上使用，未保存移動軌跡。瀏覽過的城市資料可離線查看；底圖及外部導航需要網路或地圖
+              定位用於裝置上的距離與地圖；載入資料時，伺服器會收到地圖範圍，未保存移動軌跡。最近下載的範圍可離線查看；底圖及外部導航需要網路或地圖
               App 自行支援。
             </p>
           </div>

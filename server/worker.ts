@@ -1,10 +1,9 @@
-import snapshot from "../data/dataset.json";
-import osmOriginal from "../data/osm-shinjuku.json";
-import { canRecommend, inBounds, REGIONS, type Toilet, validBbox } from "../src/core";
+import { type Country, REGIONS, validBbox } from "../src/core";
+import { isRegion } from "../src/regions";
 import { assets } from "./assets.generated";
+import { countrySources, dataset, lookupToilet, osmExport, queryToilets } from "./data";
 
 type Asset = { body: string; type: string; binary?: boolean };
-const records = snapshot.records as Toilet[];
 const headers = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -22,7 +21,7 @@ function json(data: unknown, status = 200) {
     },
   });
 }
-function respond(request: Request): Response {
+async function respond(request: Request): Promise<Response> {
   const url = new URL(request.url);
   if (!["GET", "HEAD"].includes(request.method)) {
     const response = json({ error: "Method not allowed" }, 405);
@@ -30,21 +29,30 @@ function respond(request: Request): Response {
     return response;
   }
   if (url.pathname === "/api/v1/regions")
-    return json({ regions: REGIONS, dataVersion: snapshot.dataVersion });
+    return json({ regions: REGIONS, dataVersion: dataset.dataVersion, coverage: dataset.coverage });
   if (url.pathname === "/api/v1/sources")
-    return json({ sources: snapshot.sources, dataVersion: snapshot.dataVersion });
-  if (url.pathname === "/api/v1/osm-export")
-    return json({
-      license: "ODbL-1.0",
-      attribution: "© OpenStreetMap contributors",
-      licenseUrl: "https://opendatacommons.org/licenses/odbl/1-0/",
-      source: snapshot.sources.find((s) => s.id === "osm-shinjuku"),
-      records: records.filter((t) => t.sourceId === "osm-shinjuku"),
-      original: osmOriginal,
+    return json({ sources: dataset.sources, dataVersion: dataset.dataVersion });
+  if (url.pathname === "/api/v1/osm-export") {
+    const country = url.searchParams.get("country") ?? "JP";
+    if (country !== "JP" && country !== "KR") return json({ error: "Unknown country" }, 400);
+    return new Response(osmExport(country), {
+      headers: {
+        ...headers,
+        "content-type": "application/json; charset=utf-8",
+        "content-disposition": `attachment; filename="${country.toLowerCase()}-osm-toilets.json"`,
+        "cache-control": "public, max-age=3600",
+      },
     });
+  }
   if (url.pathname === "/api/v1/toilets") {
-    const region = url.searchParams.get("region") ?? "tokyo";
-    if (region !== "tokyo" && region !== "seoul") return json({ error: "Unknown region" }, 400);
+    const countryRaw = url.searchParams.get("country");
+    if (countryRaw !== null && countryRaw !== "JP" && countryRaw !== "KR")
+      return json({ error: "Unknown country" }, 400);
+    const region = url.searchParams.get("region") ?? (countryRaw === "KR" ? "seoul" : "tokyo");
+    if (!isRegion(region)) return json({ error: "Unknown region" }, 400);
+    const country: Country = countryRaw ?? REGIONS[region].country;
+    if (country !== REGIONS[region].country)
+      return json({ error: "City and country do not match" }, 400);
     const limitRaw = url.searchParams.get("limit") ?? "200";
     const cursorRaw = url.searchParams.get("cursor") ?? "0";
     if (!/^\d+$/.test(limitRaw) || !/^\d+$/.test(cursorRaw)) {
@@ -65,19 +73,22 @@ function respond(request: Request): Response {
     if (boxRaw !== null && !box) return json({ error: "Invalid bbox" }, 400);
     if (box && (box[2] - box[0] > 5 || box[3] - box[1] > 5))
       return json({ error: "Search a smaller area" }, 400);
-    const items = records.filter(
-      (t) => t.region === region && canRecommend(t) && (!box || inBounds(t, box)),
-    );
+    const bounds = box ?? REGIONS[region].bounds;
+    const items = await queryToilets(country, bounds);
     const page = items.slice(cursor, cursor + limit);
     return json({
       items: page,
-      sources: snapshot.sources.filter((s) => items.some((t) => t.sourceId === s.id)),
-      dataVersion: snapshot.dataVersion,
-      fetchedAt: snapshot.fetchedAt,
+      sources: countrySources(country),
+      dataVersion: dataset.dataVersion,
+      fetchedAt: dataset.fetchedAt,
       nextCursor: cursor + limit < items.length ? cursor + limit : null,
       total: items.length,
       region,
       coverage: REGIONS[region].coverage,
+      bounds,
+      country,
+      countryTotal: dataset.coverage.countries[country],
+      cityCounts: dataset.coverage.cityCounts,
     });
   }
   if (url.pathname.startsWith("/api/v1/toilets/")) {
@@ -87,7 +98,7 @@ function respond(request: Request): Response {
     } catch {
       return json({ error: "Invalid ID" }, 400);
     }
-    const record = records.find((t) => t.id === id && canRecommend(t));
+    const record = await lookupToilet(id);
     return record ? json(record) : json({ error: "Not found" }, 404);
   }
   if (url.pathname.startsWith("/api/")) return json({ error: "Not found" }, 404);
@@ -113,7 +124,7 @@ function respond(request: Request): Response {
 }
 export default {
   async fetch(request: Request): Promise<Response> {
-    const response = respond(request);
+    const response = await respond(request);
     return request.method === "HEAD"
       ? new Response(null, { status: response.status, headers: response.headers })
       : response;

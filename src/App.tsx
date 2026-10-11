@@ -28,10 +28,12 @@ import {
   type Filters,
   formatDistance,
   inBounds,
+  inferRegion,
   matchesFilters,
   type NavigationProvider,
   navigationUrl,
   PLACES,
+  REGION_IDS,
   REGIONS,
   type Region,
   type Toilet,
@@ -39,6 +41,7 @@ import {
 import { type Position, useGeolocation } from "./hooks/useGeolocation";
 import { useToiletData } from "./hooks/useToiletData";
 import MapView from "./MapView";
+import { isRegion, searchableBounds } from "./regions";
 import { readPreference, savePreference } from "./storage";
 
 type InstallEvent = Event & {
@@ -48,16 +51,15 @@ type InstallEvent = Event & {
 const initialRegion = () => {
   const r =
     new URLSearchParams(location.search).get("region") ??
-    readPreference<Region>(
-      "region",
-      "tokyo",
-      (value): value is Region => value === "tokyo" || value === "seoul",
-    );
-  return r === "seoul" ? "seoul" : "tokyo";
+    readPreference<Region>("region", "tokyo", isRegion);
+  return isRegion(r) ? r : "tokyo";
 };
 export default function App() {
   const [region, setRegion] = useState<Region>(initialRegion);
   const [center, setCenter] = useState<[number, number]>(REGIONS[region].center);
+  const targetCenter = useRef(center);
+  const movingToTarget = useRef(true);
+  targetCenter.current = center;
   const [zoom, setZoom] = useState(REGIONS[region].zoom);
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>(center);
@@ -124,22 +126,21 @@ export default function App() {
       if (toastTimer.current) clearTimeout(toastTimer.current);
     };
   }, []);
-  const { data, loading, error, refresh } = useToiletData(region, notify);
+  const { data, loading, error, refresh } = useToiletData(region, bounds, notify);
   const receivePosition = useCallback(
     (p: Position) => {
-      const destination: Region | null =
-        p.lat >= 33 && p.lat <= 39 && p.lon >= 124 && p.lon <= 132
-          ? "seoul"
-          : p.lat >= 34 && p.lat <= 37 && p.lon >= 138 && p.lon <= 141
-            ? "tokyo"
-            : null;
+      movingToTarget.current = true;
+      const destination = inferRegion(p.lat, p.lon);
       if (destination && destination !== regionRef.current) {
         setRegion(destination);
         savePreference("region", destination);
+        savePreference(`country-${REGIONS[destination].country}`, destination);
       }
+      setBounds(null);
+      setSelected(null);
       setCenter([p.lon, p.lat]);
       setZoom(15);
-      if (!destination) notify("已定位。日韓以外尚無資料，可從城市選單查看東京或首爾。");
+      if (!destination) notify("已定位。日韓以外尚無資料，可從城市選單選擇目的地。");
       else if (p.accuracy > 150)
         notify(`定位精度約 ${Math.round(p.accuracy)} 公尺，距離僅供參考。`);
     },
@@ -148,6 +149,7 @@ export default function App() {
   const { position, locating, locate, stopFollowing } = useGeolocation(receivePosition, notify);
   const switchRegion = useCallback(
     (next: Region, nextCenter = REGIONS[next].center, nextZoom = REGIONS[next].zoom) => {
+      movingToTarget.current = true;
       setRegion(next);
       setCenter([...nextCenter]);
       setZoom(nextZoom);
@@ -157,17 +159,30 @@ export default function App() {
       setLimit(40);
       stopFollowing();
       savePreference("region", next);
+      savePreference(`country-${REGIONS[next].country}`, next);
     },
     [stopFollowing],
   );
   const onBounds = useCallback(
     (nextBounds: [number, number, number, number], nextCenter: [number, number]) => {
+      // A previous flyTo may emit moveend while being replaced. Its bounds belong
+      // to the old city and must not trigger a request for the newly selected city.
+      if (
+        movingToTarget.current &&
+        (Math.abs(nextCenter[0] - targetCenter.current[0]) > 0.00005 ||
+          Math.abs(nextCenter[1] - targetCenter.current[1]) > 0.00005)
+      )
+        return;
+      movingToTarget.current = false;
       setBounds(nextBounds);
       setMapCenter(nextCenter);
     },
     [],
   );
-  const onManual = stopFollowing;
+  const onManual = useCallback(() => {
+    movingToTarget.current = false;
+    stopFollowing();
+  }, [stopFollowing]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (data?.items ?? []).filter(
@@ -206,6 +221,7 @@ export default function App() {
   };
   useEffect(() => savePreference("saved", [...saved]), [saved]);
   const selectToilet = (t: Toilet) => {
+    movingToTarget.current = true;
     setSelected(t.id);
     setCenter([t.lon, t.lat]);
     setZoom(16);
@@ -330,21 +346,56 @@ export default function App() {
             </>
           )}
         </div>
-        <fieldset className="region-tabs" aria-label="選擇城市">
-          {(["tokyo", "seoul"] as Region[]).map((r) => (
+        <fieldset className="region-tabs" aria-label="選擇國家">
+          {(["JP", "KR"] as const).map((country) => (
             <button
               type="button"
-              key={r}
-              className={region === r ? "active" : ""}
-              aria-pressed={region === r}
-              onClick={() => switchRegion(r)}
+              key={country}
+              aria-label={country === "JP" ? "日本" : "韓國"}
+              className={REGIONS[region].country === country ? "active" : ""}
+              aria-pressed={REGIONS[region].country === country}
+              onClick={() =>
+                switchRegion(
+                  readPreference<Region>(
+                    `country-${country}`,
+                    country === "JP" ? "tokyo" : "seoul",
+                    (value): value is Region =>
+                      isRegion(value) && REGIONS[value].country === country,
+                  ),
+                )
+              }
             >
-              <span className={`flag ${r}`}>{r === "tokyo" ? "🇯🇵" : "🇰🇷"}</span>
-              {REGIONS[r].label}
-              <span className="region-sub">{r === "tokyo" ? "TOKYO" : "SEOUL"}</span>
+              <span className="flag">{country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
+              {country === "JP" ? "日本" : "韓國"}
+              <span className="region-sub">{country === "JP" ? "JAPAN" : "KOREA"}</span>
             </button>
           ))}
         </fieldset>
+        <div className="city-picker">
+          <label htmlFor="city">
+            <MapPin size={16} />
+            城市與周邊
+          </label>
+          <select
+            id="city"
+            aria-label="選擇城市"
+            value={region}
+            onChange={(e) => {
+              if (isRegion(e.target.value)) switchRegion(e.target.value);
+            }}
+          >
+            {REGION_IDS.filter((id) => REGIONS[id].country === REGIONS[region].country).map(
+              (id) => (
+                <option value={id} key={id}>
+                  {REGIONS[id].label}
+                  {data?.cityCounts[id] !== undefined
+                    ? ` · ${data.cityCounts[id].toLocaleString()} 筆`
+                    : ""}
+                </option>
+              ),
+            )}
+          </select>
+        </div>
         <div className="filters">
           <button
             type="button"
@@ -523,7 +574,9 @@ export default function App() {
         <footer className="sidebar-footer">
           <div className="coverage-indicator">
             <span />
-            {REGIONS[region].coverage}
+            {data?.countryTotal !== undefined
+              ? `${REGIONS[region].country === "JP" ? "日本" : "韓國"}全域收錄 ${data.countryTotal.toLocaleString()} 筆`
+              : REGIONS[region].coverage}
             <button type="button" aria-label="重新取得資料" onClick={refresh} disabled={loading}>
               <RefreshCw size={12} />
             </button>
@@ -531,7 +584,7 @@ export default function App() {
           <div className="footer-meta">
             <span>
               {data
-                ? `${data.total.toLocaleString()} 筆收錄 · ${dateLabel(data.fetchedAt)} 匯入`
+                ? `${data.total.toLocaleString()} 筆在載入範圍 · ${dateLabel(data.fetchedAt)} 匯入`
                 : "以官方與開放資料提供資訊"}
             </span>
             <button type="button" onClick={triggerInstall}>
@@ -558,7 +611,7 @@ export default function App() {
         />
         <div className="map-top">
           <span className="map-location-pill">
-            <span className="flag">{region === "tokyo" ? "🇯🇵" : "🇰🇷"}</span>
+            <span className="flag">{REGIONS[region].country === "JP" ? "🇯🇵" : "🇰🇷"}</span>
             <span>
               {REGIONS[region].label}
               <small>{REGIONS[region].local}</small>
@@ -582,7 +635,11 @@ export default function App() {
             <Sparkles size={18} />
             <div>
               <strong>找到方便，也找到安心。</strong>
-              <span>開放狀態依提供時段推估，出發前請留意使用限制。</span>
+              <span>
+                {bounds && !searchableBounds(bounds)
+                  ? "放大地圖以載入附近點位，或從城市選單快速前往。"
+                  : "開放狀態依提供時段推估，來源點位可能尚未完整。"}
+              </span>
             </div>
           </div>
         )}

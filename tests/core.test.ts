@@ -1,16 +1,22 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
-import snapshot from "../data/dataset.json";
+import { readFileSync } from "node:fs";
 import {
   distanceMeters,
   type Filters,
+  inferRegion,
   matchesFilters,
   navigationUrl,
   parseHours,
+  REGIONS,
   scheduleState,
   type Toilet,
   validBbox,
 } from "../src/core";
+
+const snapshot = JSON.parse(
+  readFileSync(new URL("../data/dataset.json", import.meta.url), "utf8"),
+) as { records: Toilet[] };
 
 const t = (hoursRaw: string) => ({ hoursRaw, timezone: "Asia/Seoul" }) as const;
 const at = (localHour: number, minute = 0) =>
@@ -34,6 +40,10 @@ test("Weekday, holiday and business-hour exceptions stay unknown", () => {
     "정시(영업시작~종료)|",
     "平日 09:00–18:00",
     "공휴일 제외 24시간",
+    "Mo-Fr 09:00-18:00",
+    "24/7; PH off",
+    "Apr-Oct 08:00-20:00",
+    "하절기 09:00-18:00",
     "",
   ])
     assert.equal(scheduleState(t(value), at(12)), "unknown");
@@ -46,6 +56,27 @@ test("Explicit 24-hour and Japanese timestamp formats", () => {
   );
   assert.equal(scheduleState(t("00:00:00–23:59:00"), at(23, 59)), "closed");
   assert.equal(parseHours("29:99~12:00"), null);
+  assert.deepEqual(parseHours("24시"), [[0, 1440]]);
+  assert.deepEqual(parseHours("상시"), [[0, 1440]]);
+});
+test("Geolocation selects major cities across both countries and rejects outside locations", () => {
+  for (const id of [
+    "osaka",
+    "sapporo",
+    "fukuoka",
+    "busan",
+    "jeju",
+    "daegu",
+    "tsushima",
+    "ishigaki",
+    "ogasawara",
+  ] as const) {
+    const city = REGIONS[id];
+    assert.equal(inferRegion(city.center[1], city.center[0]), id);
+  }
+  assert.equal(inferRegion(25.03, 121.56), null);
+  assert.equal(inferRegion(51.5, -0.1), null);
+  assert.equal(inferRegion(Number.NaN, 127), null);
 });
 test("Unknown fields and private access cannot masquerade as eligible", () => {
   const base = snapshot.records[0] as Toilet;
@@ -98,8 +129,8 @@ test("Distance and bbox validation", () => {
   assert.deepEqual(validBbox("139,35,140,36"), [139, 35, 140, 36]);
 });
 test("Full source snapshot has unique IDs and valid positioned records", () => {
-  assert.equal(snapshot.records.length, 4711);
-  assert.equal(snapshot.records.filter((t) => t.region === "seoul").length, 4455);
+  assert.equal(snapshot.records.length, 45867);
+  assert.equal(snapshot.records.filter((t) => t.sourceId === "seoul").length, 4455);
   assert.equal(new Set(snapshot.records.map((t) => t.id)).size, snapshot.records.length);
   for (const r of snapshot.records) {
     assert.ok(Number.isFinite(r.lat) && Number.isFinite(r.lon));

@@ -1,0 +1,168 @@
+[
+  {
+    "sourceId": "kr-busan-galmatgil",
+    "catalogUrl": "https://www.data.go.kr/data/15084238/fileData.do",
+    "downloadUrl": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003539631&fileDetailSn=1&insertDataPrcus=N",
+    "file": "busan-galmatgil.zip",
+    "fetchedAt": "2026-10-11T12:44:40.747215+00:00",
+    "sha256": "eb215304e82faf0b7e141138feb9ce5ec0523671da089728a8da2a6775b154f4",
+    "catalogSha256": "445c1822b204b9d35aa2a098f041344b16dd6aba58d2a8a53b048794542d757c",
+    "catalogUpdatedAt": "2026-03-25",
+    "sourceEditionDate": "2025-10-30",
+    "licenseOriginal": "이용허락범위 제한 없음",
+    "licenseUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+    "privateApiKeyRequired": false,
+    "encoding": "UTF-8 SHP/DBF",
+    "quality": {
+      "rawRows": 197,
+      "missingCoordinates": 0,
+      "invalidCoordinates": 0,
+      "duplicateFeaturesCollapsed": 0,
+      "conflictingHours": 0,
+      "conflictingAccess": 0,
+      "acceptedRecords": 197,
+      "excludedRows": []
+    }
+  },
+  {
+    "sourceId": "kr-incheon-michuhol",
+    "catalogUrl": "https://www.data.go.kr/data/15071405/fileData.do",
+    "downloadUrl": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000007638838&fileDetailSn=1&insertDataPrcus=N",
+    "file": "incheon-michuhol.csv",
+    "fetchedAt": "2026-10-11T12:41:58.659518+00:00",
+    "sha256": "160624d85a29dc078a6d7470639c6cc42b4d84fcaa28e1a0920dce1b548189c3",
+    "catalogSha256": "20ce9ae0b34c9ec80a5d58f9b18b051dada43b1e0ea0f6a7215cb767f0c854b6",
+    "catalogUpdatedAt": "2026-08-31",
+    "sourceEditionDate": "2026-07-31",
+    "licenseOriginal": "이용허락범위 제한 없음",
+    "licenseUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+    "privateApiKeyRequired": false,
+    "encoding": "CP949 CSV",
+    "quality": {
+      "rawRows": 72,
+      "missingCoordinates": 0,
+      "invalidCoordinates": 0,
+      "duplicateFeaturesCollapsed": 0,
+      "conflictingHours": 0,
+      "conflictingAccess": 0,
+      "acceptedRecords": 72,
+      "excludedRows": []
+    }
+  },
+  {
+    "sourceId": "kr-jeju-city",
+    "catalogUrl": "https://www.data.go.kr/data/15110521/fileData.do",
+    "downloadUrl": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003607188&fileDetailSn=1&insertDataPrcus=N",
+    "file": "jeju.csv",
+    "fetchedAt": "2026-10-11T12:44:16.685432+00:00",
+    "sha256": "1809f07a4ac0c712e64eb368fde0839074168b07c0e2a17644f3ba9b3820bcc3",
+    "catalogSha256": "39a7163f3ad541e181f25073b82b836e9beb01b4931754e60935bfc7250ced73",
+    "catalogUpdatedAt": "2026-03-12",
+    "sourceEditionDate": "2025-12-31",
+    "licenseOriginal": "이용허락범위 제한 없음",
+    "licenseUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+    "privateApiKeyRequired": false,
+    "encoding": "CP949 CSV",
+    "quality": {
+      "rawRows": 503,
+      "missingCoordinates": 12,
+      "invalidCoordinates": 1,
+      "duplicateFeaturesCollapsed": 0,
+      "conflictingHours": 0,
+      "conflictingAccess": 0,
+      "acceptedRecords": 490,
+      "excludedRows": [
+        {
+          "row": 56,
+          "id": "PT0056",
+          "reason": "invalidCoordinates"
+        },
+        {
+          "row": 453,
+          "id": "PT0453",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 457,
+          "id": "PT0457",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 461,
+          "id": "PT0461",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 462,
+          "id": "PT0462",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 473,
+          "id": "PT0473",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 475,
+          "id": "PT0475",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 479,
+          "id": "PT0479",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 480,
+          "id": "PT0480",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 483,
+          "id": "PT0483",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 484,
+          "id": "PT0484",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 490,
+          "id": "PT0490",
+          "reason": "missingCoordinates"
+        },
+        {
+          "row": 498,
+          "id": "PT0498",
+          "reason": "missingCoordinates"
+        }
+      ]
+    }
+  },
+  {
+    "sourceId": "kr-jeonbuk",
+    "catalogUrl": "https://www.data.go.kr/data/15134318/fileData.do",
+    "downloadUrl": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003007239&fileDetailSn=1&insertDataPrcus=N",
+    "file": "jeonbuk.csv",
+    "fetchedAt": "2026-10-11T12:43:59.123805+00:00",
+    "sha256": "08f6592365e5688c427b890c71fa9b1f8fae45a5d784e96a9b2e6035f05d2c39",
+    "catalogSha256": "129e351f63ef11e5b33cde039f0f09c91e0b8934d0750e81bb4d3c430b7e3026",
+    "catalogUpdatedAt": "2025-08-23",
+    "sourceEditionDate": "2024-07-29",
+    "licenseOriginal": "이용허락범위 제한 없음",
+    "licenseUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+    "privateApiKeyRequired": false,
+    "encoding": "CP949 CSV",
+    "quality": {
+      "rawRows": 2839,
+      "missingCoordinates": 0,
+      "invalidCoordinates": 0,
+      "duplicateFeaturesCollapsed": 48,
+      "conflictingHours": 32,
+      "conflictingAccess": 5,
+      "acceptedRecords": 2791,
+      "excludedRows": []
+    }
+  }
+]

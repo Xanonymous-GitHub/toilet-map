@@ -1,0 +1,582 @@
+{
+  "radiusKm": 25,
+  "note": "Nearby counts within a city-center radius; not official municipal boundaries.",
+  "cities": [
+    {
+      "country": "JP",
+      "name": "札幌",
+      "lat": 43.0618,
+      "lon": 141.3545,
+      "count": 525
+    },
+    {
+      "country": "JP",
+      "name": "旭川",
+      "lat": 43.7706,
+      "lon": 142.365,
+      "count": 44
+    },
+    {
+      "country": "JP",
+      "name": "函館",
+      "lat": 41.7687,
+      "lon": 140.7288,
+      "count": 47
+    },
+    {
+      "country": "JP",
+      "name": "青森",
+      "lat": 40.8222,
+      "lon": 140.7474,
+      "count": 81
+    },
+    {
+      "country": "JP",
+      "name": "盛岡",
+      "lat": 39.7019,
+      "lon": 141.1543,
+      "count": 60
+    },
+    {
+      "country": "JP",
+      "name": "仙台",
+      "lat": 38.2682,
+      "lon": 140.8694,
+      "count": 419
+    },
+    {
+      "country": "JP",
+      "name": "秋田",
+      "lat": 39.72,
+      "lon": 140.1024,
+      "count": 113
+    },
+    {
+      "country": "JP",
+      "name": "山形",
+      "lat": 38.2554,
+      "lon": 140.3396,
+      "count": 60
+    },
+    {
+      "country": "JP",
+      "name": "福島",
+      "lat": 37.7608,
+      "lon": 140.4747,
+      "count": 108
+    },
+    {
+      "country": "JP",
+      "name": "東京",
+      "lat": 35.6762,
+      "lon": 139.6503,
+      "count": 4454
+    },
+    {
+      "country": "JP",
+      "name": "橫濱",
+      "lat": 35.4437,
+      "lon": 139.638,
+      "count": 2485
+    },
+    {
+      "country": "JP",
+      "name": "千葉",
+      "lat": 35.6074,
+      "lon": 140.1065,
+      "count": 583
+    },
+    {
+      "country": "JP",
+      "name": "埼玉",
+      "lat": 35.8617,
+      "lon": 139.6455,
+      "count": 2770
+    },
+    {
+      "country": "JP",
+      "name": "宇都宮",
+      "lat": 36.5551,
+      "lon": 139.8824,
+      "count": 160
+    },
+    {
+      "country": "JP",
+      "name": "前橋",
+      "lat": 36.3895,
+      "lon": 139.0634,
+      "count": 322
+    },
+    {
+      "country": "JP",
+      "name": "水戶",
+      "lat": 36.3659,
+      "lon": 140.4712,
+      "count": 91
+    },
+    {
+      "country": "JP",
+      "name": "新潟",
+      "lat": 37.9161,
+      "lon": 139.0364,
+      "count": 109
+    },
+    {
+      "country": "JP",
+      "name": "長野",
+      "lat": 36.6486,
+      "lon": 138.1948,
+      "count": 239
+    },
+    {
+      "country": "JP",
+      "name": "松本",
+      "lat": 36.238,
+      "lon": 137.972,
+      "count": 135
+    },
+    {
+      "country": "JP",
+      "name": "甲府",
+      "lat": 35.6621,
+      "lon": 138.5682,
+      "count": 198
+    },
+    {
+      "country": "JP",
+      "name": "靜岡",
+      "lat": 34.9756,
+      "lon": 138.3828,
+      "count": 222
+    },
+    {
+      "country": "JP",
+      "name": "濱松",
+      "lat": 34.7108,
+      "lon": 137.7261,
+      "count": 473
+    },
+    {
+      "country": "JP",
+      "name": "名古屋",
+      "lat": 35.1815,
+      "lon": 136.9066,
+      "count": 888
+    },
+    {
+      "country": "JP",
+      "name": "岐阜",
+      "lat": 35.4233,
+      "lon": 136.7607,
+      "count": 273
+    },
+    {
+      "country": "JP",
+      "name": "富山",
+      "lat": 36.6953,
+      "lon": 137.2113,
+      "count": 109
+    },
+    {
+      "country": "JP",
+      "name": "金澤",
+      "lat": 36.5613,
+      "lon": 136.6562,
+      "count": 132
+    },
+    {
+      "country": "JP",
+      "name": "福井",
+      "lat": 36.0641,
+      "lon": 136.2196,
+      "count": 151
+    },
+    {
+      "country": "JP",
+      "name": "津",
+      "lat": 34.7186,
+      "lon": 136.5055,
+      "count": 125
+    },
+    {
+      "country": "JP",
+      "name": "京都",
+      "lat": 35.0116,
+      "lon": 135.7681,
+      "count": 948
+    },
+    {
+      "country": "JP",
+      "name": "大阪",
+      "lat": 34.6937,
+      "lon": 135.5023,
+      "count": 1521
+    },
+    {
+      "country": "JP",
+      "name": "神戶",
+      "lat": 34.6901,
+      "lon": 135.1955,
+      "count": 726
+    },
+    {
+      "country": "JP",
+      "name": "奈良",
+      "lat": 34.6851,
+      "lon": 135.8049,
+      "count": 683
+    },
+    {
+      "country": "JP",
+      "name": "大津",
+      "lat": 35.0178,
+      "lon": 135.8546,
+      "count": 933
+    },
+    {
+      "country": "JP",
+      "name": "和歌山",
+      "lat": 34.2305,
+      "lon": 135.1708,
+      "count": 193
+    },
+    {
+      "country": "JP",
+      "name": "岡山",
+      "lat": 34.6551,
+      "lon": 133.9195,
+      "count": 314
+    },
+    {
+      "country": "JP",
+      "name": "廣島",
+      "lat": 34.3853,
+      "lon": 132.4553,
+      "count": 281
+    },
+    {
+      "country": "JP",
+      "name": "鳥取",
+      "lat": 35.5011,
+      "lon": 134.2351,
+      "count": 83
+    },
+    {
+      "country": "JP",
+      "name": "松江",
+      "lat": 35.4681,
+      "lon": 133.0484,
+      "count": 142
+    },
+    {
+      "country": "JP",
+      "name": "山口",
+      "lat": 34.1785,
+      "lon": 131.4737,
+      "count": 67
+    },
+    {
+      "country": "JP",
+      "name": "德島",
+      "lat": 34.0703,
+      "lon": 134.5548,
+      "count": 111
+    },
+    {
+      "country": "JP",
+      "name": "高松",
+      "lat": 34.3428,
+      "lon": 134.0466,
+      "count": 210
+    },
+    {
+      "country": "JP",
+      "name": "松山",
+      "lat": 33.8392,
+      "lon": 132.7657,
+      "count": 82
+    },
+    {
+      "country": "JP",
+      "name": "高知",
+      "lat": 33.5597,
+      "lon": 133.5311,
+      "count": 206
+    },
+    {
+      "country": "JP",
+      "name": "福岡",
+      "lat": 33.5902,
+      "lon": 130.4017,
+      "count": 475
+    },
+    {
+      "country": "JP",
+      "name": "北九州",
+      "lat": 33.8835,
+      "lon": 130.8754,
+      "count": 133
+    },
+    {
+      "country": "JP",
+      "name": "佐賀",
+      "lat": 33.2635,
+      "lon": 130.3009,
+      "count": 224
+    },
+    {
+      "country": "JP",
+      "name": "長崎",
+      "lat": 32.7503,
+      "lon": 129.8777,
+      "count": 111
+    },
+    {
+      "country": "JP",
+      "name": "熊本",
+      "lat": 32.8032,
+      "lon": 130.7079,
+      "count": 150
+    },
+    {
+      "country": "JP",
+      "name": "大分",
+      "lat": 33.2396,
+      "lon": 131.6093,
+      "count": 188
+    },
+    {
+      "country": "JP",
+      "name": "宮崎",
+      "lat": 31.9077,
+      "lon": 131.4202,
+      "count": 138
+    },
+    {
+      "country": "JP",
+      "name": "鹿兒島",
+      "lat": 31.5966,
+      "lon": 130.5571,
+      "count": 202
+    },
+    {
+      "country": "JP",
+      "name": "那霸",
+      "lat": 26.2124,
+      "lon": 127.6809,
+      "count": 298
+    },
+    {
+      "country": "KR",
+      "name": "首爾",
+      "lat": 37.5665,
+      "lon": 126.978,
+      "count": 1243
+    },
+    {
+      "country": "KR",
+      "name": "釜山",
+      "lat": 35.1796,
+      "lon": 129.0756,
+      "count": 235
+    },
+    {
+      "country": "KR",
+      "name": "仁川",
+      "lat": 37.4563,
+      "lon": 126.7052,
+      "count": 634
+    },
+    {
+      "country": "KR",
+      "name": "大邱",
+      "lat": 35.8714,
+      "lon": 128.6014,
+      "count": 103
+    },
+    {
+      "country": "KR",
+      "name": "大田",
+      "lat": 36.3504,
+      "lon": 127.3845,
+      "count": 166
+    },
+    {
+      "country": "KR",
+      "name": "光州",
+      "lat": 35.1595,
+      "lon": 126.8526,
+      "count": 129
+    },
+    {
+      "country": "KR",
+      "name": "蔚山",
+      "lat": 35.5384,
+      "lon": 129.3114,
+      "count": 68
+    },
+    {
+      "country": "KR",
+      "name": "世宗",
+      "lat": 36.48,
+      "lon": 127.289,
+      "count": 192
+    },
+    {
+      "country": "KR",
+      "name": "水原",
+      "lat": 37.2636,
+      "lon": 127.0286,
+      "count": 413
+    },
+    {
+      "country": "KR",
+      "name": "城南",
+      "lat": 37.42,
+      "lon": 127.1265,
+      "count": 1056
+    },
+    {
+      "country": "KR",
+      "name": "高陽",
+      "lat": 37.6584,
+      "lon": 126.832,
+      "count": 936
+    },
+    {
+      "country": "KR",
+      "name": "龍仁",
+      "lat": 37.2411,
+      "lon": 127.1776,
+      "count": 233
+    },
+    {
+      "country": "KR",
+      "name": "清州",
+      "lat": 36.6424,
+      "lon": 127.489,
+      "count": 86
+    },
+    {
+      "country": "KR",
+      "name": "全州",
+      "lat": 35.8242,
+      "lon": 127.148,
+      "count": 92
+    },
+    {
+      "country": "KR",
+      "name": "昌原",
+      "lat": 35.2281,
+      "lon": 128.6811,
+      "count": 138
+    },
+    {
+      "country": "KR",
+      "name": "天安",
+      "lat": 36.8151,
+      "lon": 127.1139,
+      "count": 62
+    },
+    {
+      "country": "KR",
+      "name": "平澤",
+      "lat": 36.9921,
+      "lon": 127.1127,
+      "count": 93
+    },
+    {
+      "country": "KR",
+      "name": "金海",
+      "lat": 35.2285,
+      "lon": 128.8894,
+      "count": 274
+    },
+    {
+      "country": "KR",
+      "name": "浦項",
+      "lat": 36.019,
+      "lon": 129.3435,
+      "count": 47
+    },
+    {
+      "country": "KR",
+      "name": "慶州",
+      "lat": 35.8562,
+      "lon": 129.2247,
+      "count": 50
+    },
+    {
+      "country": "KR",
+      "name": "春川",
+      "lat": 37.8813,
+      "lon": 127.7298,
+      "count": 43
+    },
+    {
+      "country": "KR",
+      "name": "原州",
+      "lat": 37.3422,
+      "lon": 127.9202,
+      "count": 60
+    },
+    {
+      "country": "KR",
+      "name": "江陵",
+      "lat": 37.7519,
+      "lon": 128.8761,
+      "count": 48
+    },
+    {
+      "country": "KR",
+      "name": "束草",
+      "lat": 38.207,
+      "lon": 128.5918,
+      "count": 67
+    },
+    {
+      "country": "KR",
+      "name": "麗水",
+      "lat": 34.7604,
+      "lon": 127.6622,
+      "count": 120
+    },
+    {
+      "country": "KR",
+      "name": "順天",
+      "lat": 34.9506,
+      "lon": 127.4872,
+      "count": 75
+    },
+    {
+      "country": "KR",
+      "name": "木浦",
+      "lat": 34.8118,
+      "lon": 126.3922,
+      "count": 19
+    },
+    {
+      "country": "KR",
+      "name": "晉州",
+      "lat": 35.18,
+      "lon": 128.1076,
+      "count": 59
+    },
+    {
+      "country": "KR",
+      "name": "濟州",
+      "lat": 33.4996,
+      "lon": 126.5312,
+      "count": 370
+    },
+    {
+      "country": "KR",
+      "name": "西歸浦",
+      "lat": 33.2541,
+      "lon": 126.5601,
+      "count": 145
+    }
+  ],
+  "checkedCities": 82,
+  "citiesWithSourceData": 82
+}
