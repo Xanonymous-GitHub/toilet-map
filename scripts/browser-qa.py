@@ -308,7 +308,7 @@ with sync_playwright() as pw:
         })()"""),
     )
     page.get_by_role("button", name="關閉說明").click()
-    page.get_by_role("textbox", name="搜尋城市、車站或廁所").fill("明洞")
+    page.get_by_role("searchbox", name="搜尋城市、車站或廁所").fill("明洞")
     page.locator(".search-results button").first.click()
     expect(page.locator(".toilet-card").first).to_be_visible(timeout=10000)
     check("Place search changes the viewport and updates nearby list")
@@ -375,50 +375,163 @@ with sync_playwright() as pw:
     page.on("pageerror", lambda e: report["pageErrors"].append(str(e)))
     page.on("console", record_console)
     page.goto(f"{BASE_URL}?region=seoul", wait_until="networkidle", timeout=45000)
-    expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
+    expect(page.locator(".map-loading")).to_have_count(0, timeout=20000)
+    expect(page.locator(".mobile-results-trigger")).not_to_contain_text("…", timeout=20000)
     check(
-        "Mobile has no horizontal document overflow",
-        page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
+        "Mobile starts with a full map and keeps secondary controls off the main screen",
+        page.locator(".map-panel").bounding_box()["height"] == 844
+        and page.locator(".sidebar, .sidebar-footer, .region-tabs, .toilet-list").count() == 0
+        and not page.locator(".map-legend").is_visible(),
     )
     page.screenshot(path=str(out / "mobile.png"))
-    page.get_by_role("button", name="收起側邊欄", exact=True).click()
-    expect(page.locator(".sidebar")).to_have_count(0)
-    expect(page.get_by_role("button", name="展開側邊欄", exact=True)).to_be_visible()
-    page.wait_for_timeout(250)
-    check(
-        "Mobile collapsed map fills the viewport without overflow",
-        page.locator(".maplibregl-canvas").bounding_box()["width"] == 390
-        and page.locator(".map-panel").bounding_box()["height"] == 844
-        and page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
-    )
+    page.get_by_role("button", name="地點與篩選", exact=True).click()
+    expect(page.get_by_role("dialog", name="地點與篩選")).to_be_visible()
     page.get_by_role("combobox", name="切換外觀", exact=True).select_option("dark")
-    page.screenshot(path=str(out / "mobile-dark-collapsed.png"))
-    page.get_by_role("button", name="展開側邊欄", exact=True).click()
+    page.get_by_role("button", name="返回地圖", exact=True).click()
+    page.wait_for_timeout(250)
+    page.screenshot(path=str(out / "mobile-dark.png"))
+    check(
+        "Mobile settings close cleanly and return keyboard focus to the trigger",
+        page.locator(".mobile-panel").count() == 0
+        and page.get_by_role("button", name="地點與篩選", exact=True).evaluate(
+            "e => e === document.activeElement"
+        ),
+    )
+    # Check usable space and hit targets, rather than only document overflow.
+    for width, height in [(320, 568), (375, 667), (430, 932), (393, 480), (844, 390)]:
+        page.set_viewport_size({"width": width, "height": height})
+        page.wait_for_timeout(250)
+        check(
+            f"Mobile {width}x{height} preserves map space and reachable non-overlapping controls",
+            page.evaluate("""() => {
+                const map = document.querySelector('.map-panel').getBoundingClientRect();
+                const header = document.querySelector('.mobile-map-header').getBoundingClientRect();
+                const list = document.querySelector('.mobile-results-trigger')
+                    .getBoundingClientRect();
+                const gps = document.querySelector('.locate-control').getBoundingClientRect();
+                const controls = ['.mobile-settings-trigger',
+                    '.mobile-results-trigger', '.locate-control'];
+                return document.documentElement.scrollWidth <= innerWidth
+                    && document.documentElement.scrollHeight <= innerHeight
+                    && map.width === innerWidth && map.height === innerHeight
+                    && list.left >= 0 && gps.right <= innerWidth
+                    && list.right < gps.left && list.bottom <= innerHeight
+                    && header.height <= 64 && list.top - header.bottom >= innerHeight * 0.6
+                    && controls.every(selector => {
+                        const element = document.querySelector(selector);
+                        const rect = element.getBoundingClientRect();
+                        return rect.width >= 44 && rect.height >= 44
+                            && element.contains(document.elementFromPoint(
+                                rect.x + rect.width / 2, rect.y + rect.height / 2));
+                    });
+            }"""),
+        )
+        page.locator(".mobile-results-trigger").click()
+        expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
+        expect(page.locator(".mobile-panel")).to_be_in_viewport(ratio=1)
+        check(
+            f"Mobile {width}x{height} list heading leaves the first facility card unobscured",
+            page.evaluate("""() => {
+                const heading = document.querySelector('.list-heading').getBoundingClientRect();
+                const first = document.querySelector('.toilet-card').getBoundingClientRect();
+                const panel = document.querySelector('.mobile-panel').getBoundingClientRect();
+                const list = document.querySelector('.toilet-list').getBoundingClientRect();
+                return first.top >= heading.bottom && first.top >= list.top
+                    && first.bottom <= panel.bottom && panel.width <= innerWidth
+                    && panel.top >= 0 && panel.bottom <= innerHeight;
+            }"""),
+        )
+        page.screenshot(path=str(out / f"mobile-list-{width}x{height}.png"))
+        page.get_by_role("button", name="返回地圖", exact=True).click()
+        page.get_by_role("button", name="地點與篩選", exact=True).click()
+        page.locator(".mobile-settings-body").evaluate("e => e.scrollTop=e.scrollHeight")
+        expect(page.get_by_role("button", name="加入主畫面", exact=True)).to_be_in_viewport()
+        check(f"Mobile {width}x{height} secondary actions remain reachable by scrolling")
+        page.get_by_role("button", name="返回地圖", exact=True).click()
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.get_by_role("button", name="地點與篩選", exact=True).click()
+    page.get_by_role("button", name="無障礙", exact=True).click()
+    expect(page.get_by_role("button", name="無障礙", exact=True)).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    page.get_by_role("button", name="查看地圖 · 1 項篩選", exact=True).click()
+    expect(page.locator(".filter-count")).to_have_text("1")
+    check("Mobile shows the active filter count without leaving the filter controls open")
+    page.get_by_role("button", name="地點與篩選，已套用 1 項", exact=True).click()
+    page.get_by_role("button", name="無障礙", exact=True).click()
+    page.get_by_role("combobox", name="選擇城市", exact=True).select_option("busan")
+    expect(page.locator(".footer-meta")).to_contain_text(expected_count("busan"), timeout=20000)
+    page.screenshot(path=str(out / "mobile-settings.png"))
+    page.keyboard.press("Escape")
+    expect(page.locator(".mobile-panel")).to_have_count(0)
+    expect(page.locator(".mobile-results-trigger")).to_contain_text("釜山")
+    check("Mobile can select a non-capital city and dismiss settings with Escape")
+    page.get_by_role("searchbox", name="搜尋城市、車站或廁所").click()
+    page.get_by_role("searchbox", name="搜尋城市、車站或廁所").fill("明洞")
+    page.locator(".search-results button").first.click()
+    expect(page.locator(".mobile-results-trigger")).to_contain_text("首爾")
+    expect(page.locator(".search-results")).to_have_count(0)
+    check("Mobile place search changes the city and returns to the full map")
+    page.get_by_role("searchbox", name="搜尋城市、車站或廁所").fill("不存在的廁所名稱")
+    page.get_by_role("searchbox", name="搜尋城市、車站或廁所").press("Enter")
+    expect(page.get_by_role("dialog", name="附近廁所", exact=True)).to_be_visible()
+    expect(page.get_by_role("heading", name="這個區域沒有符合的資料")).to_be_visible()
+    check("Mobile search submit opens a usable empty-results panel")
+    page.get_by_role("button", name="返回地圖", exact=True).click()
+    page.get_by_role("button", name="清除搜尋", exact=True).click()
+    page.get_by_role("button", name="關閉搜尋建議", exact=True).click()
     page.get_by_role("button", name="定位目前位置", exact=True).click()
     expect(page.get_by_role("status")).to_contain_text("定位權限未開啟", timeout=15000)
     check("Denied GPS gives a useful message and keeps the map usable")
+    page.get_by_role("button", name="關閉訊息", exact=True).click()
     check(
         "Malformed saved preferences recover without blocking the app",
         page.evaluate("Array.isArray(JSON.parse(localStorage.getItem('saved')))"),
     )
+    page.locator(".mobile-results-trigger").click()
+    expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
     page.locator(".card-main").first.click()
     expect(page.locator(".detail-panel")).to_be_visible()
+    expect(page.locator(".mobile-panel")).to_have_count(0)
     page.locator(".detail-panel").evaluate("(e)=>e.scrollTop=e.scrollHeight")
     expect(page.get_by_role("button", name="Kakao 網頁", exact=True)).to_be_visible()
     page.screenshot(path=str(out / "mobile-detail.png"))
-    check("Mobile detail sheet scrolls to navigation controls")
+    check("Mobile results close before details open, and navigation remains reachable")
     page.get_by_role("button", name="關閉廁所詳細資訊").click()
+    expect(page.locator(".mobile-results-trigger")).to_be_focused()
+    check("Mobile detail dismissal restores focus to the nearby list entry")
+    page.get_by_role("button", name="地點與篩選", exact=True).click()
+    page.get_by_role("button", name="資料來源與使用說明", exact=True).click()
+    expect(page.get_by_role("dialog", name="每一點，都有出處。")).to_be_visible()
+    expect(page.locator(".mobile-panel")).to_have_count(0)
+    check("Mobile source information opens without stacked settings overlays")
+    page.get_by_role("button", name="關閉說明").click()
+    page.get_by_role("button", name="地點與篩選", exact=True).click()
     page.get_by_role("button", name="加入主畫面", exact=True).click()
     expect(page.get_by_role("heading", name="把方便，帶在身邊。")).to_be_visible()
-    check("PWA installation guidance is available")
+    expect(page.locator(".mobile-panel")).to_have_count(0)
+    check("PWA installation guidance is available on demand without stacked overlays")
     page.get_by_role("button", name="關閉說明").click()
+    expect(page.locator(".mobile-settings-trigger")).to_be_focused()
+    check("Mobile information dismissal restores focus to settings")
     page.evaluate("navigator.geolocation.getCurrentPosition=(resolve)=>{window.__lateGPS=resolve}")
     page.get_by_role("button", name="定位目前位置", exact=True).click()
+    page.get_by_role("button", name="地點與篩選", exact=True).click()
     page.locator(".region-tabs button").first.click()
     page.evaluate("window.__lateGPS({coords:{latitude:37.5665,longitude:126.978,accuracy:20}})")
     expect(page.locator(".region-tabs button").first).to_have_attribute("aria-pressed", "true")
     expect(page.locator(".footer-meta")).to_contain_text(expected_count("tokyo"), timeout=20000)
     check("A late location result cannot undo the user's city selection")
+    page.get_by_role("button", name="返回地圖", exact=True).click()
+    page.wait_for_function("() => navigator.serviceWorker.controller !== null", timeout=20000)
+    report["offlineBridge"] = True
+    mobile.set_offline(True)
+    page.reload(wait_until="domcontentloaded")
+    expect(page.locator(".offline-banner")).to_be_visible(timeout=20000)
+    page.locator(".mobile-results-trigger").click()
+    expect(page.locator(".toilet-card").first).to_be_visible(timeout=20000)
+    check("Mobile offline reload still opens the cached nearby toilet list")
+    report["offlineBridge"] = False
     mobile.close()
     unavailable_map = browser.new_context()
     if FIXTURE_ASSETS or proxy:

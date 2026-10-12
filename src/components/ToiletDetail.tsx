@@ -29,6 +29,7 @@ type Props = {
   toggleSave: (toilet: Toilet) => void;
   openNav: (provider: NavigationProvider, toilet: Toilet) => void;
   copyAddress: (toilet: Toilet) => Promise<void>;
+  restoreFocus?: () => void;
 };
 export function ToiletDetail({
   detail,
@@ -39,6 +40,7 @@ export function ToiletDetail({
   toggleSave,
   openNav,
   copyAddress,
+  restoreFocus,
 }: Props) {
   return (
     <Sheet
@@ -48,7 +50,17 @@ export function ToiletDetail({
         if (!open) onClose();
       }}
     >
-      <SheetContent className="detail-panel" aria-label="廁所詳細資訊" showCloseButton={false}>
+      <SheetContent
+        className="detail-panel"
+        aria-label="廁所詳細資訊"
+        showCloseButton={false}
+        onCloseAutoFocus={(event) => {
+          if (restoreFocus) {
+            event.preventDefault();
+            restoreFocus();
+          }
+        }}
+      >
         <SheetDescription className="sr-only">
           查看開放時間、設施、使用條件與步行導航。
         </SheetDescription>

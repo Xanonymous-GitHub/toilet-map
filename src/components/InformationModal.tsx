@@ -3,8 +3,13 @@ import type { Source } from "../core";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog";
 
-type Props = { mode: "sources" | "install"; sources: Source[]; onClose: () => void };
-export function InformationModal({ mode, sources, onClose }: Props) {
+type Props = {
+  mode: "sources" | "install";
+  sources: Source[];
+  onClose: () => void;
+  restoreFocus?: () => void;
+};
+export function InformationModal({ mode, sources, onClose, restoreFocus }: Props) {
   return (
     <Dialog
       open
@@ -12,7 +17,17 @@ export function InformationModal({ mode, sources, onClose }: Props) {
         if (!open) onClose();
       }}
     >
-      <DialogContent className="modal" aria-modal="true" showCloseButton={false}>
+      <DialogContent
+        className="modal"
+        aria-modal="true"
+        showCloseButton={false}
+        onCloseAutoFocus={(event) => {
+          if (restoreFocus) {
+            event.preventDefault();
+            restoreFocus();
+          }
+        }}
+      >
         <DialogDescription className="sr-only">
           {mode === "sources" ? "資料來源、授權與使用限制" : "依照裝置加入主畫面的方式"}
         </DialogDescription>

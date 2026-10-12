@@ -246,7 +246,9 @@ export default function MapView(p: Props) {
       const overlays = Array.from(
         container
           .closest(".map-panel")
-          ?.querySelectorAll(".map-controls, .map-legend, .map-top, .maplibregl-ctrl-attrib") ?? [],
+          ?.querySelectorAll(
+            ".map-controls, .map-legend, .map-top, .mobile-map-header, .mobile-results-trigger, .maplibregl-ctrl-attrib",
+          ) ?? [],
         (element) => element.getBoundingClientRect(),
       );
       for (const feature of m.queryRenderedFeatures({ layers: ["cluster-circles"] })) {

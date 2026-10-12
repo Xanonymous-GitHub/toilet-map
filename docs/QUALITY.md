@@ -26,7 +26,7 @@ Biome recommended 規則與 React／Playwright／types／test domains 保留啟�
 
 地圖元件使用 React lazy／Suspense，入口 chunk 約 277 KB（gzip 90 KB），共用 chunk 約 53 KB（gzip 21 KB），首屏 JavaScript 合計約 330 KB（gzip 110 KB）；MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB）。MapLibre 發布的是單一預打包 ESM 模組，不能用模組層級的 code splitting 再切小；Vite 的一般提示門檻配合此模組調整為 1,100 KB，另由建置 plugin 強制每個應用程式 chunk 不超過 500,000 bytes、MapLibre 不超過 1,100,000 bytes，超標直接失敗，並非整體忽略大小問題。Bun 測試另確認所有延後載入 chunks 都包含在離線 shell。
 
-地圖模組下載失敗時顯示 fallback，不會使清單與詳細資訊失效。瀏覽器測試等待城市飛行完成後，才操作手動縮放或拖曳，避免把中途的跨國 viewport 誤當成目的地。45 項檢查記錄 console warnings；只允許 Chromium 軟體 WebGL 截圖讀回像素的 `GPU stall due to ReadPixels` 驅動診斷，其他警告使測試失敗。離線與刻意阻斷模組的網路錯誤保留在報告中。
+地圖模組下載失敗時顯示 fallback，不會使清單與詳細資訊失效。瀏覽器測試等待城市飛行完成後，才操作手動縮放或拖曳，避免把中途的跨國 viewport 誤當成目的地。68 項檢查記錄 console warnings；只允許 Chromium 軟體 WebGL 截圖讀回像素的 `GPU stall due to ReadPixels` 驅動診斷，其他警告使測試失敗。離線與刻意阻斷模組的網路錯誤保留在報告中。
 
 ## 本輪整理
 
@@ -63,3 +63,11 @@ TypeScript 與建置 target 使用 ESNext，Python 為 3.15／Ruff py315。主�
 Rolldown／Vite、Lightning CSS、cssnano、SVGO 與 html-minifier-terser 負責壓縮，JS output comments=false。Netlify 的 route scanner 尚不接受部分 template literal 設定，以維護中的 Terser 設定雙引號輸出；不使用文字替換清除註解。`rollup-plugin-license` 保存獨立授權 JSON。正式資產的 JS AST、CSS、JSON byte 格式與授權檔由測試檢查。
 
 Netlify 最新官方 packager 的 TypeScript parser 尚未相容專案使用的 TypeScript 7，因此打包驗證工具使用獨立的 tooling lockfile；正式專案仍使用 TypeScript 7，不以全域 overrides 強制替換間接依賴。平台 adapter 共用 API，Node 24 尚未提供 Uint8Array.fromBase64 時使用標準 atob fallback。詳見 [部署說明](DEPLOYMENT.md)。
+
+## 手機畫面整理
+
+手機（含 1024px 以下的觸控橫向畫面）以完整地圖為主，常駐搜尋、篩選入口、附近清單與定位。國家／城市／篩選／外觀／來源／安裝與圖例集中在按需展開的 shadcn Sheet；全國收錄與載入統計不再固定占用底部空間。桌面保留可收合側欄。
+
+手機清單使用獨立的標題與捲動區，移除固定 256px 地圖起點與 32dvh 高度。關閉面板會回到入口焦點，查看詳細資訊或說明時先關閉舊面板；搜尋 Enter 會處理預設按鍵動作與輸入法組字，避免新面板被 Enter 立即關閉。地圖始終維持同一個實例，展開清單不會重新建立 WebGL。
+
+`MobilePanel` 延後載入並重用 shadcn Sheet。手機面板不使用位移動畫，卡片直接顯示，避免 content-visibility 與進場位置造成暫時空白。定位與清單入口至少 44px，支援動態 viewport 與安全區；圖磚著作權仍保留。
