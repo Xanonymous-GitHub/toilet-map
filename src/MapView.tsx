@@ -45,6 +45,8 @@ export default function MapView(p: Props) {
         zoom: latest.current.zoom,
         minZoom: 5,
         maxZoom: 19,
+        // Raster tiles stay sharp at 2x without a 3x phone drawing nine pixels per CSS pixel.
+        pixelRatio: Math.min(devicePixelRatio, 2),
         attributionControl: { compact: false },
         style: {
           version: 8,
@@ -73,7 +75,11 @@ export default function MapView(p: Props) {
       return;
     }
     map.current = m;
-    const observer = new ResizeObserver(() => m.resize());
+    const observer = new ResizeObserver(() => {
+      const ratio = Math.min(devicePixelRatio, 2);
+      if (m.getPixelRatio() !== ratio) m.setPixelRatio(ratio);
+      else m.resize();
+    });
     observer.observe(container);
     const emitBounds = () => {
       const b = m.getBounds(),

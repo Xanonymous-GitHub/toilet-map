@@ -366,7 +366,10 @@ with sync_playwright() as pw:
     check("Panning beyond a city's initial area requests another country-wide bbox")
     context.close()
     mobile = browser.new_context(
-        viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True
+        viewport={"width": 390, "height": 844},
+        device_scale_factor=3,
+        is_mobile=True,
+        has_touch=True,
     )
     if FIXTURE_ASSETS or proxy:
         mobile.route("https://**/*", verified_asset)
@@ -382,6 +385,13 @@ with sync_playwright() as pw:
         page.locator(".map-panel").bounding_box()["height"] == 844
         and page.locator(".sidebar, .sidebar-footer, .region-tabs, .toilet-list").count() == 0
         and not page.locator(".map-legend").is_visible(),
+    )
+    check(
+        "High-density phones keep the map canvas at 2x while UI text retains device resolution",
+        page.locator(".maplibregl-canvas").evaluate(
+            "e => devicePixelRatio === 3 && e.width === e.clientWidth * 2"
+            " && e.height === e.clientHeight * 2"
+        ),
     )
     page.screenshot(path=str(out / "mobile.png"))
     page.get_by_role("button", name="地點與篩選", exact=True).click()
