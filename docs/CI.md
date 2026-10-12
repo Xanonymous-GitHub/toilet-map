@@ -8,12 +8,12 @@
 
 | Job | 檢查 |
 | --- | --- |
-| Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置、大小與壓縮／註解檢查、Netlify 實際打包、Vercel handler、Biome、Ruff lint／format、TypeScript strict、38 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
-| Desktop, mobile and offline browser checks | Playwright Chromium 的 101 項檢查（69 項原有回歸＋32 項狀態／分享），含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、320／375／390／430px、短視窗與觸控橫向排版、清單遮擋與觸控範圍、深淺色／系統切換、側邊欄收合、安裝提醒、離線重開與地圖模組下載失敗，以及跨使用者分享、瀏覽歷程、四種捲動還原、快取升級與儲存受限 |
+| Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置、大小與壓縮／註解檢查、Netlify 實際打包、Vercel handler、Biome、Ruff lint／format、TypeScript strict、42 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
+| Desktop, mobile and offline browser checks | Playwright Chromium 的 109 項檢查（69 項原有回歸＋32 項狀態／分享＋8 項底圖失敗／恢復），含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、320／375／390／430px、短視窗與觸控橫向排版、清單遮擋與觸控範圍、深淺色／系統切換、側邊欄收合、安裝提醒、離線重開與地圖模組下載失敗，以及跨使用者分享、瀏覽歷程、四種捲動還原、快取升級與儲存受限 |
 
 Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 0.13.0。Actions 固定完整 commit SHA，註解保留已查證的 release 版本標籤。Workflow 僅需要 `contents: read`；新提交會取消同一 ref 的舊執行。
 
-瀏覽器 CI 的底圖使用提交的固定 PNG 圖磚，字型使用系統字型。公廁資料、API、MapLibre Worker、定位回呼與 PWA 資產使用真正的本機正式建置，外部導航檢查 URL。這個模式驗證 App 操作與離線流程；一般 `bun run test:browser` 使用真實公開圖磚，沒有代理時由瀏覽器直接以 TLS 驗證載入，有代理時使用 CA 驗證橋接器。驗證範圍見 [VALIDATION.md](VALIDATION.md)。
+瀏覽器 CI 使用提交的真實向量圖塊與供應商非文字樣式圖層；不向外部服務抓取字形或 sprites。公廁資料、API、MapLibre Worker、定位回呼與 PWA 資產使用真正的本機正式建置，外部導航檢查 URL。這個模式驗證 App 操作與離線流程；一般 `bun run test:browser` 使用真實公開圖磚，沒有代理時由瀏覽器直接以 TLS 驗證載入，有代理時使用 CA 驗證橋接器。底圖回歸另外模擬樣式 403、部分圖塊失敗、手動重試、選取／鏡頭保存與快速切換外觀，並禁止請求舊的 OSM raster host。設定 `RELIEF_QA_REAL_BASEMAP=1` 執行底圖專項腳本，可再檢查 3 種真實服務畫面；真實服務不作為 CI 的依賴。驗證範圍見 [VALIDATION.md](VALIDATION.md)。
 
 成功建置保存 `production-build` 與 `deployment-checks` artifacts；瀏覽器 job 無論成功或失敗，都保存報告、截圖及 preview log 到 `browser-results`。Artifacts 保留 14 天。
 

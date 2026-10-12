@@ -27,11 +27,13 @@ bun run preview
 
 側邊欄可收起並記住偏好；支援淺色、深色與跟隨系統。地圖控制項放在底部，安裝提醒會自動收起，仍可由頁尾加入主畫面。按鈕、篩選、原生選單、說明與詳細資訊使用官方 shadcn UI 元件。
 
+底圖使用 [OpenFreeMap](https://openfreemap.org/) 的 Positron／Dark 向量樣式，不再向 `tile.openstreetmap.org` 的志工圖塊服務發出請求。底圖與廁所圖層獨立初始化；服務拒絕、斷線或部分圖塊失敗時，仍可查看廁所標記、清單與導航，並手動重試。切換外觀保留廁所、定位與選取圖層；來源署名持續顯示。
+
 Netlify／Vercel 的設定與 API adapter 已加入並通過官方打包及 Node handler 檢查，可匯入 repository 部署；尚未替使用者在這兩個平台正式發布。完整步驟見 [部署說明](docs/DEPLOYMENT.md)。
 
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、38 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、42 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
 
 | 指令 | 用途 |
 | --- | --- |
@@ -98,7 +100,7 @@ bun run test
 
 ## 瀏覽器驗證
 
-先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。101 項檢查的結果與截圖寫入 `test-results/`。69 項地圖回歸預設由瀏覽器以 TLS 驗證載入真實底圖；32 項狀態／分享檢查使用固定圖磚；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。109 項 CI 檢查的結果與截圖寫入 `test-results/`：69 項地圖回歸、32 項狀態／分享與 8 項底圖失敗／恢復。固定底圖使用真實向量圖塊與供應商的非文字樣式圖層；CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser`，避免依賴外部服務。一般地圖回歸預設以 TLS 驗證載入真實底圖；設定 HTTP／HTTPS 代理時使用受信任 CA 的來源橋接器，離線階段關閉橋接器。另可執行 `RELIEF_QA_REAL_BASEMAP=1 uv run --locked python scripts/basemap-browser-qa.py`，檢查東京桌面明暗與釜山手機的真實樣式、向量圖塊、glyphs、sprites 和署名。完整驗證紀錄見 `docs/VALIDATION.md`。
 
 ## 手機操作
 

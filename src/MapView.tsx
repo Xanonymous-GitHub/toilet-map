@@ -29,11 +29,13 @@ export default function MapView(p: Props) {
   const holder = useRef<HTMLDivElement>(null),
     map = useRef<maplibregl.Map | null>(null),
     latest = useRef(p),
-    clusters = useRef<Map<string, maplibregl.Marker>>(new Map());
+    clusters = useRef<Map<string, maplibregl.Marker>>(new Map()),
+    pendingBasemapStyle = useRef(true);
   latest.current = p;
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
     [tileError, setTileError] = useState(false),
+    [basemapLoading, setBasemapLoading] = useState(true),
     [basemapAttempt, setBasemapAttempt] = useState(0);
   const reportCamera = useCallback(() => {
     const m = map.current;
@@ -192,12 +194,17 @@ export default function MapView(p: Props) {
       if (e.originalEvent) latest.current.onManual();
     });
     m.on("moveend", emitBounds);
+    m.on("idle", () => {
+      if (!pendingBasemapStyle.current && m.getSource("openmaptiles")) setBasemapLoading(false);
+    });
     m.on("error", (e) => {
       if (
         e.error instanceof maplibregl.AJAXError ||
         /tile|fetch|network|ajax|glyph|sprite/i.test(e.error?.message ?? "")
-      )
+      ) {
         setTileError(true);
+        setBasemapLoading(false);
+      }
     });
     return () => {
       observer.disconnect();
@@ -215,17 +222,24 @@ export default function MapView(p: Props) {
     if (!m) return;
     const controller = new AbortController();
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]);
+    pendingBasemapStyle.current = true;
+    setBasemapLoading(true);
     setTileError(false);
     if (m.isStyleLoaded() && !m.getSource("openmaptiles"))
       m.setPaintProperty("background", "background-color", p.dark ? "#101c18" : "#f5f4ee");
     void loadBasemap(p.dark, signal)
       .then((style) => {
         if (controller.signal.aborted) return;
+        pendingBasemapStyle.current = false;
         if (basemapAttempt > 0) setReady(false);
         m.setStyle(style, { transformStyle: preserveOverlays, diff: basemapAttempt === 0 });
       })
       .catch(() => {
-        if (!controller.signal.aborted) setTileError(true);
+        if (!controller.signal.aborted) {
+          pendingBasemapStyle.current = false;
+          setTileError(true);
+          setBasemapLoading(false);
+        }
       });
     return () => controller.abort();
   }, [p.dark, basemapAttempt]);
@@ -405,7 +419,12 @@ export default function MapView(p: Props) {
   return (
     <TooltipProvider delayDuration={350}>
       <div className="map-stage">
-        <section className="map-canvas" ref={holder} aria-label="公廁位置地圖" />
+        <section
+          className="map-canvas"
+          ref={holder}
+          aria-label="公廁位置地圖"
+          aria-busy={basemapLoading && !failed}
+        />
         {failed && (
           <div className="map-fallback">
             <MapIcon size={34} />

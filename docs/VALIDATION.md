@@ -1,15 +1,23 @@
 # UI、部署與全國覆蓋驗證紀錄
 
-本輪驗證日期：2026-10-12（Asia/Taipei）。從 GitHub 最新 main `26733d6` 開始加入畫面保存與分享；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
+本輪驗證日期：2026-10-12（Asia/Taipei）。從 GitHub 最新 main `59aa676` 修正底圖存取封鎖，保留既有畫面保存與分享功能；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
 
 ## 工具鏈與建置
 
 - Bun 1.4.3、Python 3.15.0 final、uv 0.13.0、TypeScript 7.0.2、Vite 8.3.4、Biome 2.5.15、Ruff 0.17.0、Playwright 1.63.0、Chromium 154。
 - TypeScript／前端／Worker target 為 ESNext，Python 最低版本 3.15，Ruff target py315。32 項直接套件／工具均向官方查證為最新穩定版，見 `dependency-versions.json`；沒有依賴刷新 workflow。
-- `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、38 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
+- `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、42 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
 - 正式 JS 的 AST 沒有註解，CSS 不含註解，JSON／manifest 等於 compact JSON.stringify；HTML／SVG 亦壓縮。開源聲明另存 `third-party-licenses.json`，可從使用說明開啟。
-- 入口 chunk 約 294 KB（gzip 95 KB），另有首屏共用 chunk 約 53 KB（gzip 21 KB）；首屏 JavaScript 合計約 346 KB（gzip 116 KB）。延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
+- 入口 chunk 約 294 KB（gzip 95 KB），另有首屏共用 chunk 約 53 KB（gzip 21 KB）；首屏 JavaScript 合計約 346 KB（gzip 116 KB）。延後載入 MapView 約 48 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
 - 正式建置由 Vite／Rolldown、Lightning CSS、cssnano、SVGO 與 html-minifier-terser 壓縮；Netlify Function 使用 Terser 設定解決官方 route scanner 的字串語法限制。
+
+## 底圖服務與失敗恢復
+
+不再請求 `tile.openstreetmap.org`。底圖使用 OpenFreeMap 的 Positron／Dark 向量樣式，深色地名提高對比；保留 OSM／OpenMapTiles 署名。廁所與定位圖層先在本機空白樣式初始化，底圖請求有 15 秒 timeout 和切換時取消舊請求；樣式切換保留資料與選取，不額外發出範圍查詢。HTTP 快取由瀏覽器管理，PWA 不快取、預抓或代理底圖，正式網站直接向供應商請求。
+
+底圖專項本機 11 項檢查通過：8 項涵蓋樣式 403、部分圖塊失敗、不被其他成功圖塊誤清除的錯誤提示、手動重試、鏡頭／查看紀錄保存、快速外觀切換與後續城市載入；另 3 項以真實服務驗證東京桌面明暗和釜山手機的樣式、向量圖塊、glyphs、sprites 與署名；以 MapLibre idle 確认完成繪製才擷取截圖。測試經 session proxy 以 CA 驗證取得真實 bytes，沒有停用 TLS，沒有使用替代圖片。報告為 `basemap-live-report.json`，截圖在 CI／本機 `test-results/basemap-*.png`。本輪本機合計 112 項瀏覽器檢查，CI 執行 109 項固定底圖檢查。
+
+服務規範與整合來源：[OSMF 圖塊政策](https://operations.osmfoundation.org/policies/tiles/)、[OpenFreeMap 官方說明](https://openfreemap.org/)、[MapLibre 整合指南](https://openfreemap.org/quick_start/)。
 
 ## 平台與瀏覽器
 
@@ -19,15 +27,15 @@ Chromium 69 項檢查涵蓋桌面 1440×1000 與手機 390×844，新增 320×56
 
 功能回歸包含深淺色與跟隨系統、偏好重開、桌面側欄收合、底部控制、安裝提醒自動收起、聚合點選、搜尋與 Enter／空結果、來源 modal 的名稱與鍵盤焦點、詳細資訊、導航、收藏、GPS 拒絕／晚到回呼、非首都與離島切換、拖曳新範圍、桌面與手機離線重開、地圖 chunk 失敗回復。詳細資訊／說明先關閉舊面板，關閉後回到手機入口焦點。
 
-本輪完整固定圖磚報告為 `browser-fixture-report.json`，另以真實 OSM 圖磚通過 5 項手機主畫面、深色、清單與導航檢查，見 `mobile-live-report.json`；`browser-report.json` 保留前一輪 45 項真實圖磚檢查的歷史紀錄。固定圖磚只替換外部圖像，API、資料、MapLibre、Worker、PWA 和定位回呼均為正式建置。無未處理錯誤或應用程式警告。console 保留刻意離線／阻斷下載造成的網路錯誤。
+本輪完整固定向量底圖報告為 `browser-fixture-report.json`。固定底圖使用供應商非文字樣式圖層與單一真實圖塊的 water 圖層；API、資料、MapLibre、Worker、PWA 和定位回呼均為正式建置。無未處理錯誤或應用程式警告。console 保留刻意離線／阻斷下載造成的網路錯誤。`mobile-live-report.json` 與 `browser-report.json` 保留前幾輪 OSM raster 底圖的歷史檢查，不能代表本輪向量底圖。
 
-新增 32 項狀態／分享檢查全部通過，報告為 `state-browser-report.json`。包含原生分享與取消、剪貼簿／手動選取 fallback、跨接收者網址優先、獨立收藏清單、不自動請求 GPS、重新整理與無參數重開、上一頁／下一頁、舊 IndexedDB 升級、離線廁所、非首都 ID-only 連結、失效廁所與無效／儲存受限的還原，以及四種捲動位置與手機旋轉。合計 101 項瀏覽器檢查。
+新增 32 項狀態／分享檢查全部通過，報告為 `state-browser-report.json`。包含原生分享與取消、剪貼簿／手動選取 fallback、跨接收者網址優先、獨立收藏清單、不自動請求 GPS、重新整理與無參數重開、上一頁／下一頁、舊 IndexedDB 升級、離線廁所、非首都 ID-only 連結、失效廁所與無效／儲存受限的還原，以及四種捲動位置與手機旋轉。上述合計 101 項操作與狀態檢查，另有 8 項底圖失敗／恢復 CI 檢查。
 
 這些檢查是 Chromium 的手機尺寸與觸控模擬，並非已完成 iOS／Android 實機驗證。
 
 ## Lighthouse
 
-以下效能數據保留前輪 `f19f899` 的測量基準，本輪狀態功能未重新量測 Lighthouse，不宣稱本輪已達效能目標。
+以下效能數據保留前輪 `f19f899` 的測量基準，本輪底圖修正未重新量測 Lighthouse，不宣稱本輪已達效能目標。
 
 `bun run test:performance` 使用 Lighthouse 13.5.0、冷啟動 browser profiles、固定圖磚、gzip 預覽、Chromium 軟體 WebGL，以及標準手機／桌面模擬節流。可重跑的程式為 `scripts/performance-qa.py`，完整 JSON／HTML 在 `test-results/`，摘要為 `performance-report.json`。
 

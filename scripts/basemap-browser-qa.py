@@ -164,6 +164,9 @@ with sync_playwright() as playwright:
                 timeout=60000,
             )
             expect(page.locator(".map-network-note")).to_have_count(0)
+            expect(page.locator(".map-canvas")).to_have_attribute(
+                "aria-busy", "false", timeout=60000
+            )
             expect(page.locator(".maplibregl-ctrl-attrib")).to_contain_text("OpenMapTiles")
             page.screenshot(path=str(OUT / f"basemap-{name}.png"))
             check(

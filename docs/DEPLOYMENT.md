@@ -19,7 +19,7 @@ OSM 完整下載在 Netlify／Vercel 由 API 303 轉導到 `dist/client/download
 - 以 Node 24 執行兩個平台的真實 Web handler，確認城市資料、query、HEAD、錯誤回應與下載轉導；另外驗證 Vercel rewrite 後的路徑復原。
 - 最新 Netlify 官方 packager 實際產生 API v2 的 ZIP，確認 `/api/*` 路由、串流模式及壓縮後大小約 2.4 MB；不是只檢查設定文字。
 - JS／CSS／HTML／SVG／JSON／manifest 都由維護中的建置工具壓縮；JavaScript AST 驗證沒有註解。開源授權集中於可下載的 `third-party-licenses.json`。
-- CSP、地理定位權限、Service Worker 更新與 hashed assets 的快取標頭已設定；不載入外部字型。
+- CSP、地理定位權限、Service Worker 更新與 hashed assets 的快取標頭已設定；介面使用系統字型，底圖的 glyphs、sprites 與圖塊允許來自 `tiles.openfreemap.org`。Sites、Netlify 與 Vercel 的 CSP／Referrer-Policy 一致並有回歸測試。
 - 桌面、手機、深淺色、定位、導航、離線重開與下載失敗回復由瀏覽器驗證。
 
 沒有連線到使用者的 Netlify／Vercel 帳號執行正式部署。以上是建置與平台打包／handler 驗證；部署後還需在實際網域確認下列 smoke checks。
@@ -32,4 +32,4 @@ OSM 完整下載在 Netlify／Vercel 由 API 303 轉導到 `dist/client/download
 4. 瀏覽一次後離線重新開啟，確認 App 與最近載入範圍可用；底圖及外部導航需要網路。
 5. 在實際手機與部署網域量測載入速度、GPS、安裝及地圖 App 交接。本機軟體 WebGL／固定圖磚的 Lighthouse 結果見 `performance-report.json`，不能當成真實手機與圖磚服務的效能承諾。
 
-公共 OSM 圖磚適用目前的小規模測試。擴大服務時需使用符合容量需求的圖磚供應商，並保留 attribution 與來源授權。
+底圖使用 [OpenFreeMap](https://openfreemap.org/quick_start/) 的 Positron／Dark 向量服務，不需要 API key，也不再使用 OSM 志工 raster 圖塊。保留平台設定中的 `tiles.openfreemap.org` CSP 許可與來源署名。外部服務失敗時，廁所圖層與清單仍可使用，並可手動重試；App 不預下載或離線保存底圖。

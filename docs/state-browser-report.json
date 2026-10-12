@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-12T04:33:54.739413+00:00",
+  "startedAt": "2026-10-12T12:21:25.888693+00:00",
   "passed": true,
   "transport": "Fixed map tiles; actual production API, state, UI, worker and PWA assets.",
   "checks": [
