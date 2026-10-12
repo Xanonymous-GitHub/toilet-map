@@ -1,9 +1,15 @@
-import { spyOn, test } from "bun:test";
+import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import type { StyleSpecification } from "maplibre-gl";
 import { headers } from "../server/headers";
-import { basemapStyles, fallbackStyle, loadBasemap, preserveOverlays } from "../src/basemap";
+import {
+  basemapStyle,
+  basemapTileUrl,
+  fallbackStyle,
+  preserveOverlays,
+  transformMapRequest,
+} from "../src/basemap";
 
 test("Basemap swaps keep live toilet data, selection and location above provider layers", () => {
   const previous: StyleSpecification = {
@@ -34,26 +40,18 @@ test("Basemap swaps keep live toilet data, selection and location above provider
   assert.notEqual(fallbackStyle(false).layers[0], next.layers[0]);
 });
 
-test("Style requests preserve browser cache defaults, cancellation and provider failure status", async () => {
-  const signal = new AbortController().signal;
-  const style = fallbackStyle(false);
-  const fetch = spyOn(globalThis, "fetch");
-  try {
-    fetch.mockResolvedValueOnce(Response.json(style));
-    assert.deepEqual(await loadBasemap(false, signal), style);
-    assert.deepEqual(fetch.mock.calls[0], [basemapStyles.light, { signal }]);
-    fetch.mockResolvedValueOnce(new Response(null, { status: 403 }));
-    await assert.rejects(loadBasemap(true, signal), /403/);
-    fetch.mockResolvedValueOnce(Response.json({ error: "Service unavailable" }));
-    await assert.rejects(loadBasemap(false, signal), /Invalid basemap style/);
-    fetch.mockRejectedValueOnce(new DOMException("Cancelled", "AbortError"));
-    await assert.rejects(
-      loadBasemap(true, signal),
-      (error) => error instanceof DOMException && error.name === "AbortError",
-    );
-  } finally {
-    fetch.mockRestore();
-  }
+test("Official OSM requests override document referrer policy without bypassing browser cache", () => {
+  const url = "https://tile.openstreetmap.org/13/7276/3226.png";
+  assert.deepEqual(transformMapRequest(url), {
+    url,
+    referrerPolicy: "strict-origin-when-cross-origin",
+  });
+  for (const other of [
+    "/api/v1/toilets",
+    "https://tile.openstreetmap.org.example/13/7276/3226.png",
+    "https://example.com/image.png",
+  ])
+    assert.deepEqual(transformMapRequest(other), { url: other });
 });
 
 test("Sites, Netlify and Vercel permit provider assets with identical CSP and referrer policy", async () => {
@@ -69,39 +67,24 @@ test("Sites, Netlify and Vercel permit provider assets with identical CSP and re
     assert.equal(vercelHeaders[name], headers[name]);
   }
   assert.ok(
-    headers["Content-Security-Policy"].includes("connect-src 'self' https://tiles.openfreemap.org"),
+    headers["Content-Security-Policy"].includes(
+      "connect-src 'self' https://tile.openstreetmap.org",
+    ),
   );
-  assert.ok(!headers["Content-Security-Policy"].includes("tile.openstreetmap.org"));
+  assert.ok(!headers["Content-Security-Policy"].includes("tiles.openfreemap.org"));
 });
 
-test("Dark map labels stay legible while provider geometry and label expressions are preserved", async () => {
-  const style: StyleSpecification = {
-    ...fallbackStyle(true),
-    layers: [
-      { id: "background", type: "background", paint: { "background-color": "#101c18" } },
-      {
-        id: "street",
-        type: "symbol",
-        source: "openmaptiles",
-        layout: { "text-field": ["get", "name"] },
-        paint: { "text-color": "#333", "text-halo-width": 0.5 },
-      },
-    ],
-  };
-  const fetch = spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(style));
-  try {
-    const loaded = await loadBasemap(true, new AbortController().signal);
-    assert.deepEqual(loaded.layers[0], {
-      ...style.layers[0],
-      paint: { "background-color": "#16232d" },
-    });
-    assert.equal(loaded.layers[1].type, "symbol");
-    if (loaded.layers[1].type === "symbol") {
-      assert.deepEqual(loaded.layers[1].layout, style.layers[1].layout);
-      assert.equal(loaded.layers[1].paint?.["text-color"], "#d4dfe7");
-      assert.equal(loaded.layers[1].paint?.["text-halo-width"], 1.4);
-    }
-  } finally {
-    fetch.mockRestore();
+test("Both appearances use the same official colored raster tiles and attribution", () => {
+  const light = basemapStyle(false);
+  const dark = basemapStyle(true);
+  assert.deepEqual(light.sources, dark.sources);
+  const source = light.sources.osm;
+  assert.equal(source.type, "raster");
+  if (source.type === "raster") {
+    assert.deepEqual(source.tiles, [basemapTileUrl]);
+    assert.equal(source.tileSize, 256);
+    assert.match(source.attribution ?? "", /OpenStreetMap contributors/);
   }
+  assert.equal(light.layers[1].type, "raster");
+  assert.equal(dark.layers[1].type, "raster");
 });

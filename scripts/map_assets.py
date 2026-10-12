@@ -1,27 +1,20 @@
-"""Deterministic OpenFreeMap assets for UI and offline browser checks."""
+"""Deterministic OSM assets for UI and offline browser checks."""
 
 import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
-BASEMAP_HOST = "tiles.openfreemap.org"
+BASEMAP_HOST = "tile.openstreetmap.org"
 FIXTURES = Path(__file__).resolve().parent.parent / "tests/fixtures"
 
 
 def basemap_fixture(url):
     path = urlparse(url).path
-    if path in {"/styles/bright", "/styles/dark"}:
-        name = path.rsplit("/", 1)[1]
+    if path.endswith(".png"):
         return {
             "status": 200,
-            "content_type": "application/json",
-            "body": (FIXTURES / f"openfreemap-{name}.json").read_bytes(),
-        }
-    if path.startswith("/fixtures/") and path.endswith(".pbf"):
-        return {
-            "status": 200,
-            "content_type": "application/x-protobuf",
-            "body": (FIXTURES / "basemap.pbf").read_bytes(),
+            "content_type": "image/png",
+            "body": (FIXTURES / "basemap.png").read_bytes(),
         }
     return {"status": 404, "body": "Unexpected basemap fixture request"}
 

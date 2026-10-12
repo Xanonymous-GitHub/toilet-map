@@ -19,8 +19,8 @@ test("Map worker URL versions its response CSP across CDN and PWA caches", async
   const staleRevision = createHash("sha256")
     .update(
       headers["Content-Security-Policy"].replaceAll(
-        "tiles.openfreemap.org",
         "tile.openstreetmap.org",
+        "tiles.openfreemap.org",
       ),
     )
     .digest("hex")

@@ -3,7 +3,13 @@ import * as maplibregl from "maplibre-gl";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fallbackStyle, loadBasemap, preserveOverlays } from "./basemap";
+import {
+  basemapSource,
+  basemapStyle,
+  fallbackStyle,
+  preserveOverlays,
+  transformMapRequest,
+} from "./basemap";
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
 import { scheduleState, type Toilet } from "./core";
@@ -29,8 +35,7 @@ export default function MapView(p: Props) {
   const holder = useRef<HTMLDivElement>(null),
     map = useRef<maplibregl.Map | null>(null),
     latest = useRef(p),
-    clusters = useRef<Map<string, maplibregl.Marker>>(new Map()),
-    pendingBasemapStyle = useRef(true);
+    clusters = useRef<Map<string, maplibregl.Marker>>(new Map());
   latest.current = p;
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
@@ -66,8 +71,11 @@ export default function MapView(p: Props) {
         pitch: latest.current.camera.pitch,
         minZoom: 5,
         maxZoom: 19,
-        // Cap GPU work on high-DPI phones while keeping the vector map and UI sharp.
+        // Cap GPU work on high-DPI phones while keeping the map and UI sharp.
         pixelRatio: Math.min(devicePixelRatio, 2),
+        transformRequest: transformMapRequest,
+        // Use fetch to preserve cache headers and the per-request referrer policy.
+        refreshExpiredTiles: true,
         attributionControl: { compact: false },
         style: fallbackStyle(latest.current.dark),
       });
@@ -195,7 +203,7 @@ export default function MapView(p: Props) {
     });
     m.on("moveend", emitBounds);
     m.on("idle", () => {
-      if (!pendingBasemapStyle.current && m.getSource("openmaptiles")) setBasemapLoading(false);
+      if (m.getSource(basemapSource)) setBasemapLoading(false);
     });
     m.on("error", (e) => {
       if (
@@ -220,28 +228,18 @@ export default function MapView(p: Props) {
   useEffect(() => {
     const m = map.current;
     if (!m) return;
-    const controller = new AbortController();
-    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]);
-    pendingBasemapStyle.current = true;
     setBasemapLoading(true);
     setTileError(false);
-    if (m.isStyleLoaded() && !m.getSource("openmaptiles"))
-      m.setPaintProperty("background", "background-color", p.dark ? "#101c18" : "#f5f4ee");
-    void loadBasemap(p.dark, signal)
-      .then((style) => {
-        if (controller.signal.aborted) return;
-        pendingBasemapStyle.current = false;
-        if (basemapAttempt > 0) setReady(false);
-        m.setStyle(style, { transformStyle: preserveOverlays, diff: basemapAttempt === 0 });
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          pendingBasemapStyle.current = false;
-          setTileError(true);
-          setBasemapLoading(false);
-        }
+    try {
+      if (basemapAttempt > 0) setReady(false);
+      m.setStyle(basemapStyle(p.dark), {
+        transformStyle: preserveOverlays,
+        diff: basemapAttempt === 0,
       });
-    return () => controller.abort();
+    } catch {
+      setTileError(true);
+      setBasemapLoading(false);
+    }
   }, [p.dark, basemapAttempt]);
   useEffect(() => {
     const m = map.current;

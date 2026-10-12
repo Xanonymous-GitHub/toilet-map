@@ -27,7 +27,7 @@ bun run preview
 
 側邊欄可收起並記住偏好；支援淺色、深色與跟隨系統。地圖控制項放在底部，安裝提醒會自動收起，仍可由頁尾加入主畫面。按鈕、篩選、原生選單、說明與詳細資訊使用官方 shadcn UI 元件。
 
-底圖使用 [OpenFreeMap](https://openfreemap.org/) 的 Bright／Dark 向量樣式。底圖與廁所圖層獨立初始化；服務拒絕、斷線或部分圖塊失敗時，仍可查看廁所標記、清單與導航，並手動重試。切換外觀保留廁所、定位與選取圖層；來源署名持續顯示。地圖 Worker 檔名包含內容與 CSP 版本，安全政策更新會自動取得新資產，避免 CDN／PWA 保留舊連線權限。
+底圖使用 OpenStreetMap 官方 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` 彩色圖塊。每筆圖塊請求指定 `referrerPolicy: "strict-origin-when-cross-origin"`，即使部署平台將頁面政策覆寫成 `same-origin`，仍送出必要的網站來源 Referer。保留瀏覽器 HTTP 快取與 OSM 署名；不預抓、代理或離線保存底圖。深色介面僅降低底圖亮度，保留道路、水域與公園的原始色彩。底圖失敗時，廁所標記、清單與導航仍可使用，並可手動重試。地圖 Worker 檔名包含內容與 CSP 版本，避免 CDN／PWA 保留舊連線權限。
 
 Netlify／Vercel 的設定與 API adapter 已加入並通過官方打包及 Node handler 檢查，可匯入 repository 部署；尚未替使用者在這兩個平台正式發布。完整步驟見 [部署說明](docs/DEPLOYMENT.md)。
 
@@ -100,7 +100,7 @@ bun run test
 
 ## 瀏覽器驗證
 
-先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。111 項 CI 檢查的結果與截圖寫入 `test-results/`：69 項地圖回歸、32 項狀態／分享與 10 項底圖失敗／恢復，包含 Worker 舊 CSP 黑屏及新政策恢復。固定底圖使用真實向量圖塊與供應商的非文字樣式圖層；CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser`，避免依賴外部服務。一般地圖回歸在代理環境使用受信任 CA 的來源橋接器，離線階段關閉橋接器。底圖專項的 `RELIEF_QA_REAL_BASEMAP=1 uv run --locked python scripts/basemap-browser-qa.py` 則由 Chromium 原生請求真實樣式、圖塊、glyphs、sprites，驗證東京桌面明暗與釜山手機；保留 TLS 驗證，使用環境代理時瀏覽器需信任環境 CA。設定 `RELIEF_BASE_URL` 可檢查正式部署網域。完整紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。111 項 CI 檢查的結果與截圖寫入 `test-results/`：69 項地圖回歸、32 項狀態／分享與 10 項底圖失敗／恢復，包含頁面 `same-origin` 政策與圖塊 Referer 覆寫。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 和固定 PNG，不依賴外部服務。一般地圖回歸在代理環境使用受信任 CA 的來源橋接器，離線階段關閉橋接器。`RELIEF_QA_REAL_BASEMAP=1 uv run --locked python scripts/basemap-browser-qa.py` 由 Chromium 原生請求實際 OSM 圖塊，驗證東京桌面明暗與釜山手機的 Referer、HTTP 狀態、繪製與署名；保留 TLS 驗證，使用環境代理時瀏覽器需信任環境 CA。設定 `RELIEF_BASE_URL` 可檢查正式部署網域。完整紀錄見 `docs/VALIDATION.md`。
 
 ## 手機操作
 

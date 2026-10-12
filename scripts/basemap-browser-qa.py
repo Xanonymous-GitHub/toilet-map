@@ -1,4 +1,4 @@
-"""Check provider failures, recovery and optional real vector maps."""
+"""Check official OSM requests, referrer policy, failures and live maps."""
 
 import atexit
 import json
@@ -19,6 +19,7 @@ if not CHROMIUM and Path("/usr/bin/chromium").exists():
     CHROMIUM = "/usr/bin/chromium"
 REAL_MAP = os.environ.get("RELIEF_QA_REAL_BASEMAP") == "1"
 PROXY = urlparse(os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY") or "")
+EXPECTED_REFERRER = urlparse(BASE_URL)._replace(path="/", query="", fragment="").geturl()
 REPORT = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
@@ -64,28 +65,18 @@ with sync_playwright() as playwright:
             else None
         ),
     )
-    for failure in ["style", "partial-tiles"]:
-        state = {"blocked": True, "failedTile": False, "tiles": 0, "oldHost": 0}
+    for failure in ["all-tiles", "partial-tiles"]:
+        state = {"blocked": True, "failedTile": False, "tiles": 0}
         context = browser.new_context(viewport={"width": 1440, "height": 1000})
 
         def asset(route, _request, state=state, failure=failure):
-            path = route.request.url
-            if state["blocked"] and (
-                (failure == "style" and "/styles/" in path)
-                or (failure == "partial-tiles" and "/fixtures/" in path and not state["failedTile"])
-            ):
+            if state["blocked"] and (failure == "all-tiles" or not state["failedTile"]):
                 state["failedTile"] = True
                 return route.fulfill(status=403, body="Provider unavailable")
-            if "/fixtures/" in path:
-                state["tiles"] += 1
-            return route.fulfill(**basemap_fixture(path))
-
-        def old_host(route, _request, state=state):
-            state["oldHost"] += 1
-            route.abort()
+            state["tiles"] += 1
+            return route.fulfill(**basemap_fixture(route.request.url))
 
         context.route(f"https://{BASEMAP_HOST}/**", asset)
-        context.route("https://tile.openstreetmap.org/**", old_host)
         page = context.new_page()
         page.on("pageerror", lambda error: REPORT["pageErrors"].append(str(error)))
         page.goto(
@@ -105,27 +96,12 @@ with sync_playwright() as playwright:
         before = page.evaluate("JSON.parse(localStorage.getItem('view-state'))")
         page.get_by_role("button", name="關閉廁所詳細資訊", exact=True).click()
         state["blocked"] = False
-        with page.expect_response(lambda response: "/fixtures/" in response.url and response.ok):
+        with page.expect_response(lambda response: BASEMAP_HOST in response.url and response.ok):
             page.locator(".map-network-note").get_by_role("button", name="重試", exact=True).click()
         expect(page.locator(".map-network-note")).to_have_count(0)
-        expect(page.locator(".maplibregl-ctrl-attrib")).to_contain_text(
-            "OpenMapTiles", timeout=20000
-        )
+        expect(page.locator(".maplibregl-ctrl-attrib")).to_contain_text("OpenStreetMap")
         ready(page)
         after = page.evaluate("JSON.parse(localStorage.getItem('view-state'))")
-        if after["camera"] != before["camera"] or after["lastViewed"] != before["selected"]:
-            print(
-                json.dumps(
-                    {
-                        "before": before["camera"],
-                        "after": after["camera"],
-                        "tiles": state["tiles"],
-                        "lastViewed": after["lastViewed"],
-                        "selected": before["selected"],
-                    }
-                ),
-                flush=True,
-            )
         check(
             f"{failure}: retry restores tiles and preserves the viewed toilet and camera",
             state["tiles"] > 0
@@ -141,32 +117,25 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="縮小地圖", exact=True).click()
         page.get_by_role("button", name="縮小地圖", exact=True).click()
         ready(page)
-        check(
-            f"{failure}: fast appearance switches leave map data responsive", not state["oldHost"]
-        )
+        check(f"{failure}: fast appearance switches leave map data responsive")
         context.close()
 
-    # A worker response enforces its own policy even when the page allows OFM.
-    # Reproduce the actual stale CDN header, then verify a fresh response recovers.
-    state = {"stale": True, "tiles": 0}
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
+    referrers = []
+    baseline = []
 
-    def worker_policy(route):
+    def same_origin_policy(route):
         response = route.fetch()
-        response_headers = response.headers
-        if state["stale"]:
-            response_headers["content-security-policy"] = response_headers[
-                "content-security-policy"
-            ].replace("tiles.openfreemap.org", "tile.openstreetmap.org")
+        response_headers = response.headers | {"referrer-policy": "same-origin"}
         route.fulfill(response=response, headers=response_headers)
 
-    def worker_asset(route):
-        if "/fixtures/" in route.request.url:
-            state["tiles"] += 1
+    def check_referrer(route):
+        values = baseline if "/0/0/0.png" in route.request.url else referrers
+        values.append(route.request.headers.get("referer"))
         route.fulfill(**basemap_fixture(route.request.url))
 
-    context.route(BASE_URL + "/assets/maplibre-gl-worker-*.js", worker_policy)
-    context.route(f"https://{BASEMAP_HOST}/**", worker_asset)
+    context.route(BASE_URL + "/", same_origin_policy)
+    context.route(f"https://{BASEMAP_HOST}/**", check_referrer)
     page = context.new_page()
     page.on("pageerror", lambda error: REPORT["pageErrors"].append(str(error)))
     page.goto(
@@ -174,20 +143,18 @@ with sync_playwright() as playwright:
         wait_until="domcontentloaded",
     )
     ready(page)
-    expect(page.locator(".map-network-note")).to_be_visible(timeout=20000)
-    expect(page.locator(".cluster-label").first).to_be_visible(timeout=20000)
-    check(
-        "Stale worker CSP blocks tiles while page style and toilet markers load", not state["tiles"]
+    page.evaluate(
+        f"fetch('https://{BASEMAP_HOST}/0/0/0.png').then(response => response.arrayBuffer())"
     )
-    camera = page.url
-    state["stale"] = False
-    page.reload(wait_until="domcontentloaded")
-    ready(page)
+    check(
+        "Document same-origin policy suppresses Referer on an ordinary cross-origin fetch",
+        baseline == [None],
+    )
     expect(page.locator(".map-canvas")).to_have_attribute("aria-busy", "false", timeout=20000)
     expect(page.locator(".map-network-note")).to_have_count(0)
     check(
-        "Fresh worker CSP restores vector tiles without clearing saved settings",
-        state["tiles"] > 0 and page.url == camera,
+        "OSM tile requests override document policy and send only the website origin",
+        bool(referrers) and all(value == EXPECTED_REFERRER for value in referrers),
     )
     context.close()
 
@@ -209,7 +176,13 @@ with sync_playwright() as playwright:
             page.on(
                 "response",
                 lambda response, responses=responses: (
-                    responses.append({"url": response.url, "status": response.status})
+                    responses.append(
+                        {
+                            "url": response.url,
+                            "status": response.status,
+                            "referer": response.request.headers.get("referer"),
+                        }
+                    )
                     if BASEMAP_HOST in response.url
                     else None
                 ),
@@ -223,14 +196,15 @@ with sync_playwright() as playwright:
             expect(page.locator(".map-canvas")).to_have_attribute(
                 "aria-busy", "false", timeout=60000
             )
-            expect(page.locator(".maplibregl-ctrl-attrib")).to_contain_text("OpenMapTiles")
+            expect(page.locator(".maplibregl-ctrl-attrib")).to_contain_text("OpenStreetMap")
             page.screenshot(path=str(OUT / f"basemap-{name}.png"))
             check(
-                f"{name}: real style, vector tiles, glyphs and sprites load with attribution",
-                any("/planet/" in row["url"] for row in responses)
-                and any("/fonts/" in row["url"] for row in responses)
-                and any("/sprites/" in row["url"] for row in responses)
-                and all(row["status"] == 200 for row in responses),
+                f"{name}: official OSM tiles load with valid Referer and attribution",
+                bool(responses)
+                and all(
+                    row["status"] == 200 and row["referer"] == EXPECTED_REFERRER
+                    for row in responses
+                ),
             )
             REPORT["externalResponses"].append({"viewport": name, "responses": responses})
             context.close()

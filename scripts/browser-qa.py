@@ -40,7 +40,7 @@ report = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
     "transport": (
-        "CI uses committed vector tiles and non-symbol provider style layers. Toilet data, API, "
+        "CI uses a committed raster tile. Toilet data, API, "
         "map worker and PWA assets come from the actual local production build."
         if FIXTURE_ASSETS
         else (
@@ -159,7 +159,7 @@ with sync_playwright() as pw:
         "response",
         lambda r: (
             report.update(tileResponses=report["tileResponses"] + 1)
-            if BASEMAP_HOST in r.url and ("/planet/" in r.url or "/fixtures/" in r.url) and r.ok
+            if BASEMAP_HOST in r.url and r.url.endswith(".png") and r.ok
             else None
         ),
     )
