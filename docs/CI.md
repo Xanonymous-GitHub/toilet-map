@@ -9,7 +9,7 @@
 | Job | 檢查 |
 | --- | --- |
 | Build, lint, types, tests and data integrity | frozen／locked 安裝、正式建置、大小與壓縮／註解檢查、Netlify 實際打包、Vercel handler、Biome、Ruff lint／format、TypeScript strict、27 項 Bun 與 4 項 Python 測試，以及從提交快照重現相同 dataset |
-| Desktop, mobile and offline browser checks | Playwright Chromium 的 45 項檢查，含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、手機排版、深淺色／系統切換、側邊欄收合、安裝提醒、離線重開與地圖模組下載失敗 |
+| Desktop, mobile and offline browser checks | Playwright Chromium 的 69 項檢查，含非首都城市切換、定位、導航 URL、收藏、篩選、地圖聚合、320／375／390／430px、短視窗與觸控橫向排版、清單遮擋與觸控範圍、深淺色／系統切換、側邊欄收合、安裝提醒、離線重開與地圖模組下載失敗 |
 
 Bun 版本取自 `.bun-version`（1.4.3）；Python 使用 3.15 系列，uv 為 0.13.0。Actions 固定完整 commit SHA，註解保留已查證的 release 版本標籤。Workflow 僅需要 `contents: read`；新提交會取消同一 ref 的舊執行。
 

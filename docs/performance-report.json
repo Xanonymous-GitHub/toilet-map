@@ -1,39 +1,40 @@
 {
-  "checkedAt": "2026-10-11T17:28:26.117525+00:00",
+  "checkedAt": "2026-10-12T02:35:53.357076+00:00",
   "lighthouse": "13.5.0",
   "environment": "Cold local production loads, gzip, deterministic tiles, software WebGL, simulated Lighthouse throttling",
   "results": [
     {
       "device": "mobile",
       "fixtureTiles": true,
-      "url": "http://127.0.0.1:8803/",
+      "url": "http://127.0.0.1:8794/",
       "scores": {
-        "performance": 66,
+        "performance": 47,
         "accessibility": 100,
         "best-practices": 100
       },
       "metrics": {
-        "largest-contentful-paint": 2639.2332499999998,
-        "total-blocking-time": 2766.0402322845457,
+        "largest-contentful-paint": 4588.7922,
+        "total-blocking-time": 3619.5,
         "cumulative-layout-shift": 0
       },
-      "transferBytes": 282875
+      "transferBytes": 608156
     },
     {
       "device": "desktop",
       "fixtureTiles": true,
-      "url": "http://127.0.0.1:8803/",
+      "url": "http://127.0.0.1:8794/",
       "scores": {
-        "performance": 66,
+        "performance": 65,
         "accessibility": 100,
         "best-practices": 100
       },
       "metrics": {
-        "largest-contentful-paint": 559.97245,
-        "total-blocking-time": 1160.5000000000002,
+        "largest-contentful-paint": 608.3651,
+        "total-blocking-time": 1345.457407284546,
         "cumulative-layout-shift": 0
       },
-      "transferBytes": 302675
+      "transferBytes": 304050
     }
-  ]
+  ],
+  "measuredSourceCommit": "f19f899"
 }

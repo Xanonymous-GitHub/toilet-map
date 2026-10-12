@@ -1,14 +1,1 @@
-{
-  "node": "24.19.0",
-  "netlify": {
-    "name": "api",
-    "runtimeAPIVersion": 2,
-    "route": "/api/*",
-    "zipBytes": 2385483
-  },
-  "vercel": {
-    "handler": "api/handler.mjs",
-    "rewrittenRequests": true
-  },
-  "liveProviderDeployment": false
-}
+{"node":"24.19.0","netlify":{"name":"api","runtimeAPIVersion":2,"route":"/api/*","zipBytes":2385483},"vercel":{"handler":"api/handler.mjs","rewrittenRequests":true},"liveProviderDeployment":false}

@@ -98,4 +98,8 @@ bun run test
 
 ## 瀏覽器驗證
 
-先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。45 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。69 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
+
+## 手機操作
+
+手機預設為完整地圖：上方搜尋、右上角「地點與篩選」、底部附近清單與定位。國家／城市、條件、深淺色、資料來源、安裝指引、全國統計和圖例都在需要時展開；附近清單可獨立捲動並返回地圖。支援觸控橫向模式、安全區與較短視窗，桌面維持可收起的側欄。
