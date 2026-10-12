@@ -1,7 +1,59 @@
-import type { Bbox, Envelope, Region } from "./core";
+import type { Bbox, Envelope, Region, Toilet } from "./core";
 import { validBbox } from "./core";
+import { isRegion, REGIONS } from "./regions";
+import { isToiletId } from "./view-state";
 
 type FetchPage = (url: string, options: RequestInit) => Promise<Response>;
+
+export function isToilet(value: unknown): value is Toilet {
+  if (!value || typeof value !== "object") return false;
+  const t = value as Record<string, unknown>;
+  return (
+    isToiletId(t.id) &&
+    isRegion(t.region) &&
+    REGIONS[t.region].country === t.country &&
+    ["name", "sourceId", "address", "entranceNote", "hoursRaw", "fetchedAt"].every(
+      (key) => typeof t[key] === "string",
+    ) &&
+    (t.nameEn === undefined || typeof t.nameEn === "string") &&
+    typeof t.lat === "number" &&
+    Number.isFinite(t.lat) &&
+    Math.abs(t.lat) <= 85 &&
+    typeof t.lon === "number" &&
+    Number.isFinite(t.lon) &&
+    Math.abs(t.lon) <= 180 &&
+    typeof t.access === "string" &&
+    ["public", "public_by_agreement", "customers", "permit", "private", "unknown"].includes(
+      t.access,
+    ) &&
+    ["fee", "wheelchair", "changingTable", "infantEquipment"].every(
+      (key) => typeof t[key] === "string" && ["yes", "no", "limited", "unknown"].includes(t[key]),
+    ) &&
+    ["male", "female", "unisex"].every((key) => t[key] === null || typeof t[key] === "boolean") &&
+    t.timezone === (t.country === "JP" ? "Asia/Tokyo" : "Asia/Seoul") &&
+    (t.sourceUpdatedAt === null || typeof t.sourceUpdatedAt === "string") &&
+    (t.coordinateQuality === "source_position" || t.coordinateQuality === "osm_center")
+  );
+}
+
+export class ToiletLookupError extends Error {
+  constructor(public readonly status: number) {
+    super(`Toilet lookup returned ${status}`);
+  }
+}
+
+export async function fetchToilet(
+  id: string,
+  signal: AbortSignal,
+  fetchPage: FetchPage = fetch,
+): Promise<Toilet> {
+  if (!isToiletId(id)) throw new Error("Invalid toilet ID");
+  const response = await fetchPage(`/api/v1/toilets/${encodeURIComponent(id)}`, { signal });
+  if (!response.ok) throw new ToiletLookupError(response.status);
+  const body: unknown = await response.json();
+  if (!isToilet(body) || body.id !== id) throw new Error("Invalid toilet lookup response");
+  return body;
+}
 
 export async function fetchRegion(
   region: Region,

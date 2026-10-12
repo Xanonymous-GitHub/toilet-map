@@ -1,13 +1,47 @@
-import type { Envelope, Region } from "./core";
+import { isToilet } from "./api";
+import type { Envelope, Region, Toilet } from "./core";
 
 const NAME = "relief-pwa";
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const r = indexedDB.open(NAME, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore("regions");
-    r.onsuccess = () => resolve(r.result);
+    const r = indexedDB.open(NAME, 2);
+    r.onupgradeneeded = () => {
+      for (const store of ["regions", "toilets"])
+        if (!r.result.objectStoreNames.contains(store)) r.result.createObjectStore(store);
+    };
+    r.onsuccess = () => {
+      r.result.onversionchange = () => r.result.close();
+      resolve(r.result);
+    };
     r.onerror = () => reject(r.error);
   });
+}
+export async function saveToilet(toilet: Toilet) {
+  const db = await openDB();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction("toilets", "readwrite");
+      transaction.objectStore("toilets").put(toilet, toilet.id);
+      transaction.oncomplete = () => resolve();
+      transaction.onabort = () => reject(transaction.error);
+      transaction.onerror = () => reject(transaction.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+export async function readToilet(id: string): Promise<Toilet | null> {
+  const db = await openDB();
+  try {
+    return await new Promise((resolve, reject) => {
+      const request = db.transaction("toilets").objectStore("toilets").get(id);
+      request.onsuccess = () =>
+        resolve(isToilet(request.result) && request.result.id === id ? request.result : null);
+      request.onerror = () => reject(request.error);
+    });
+  } finally {
+    db.close();
+  }
 }
 export async function saveRegion(region: Region, data: Envelope) {
   const db = await openDB();
@@ -48,7 +82,8 @@ export function readPreference<T>(
 }
 export function savePreference(key: string, value: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    const serialized = JSON.stringify(value);
+    if (localStorage.getItem(key) !== serialized) localStorage.setItem(key, serialized);
   } catch {
     /* Private browsing may disable local storage. */
   }

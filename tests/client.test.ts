@@ -1,11 +1,65 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
 import worker from "../server/worker";
-import { fetchRegion } from "../src/api";
-import type { Envelope } from "../src/core";
+import { fetchRegion, fetchToilet, isToilet, ToiletLookupError } from "../src/api";
+import type { Envelope, Toilet } from "../src/core";
 
 const signal = new AbortController().signal;
 const serverFetch = (path: string) => worker.fetch(new Request(`https://relief.example${path}`));
+
+test("Direct toilet links load a complete validated record and forward cancellation", async () => {
+  const envelope = (await (
+    await serverFetch("/api/v1/toilets?region=busan&limit=1")
+  ).json()) as Envelope;
+  const expected = envelope.items[0];
+  const toilet = await fetchToilet(expected.id, signal, (path, options) => {
+    assert.equal(options.signal, signal);
+    assert.equal(path, `/api/v1/toilets/${encodeURIComponent(expected.id)}`);
+    return serverFetch(path);
+  });
+  assert.deepEqual(toilet, expected);
+  assert.equal(isToilet(toilet), true);
+});
+
+test("Direct links reject invalid IDs, mismatched records and malformed cached data", async () => {
+  const data = (await (
+    await serverFetch("/api/v1/toilets?region=seoul&limit=1")
+  ).json()) as Envelope;
+  const toilet: Toilet = data.items[0];
+  await assert.rejects(
+    fetchToilet("<script>", signal, () => {
+      throw new Error("Should not fetch");
+    }),
+    /Invalid toilet ID/,
+  );
+  for (const invalid of [
+    null,
+    {},
+    { ...toilet, id: "other-id" },
+    { ...toilet, hoursRaw: null },
+    { ...toilet, male: 1 },
+    { ...toilet, lat: 91 },
+    { ...toilet, fee: { toString: null } },
+    { ...toilet, country: "JP" },
+  ])
+    await assert.rejects(
+      fetchToilet(toilet.id, signal, async () => Response.json(invalid)),
+      /Invalid toilet lookup response/,
+    );
+});
+
+test("Missing toilets remain distinguishable from network failures for offline restore", async () => {
+  await assert.rejects(
+    fetchToilet("osm-node-missing", signal, async () => new Response(null, { status: 404 })),
+    (failure) => failure instanceof ToiletLookupError && failure.status === 404,
+  );
+  await assert.rejects(
+    fetchToilet("osm-node-missing", signal, async () => {
+      throw new TypeError("offline");
+    }),
+    TypeError,
+  );
+});
 
 test("Client loads the complete Seoul dataset across every page", async () => {
   const data = await fetchRegion("seoul", signal, serverFetch);
