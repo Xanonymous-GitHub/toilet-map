@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parent.parent
 BASE_URL = os.environ.get("RELIEF_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
 OUT = ROOT / "test-results"
 OUT.mkdir(exist_ok=True)
+CHROMIUM_PATH = os.environ.get("RELIEF_CHROMIUM_PATH")
+if not CHROMIUM_PATH and Path("/usr/bin/chromium").exists():
+    CHROMIUM_PATH = "/usr/bin/chromium"
 REPORT = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
@@ -81,7 +84,7 @@ def ready(page):
 
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(
-        executable_path=os.environ.get("RELIEF_CHROMIUM_PATH") or "/usr/bin/chromium",
+        executable_path=CHROMIUM_PATH,
         headless=True,
         args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
     )
