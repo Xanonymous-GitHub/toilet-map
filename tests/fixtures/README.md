@@ -1,15 +1,13 @@
 # Browser basemap fixtures
 
-UI checks use the non-symbol layers from OpenFreeMap's Bright and Dark styles,
-with the unmodified water layer from a single fixed vector tile. Text, sprite patterns and remote URLs are omitted
-from these fixtures to keep CI deterministic. Real-provider checks separately load
-the actual styles, glyphs, sprites and currently viewed tiles with verified TLS.
+UI and offline checks use the retained 256 × 256 `basemap.png` raster fixture.
+OSM requests are intercepted only in fixture tests; toilet data, API, MapLibre,
+Worker and PWA assets come from the production build. Live-provider checks use
+native Chromium requests to the official tile URL with verified TLS and inspect
+its Referer and HTTP status.
 
-Retrieved on 2026-10-12:
+Map data: © OpenStreetMap contributors, ODbL 1.0.
 
-- Styles: https://tiles.openfreemap.org/styles/bright and https://tiles.openfreemap.org/styles/dark
-- Vector tile: https://tiles.openfreemap.org/planet/20261004_113936_pt/7/113/50.pbf
-- Style project and licenses: https://github.com/hyperknot/openfreemap-styles/blob/main/LICENSE.md
-- Map data: © OpenStreetMap contributors, ODbL 1.0; schema © OpenMapTiles.
-
-The historical PNG and Positron fixtures remain for previously recorded comparisons.
+The historical OpenFreeMap JSON and PBF fixtures remain for comparisons with
+previous vector-map reports. Their style licenses are documented at
+https://github.com/hyperknot/openfreemap-styles/blob/main/LICENSE.md.

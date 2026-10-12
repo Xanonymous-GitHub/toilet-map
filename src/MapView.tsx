@@ -234,7 +234,7 @@ export default function MapView(p: Props) {
       if (basemapAttempt > 0) setReady(false);
       m.setStyle(basemapStyle(p.dark), {
         transformStyle: preserveOverlays,
-        diff: basemapAttempt === 0,
+        diff: basemapAttempt === 0 && m.isStyleLoaded() === true,
       });
     } catch {
       setTileError(true);
