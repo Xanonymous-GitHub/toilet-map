@@ -44,6 +44,8 @@ export function basemapStyle(dark: boolean): StyleSpecification {
         type: "raster",
         source: basemapSource,
         paint: {
+          // Avoid continuous redraws while tiles fade on slower mobile GPUs.
+          "raster-fade-duration": 0,
           // Retain OSM's colors and baked labels, with reduced glare in dark UI.
           "raster-brightness-max": dark ? 0.82 : 1,
           "raster-saturation": dark ? 0.12 : 0,
