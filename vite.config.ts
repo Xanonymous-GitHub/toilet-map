@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { glob, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,10 +9,27 @@ import { minify } from "html-minifier-terser";
 import license from "rollup-plugin-license";
 import { optimize } from "svgo";
 import { defineConfig } from "vite";
+import { headers } from "./server/headers.ts";
+
+// Worker responses enforce their own CSP. Version the URL when that policy
+// changes so immutable browser, PWA and CDN caches cannot retain old permissions.
+const workerPolicyRevision = createHash("sha256")
+  .update(headers["Content-Security-Policy"])
+  .digest("hex")
+  .slice(0, 16);
+
 export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   publicDir: false,
-  worker: { format: "es", rolldownOptions: { output: { comments: false } } },
+  worker: {
+    format: "es",
+    rolldownOptions: {
+      output: {
+        comments: false,
+        entryFileNames: `assets/[name]-[hash]-${workerPolicyRevision}.js`,
+      },
+    },
+  },
   css: {
     postcss: {
       plugins: [cssnano({ preset: ["default", { discardComments: { removeAll: true } }] })],

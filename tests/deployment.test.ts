@@ -1,8 +1,44 @@
 import { test } from "bun:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 
 import { glob, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { parseSync } from "rolldown/utils";
+import { headers } from "../server/headers";
+import worker from "../server/worker";
+
+test("Map worker URL versions its response CSP across CDN and PWA caches", async () => {
+  const revision = createHash("sha256")
+    .update(headers["Content-Security-Policy"])
+    .digest("hex")
+    .slice(0, 16);
+  const workers = await Array.fromAsync(glob("dist/client/assets/maplibre-gl-worker-*.js"));
+  assert.equal(workers.length, 1);
+  const path = workers[0].replace("dist/client", "");
+  assert.ok(path.endsWith(`-${revision}.js`), path);
+  const staleRevision = createHash("sha256")
+    .update(
+      headers["Content-Security-Policy"].replaceAll(
+        "tiles.openfreemap.org",
+        "tile.openstreetmap.org",
+      ),
+    )
+    .digest("hex")
+    .slice(0, 16);
+  assert.notEqual(revision, staleRevision);
+  const response = await worker.fetch(new Request(`https://relief.example${path}`));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-security-policy"), headers["Content-Security-Policy"]);
+  assert.match(response.headers.get("cache-control") ?? "", /immutable/);
+  assert.match(response.headers.get("content-type") ?? "", /javascript/);
+  assert.equal(await response.text(), await readFile(workers[0], "utf8"));
+  assert.ok((await readFile("dist/client/sw.js", "utf8")).includes(path));
+  let referenced = false;
+  for await (const chunk of glob("dist/client/assets/MapView-*.js")) {
+    referenced ||= (await readFile(chunk, "utf8")).includes(path);
+  }
+  assert.ok(referenced, "MapView must load the new worker URL");
+});
 
 test("Every production text asset is minified and JavaScript contains no comments", async () => {
   for await (const path of glob("dist/**/*.{js,mjs,css,json,webmanifest,html,svg}")) {
