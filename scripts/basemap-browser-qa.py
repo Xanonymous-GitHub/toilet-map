@@ -5,8 +5,9 @@ import json
 import os
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
-from map_assets import BASEMAP_HOST, basemap_fixture, verified_basemap
+from map_assets import BASEMAP_HOST, basemap_fixture
 from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,10 +18,13 @@ CHROMIUM = os.environ.get("RELIEF_CHROMIUM_PATH")
 if not CHROMIUM and Path("/usr/bin/chromium").exists():
     CHROMIUM = "/usr/bin/chromium"
 REAL_MAP = os.environ.get("RELIEF_QA_REAL_BASEMAP") == "1"
+PROXY = urlparse(os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY") or "")
 REPORT = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
+    "baseUrl": BASE_URL,
     "realMap": REAL_MAP,
+    "realMapTransport": "Native Chromium requests with TLS verification",
     "checks": [],
     "pageErrors": [],
     "externalResponses": [],
@@ -51,6 +55,14 @@ with sync_playwright() as playwright:
     browser = playwright.chromium.launch(
         executable_path=CHROMIUM,
         args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+        proxy=(
+            {
+                "server": f"{PROXY.scheme}://{PROXY.hostname}:{PROXY.port}",
+                "bypass": "127.0.0.1,localhost",
+            }
+            if REAL_MAP and PROXY.hostname
+            else None
+        ),
     )
     for failure in ["style", "partial-tiles"]:
         state = {"blocked": True, "failedTile": False, "tiles": 0, "oldHost": 0}
@@ -134,6 +146,51 @@ with sync_playwright() as playwright:
         )
         context.close()
 
+    # A worker response enforces its own policy even when the page allows OFM.
+    # Reproduce the actual stale CDN header, then verify a fresh response recovers.
+    state = {"stale": True, "tiles": 0}
+    context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
+
+    def worker_policy(route):
+        response = route.fetch()
+        response_headers = response.headers
+        if state["stale"]:
+            response_headers["content-security-policy"] = response_headers[
+                "content-security-policy"
+            ].replace("tiles.openfreemap.org", "tile.openstreetmap.org")
+        route.fulfill(response=response, headers=response_headers)
+
+    def worker_asset(route):
+        if "/fixtures/" in route.request.url:
+            state["tiles"] += 1
+        route.fulfill(**basemap_fixture(route.request.url))
+
+    context.route(BASE_URL + "/assets/maplibre-gl-worker-*.js", worker_policy)
+    context.route(f"https://{BASEMAP_HOST}/**", worker_asset)
+    page = context.new_page()
+    page.on("pageerror", lambda error: REPORT["pageErrors"].append(str(error)))
+    page.goto(
+        BASE_URL + "/#v=1&region=tokyo&c=139.7671,35.6812,12,0,0&theme=dark",
+        wait_until="domcontentloaded",
+    )
+    ready(page)
+    expect(page.locator(".map-network-note")).to_be_visible(timeout=20000)
+    expect(page.locator(".cluster-label").first).to_be_visible(timeout=20000)
+    check(
+        "Stale worker CSP blocks tiles while page style and toilet markers load", not state["tiles"]
+    )
+    camera = page.url
+    state["stale"] = False
+    page.reload(wait_until="domcontentloaded")
+    ready(page)
+    expect(page.locator(".map-canvas")).to_have_attribute("aria-busy", "false", timeout=20000)
+    expect(page.locator(".map-network-note")).to_have_count(0)
+    check(
+        "Fresh worker CSP restores vector tiles without clearing saved settings",
+        state["tiles"] > 0 and page.url == camera,
+    )
+    context.close()
+
     if REAL_MAP:
         for name, region, coordinates, mobile, theme in [
             ("desktop-tokyo-light", "tokyo", "139.7671,35.6812,13,0,0", False, "light"),
@@ -146,7 +203,6 @@ with sync_playwright() as playwright:
                 has_touch=mobile,
                 service_workers="block",
             )
-            context.route(f"https://{BASEMAP_HOST}/**", verified_basemap)
             page = context.new_page()
             page.on("pageerror", lambda error: REPORT["pageErrors"].append(str(error)))
             responses = []

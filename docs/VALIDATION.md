@@ -1,6 +1,6 @@
 # UI、部署與全國覆蓋驗證紀錄
 
-本輪驗證日期：2026-10-12（Asia/Taipei）。從 GitHub 最新 main `59aa676` 修正底圖存取封鎖，保留既有畫面保存與分享功能；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
+本輪驗證日期：2026-10-12。從 GitHub main `033fe3c` 追查正式網域 `toilet-map.xcc.tw` 的黑屏，修正 Worker 的 CDN 安全標頭快取；保留既有畫面保存與分享，資料仍使用 2026-10-11 已查證快照，未改變 181 城市的覆蓋。
 
 ## 工具鏈與建置
 
@@ -15,7 +15,9 @@
 
 不再請求 `tile.openstreetmap.org`。底圖使用 OpenFreeMap 的 Positron／Dark 向量樣式，深色地名提高對比；保留 OSM／OpenMapTiles 署名。廁所與定位圖層先在本機空白樣式初始化，底圖請求有 15 秒 timeout 和切換時取消舊請求；樣式切換保留資料與選取，不額外發出範圍查詢。HTTP 快取由瀏覽器管理，PWA 不快取、預抓或代理底圖，正式網站直接向供應商請求。
 
-底圖專項本機 11 項檢查通過：8 項涵蓋樣式 403、部分圖塊失敗、不被其他成功圖塊誤清除的錯誤提示、手動重試、鏡頭／查看紀錄保存、快速外觀切換與後續城市載入；另 3 項以真實服務驗證東京桌面明暗和釜山手機的樣式、向量圖塊、glyphs、sprites 與署名；以 MapLibre idle 確认完成繪製才擷取截圖。測試經 session proxy 以 CA 驗證取得真實 bytes，沒有停用 TLS，沒有使用替代圖片。報告為 `basemap-live-report.json`，截圖在 CI／本機 `test-results/basemap-*.png`。本輪本機合計 112 項瀏覽器檢查，CI 執行 109 項固定底圖檢查。
+正式網域的 HTML 已允許 OpenFreeMap，但 `/assets/maplibre-gl-worker-CekbQLRq.js` 的 Cloudflare HIT 回應仍帶著只允許 `tile.openstreetmap.org` 的舊 CSP；實測當時 `Age: 59045`。原生 Chromium 可下載樣式／TileJSON／sprites，Worker 的向量圖塊則全數被安全政策阻擋。對照實驗僅替換 Worker 回應的 CSP，所有圖塊即成功載入，確認根因。修正 `a51cc46` 將 CSP 的 SHA-256 版本加入 Worker 檔名；新路徑的 Cloudflare HIT 回應也保有正確權限，PWA precache 與引用 chunk 同步更新。
+
+底圖專項本機與正式網域各 13 項檢查通過：10 項涵蓋樣式 403、部分圖塊失敗、手動重試、鏡頭／查看紀錄保存、快速外觀切換，以及舊 Worker CSP 黑屏與新政策恢復；另 3 項驗證東京桌面明暗和釜山手機的真實樣式、向量圖塊、glyphs、sprites 與署名。真實服務階段由 Chromium 原生網路請求，經環境代理並信任提供的 CA，保留 TLS 驗證，不攔截或替換底圖 bytes；等待 MapLibre idle 後擷取截圖。本輪本機合計 114 項瀏覽器檢查，CI 執行 111 項固定底圖檢查。
 
 服務規範與整合來源：[OSMF 圖塊政策](https://operations.osmfoundation.org/policies/tiles/)、[OpenFreeMap 官方說明](https://openfreemap.org/)、[MapLibre 整合指南](https://openfreemap.org/quick_start/)。
 
