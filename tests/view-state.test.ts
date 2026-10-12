@@ -14,6 +14,9 @@ test("Shared views round-trip every filter, camera orientation and responsive pa
         moreFilters: true,
         limit: 84,
         listScroll: 678,
+        settingsScroll: 71,
+        detailScroll: 250,
+        modalScroll: 300,
         filters: Object.fromEntries(
           ["open", "wheelchair", "free", "includeUnknown", "saved"].map((key, index) => [
             key,

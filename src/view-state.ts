@@ -24,6 +24,9 @@ export type ViewState = {
   modal: "sources" | "install" | null;
   limit: number;
   listScroll: number;
+  settingsScroll: number;
+  detailScroll: number;
+  modalScroll: number;
 };
 
 const KEYS = [
@@ -40,6 +43,9 @@ const KEYS = [
   "limit",
   "scroll",
   "saved",
+  "ss",
+  "ds",
+  "ms",
 ];
 const FILTER_KEYS = ["open", "wheelchair", "free", "includeUnknown", "saved"] as const;
 export const isToiletId = (value: unknown): value is string =>
@@ -69,6 +75,9 @@ export function defaultView(region: Region = "tokyo"): ViewState {
     modal: null,
     limit: 12,
     listScroll: 0,
+    settingsScroll: 0,
+    detailScroll: 0,
+    modalScroll: 0,
   };
 }
 
@@ -122,6 +131,9 @@ export function normalizeView(value: unknown, fallback = defaultView()): ViewSta
     modal,
     limit: number(raw.limit, 12, 50_000, fallback.limit, 0),
     listScroll: number(raw.listScroll, 0, 10_000_000, fallback.listScroll, 0),
+    settingsScroll: number(raw.settingsScroll, 0, 10_000_000, fallback.settingsScroll, 0),
+    detailScroll: number(raw.detailScroll, 0, 10_000_000, fallback.detailScroll, 0),
+    modalScroll: number(raw.modalScroll, 0, 10_000_000, fallback.modalScroll, 0),
   };
 }
 
@@ -167,6 +179,9 @@ export function parseViewUrl(url: URL): { state: ViewState; cameraExplicit: bool
       modal: panel === "sources" || panel === "install" ? panel : null,
       limit: params.has("limit") ? Number(params.get("limit")) : 12,
       listScroll: params.has("scroll") ? Number(params.get("scroll")) : 0,
+      settingsScroll: Number(params.get("ss") ?? 0),
+      detailScroll: Number(params.get("ds") ?? 0),
+      modalScroll: Number(params.get("ms") ?? 0),
     },
     defaults,
   );
@@ -196,6 +211,9 @@ export function viewUrl(base: URL, view: ViewState, ownSaved: Iterable<string> =
   if (state.moreFilters) params.set("more", "1");
   if (state.limit > 12) params.set("limit", String(state.limit));
   if (state.listScroll) params.set("scroll", String(state.listScroll));
+  if (state.settingsScroll) params.set("ss", String(state.settingsScroll));
+  if (state.detailScroll) params.set("ds", String(state.detailScroll));
+  if (state.modalScroll) params.set("ms", String(state.modalScroll));
   url.hash = params.toString();
   return url;
 }

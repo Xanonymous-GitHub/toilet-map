@@ -1,5 +1,6 @@
-import { ArrowUpRight, MapPin, X } from "lucide-react";
+import { ArrowUpRight, MapPin, Share2, X } from "lucide-react";
 import type { Source } from "../core";
+import { useScrollRestoration } from "../hooks/useScrollRestoration";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog";
 
@@ -8,8 +9,27 @@ type Props = {
   sources: Source[];
   onClose: () => void;
   restoreFocus?: () => void;
+  onShare: () => void;
+  scrollOffset: number;
+  scrollKey: string;
+  onScrollOffset: (offset: number) => void;
 };
-export function InformationModal({ mode, sources, onClose, restoreFocus }: Props) {
+export function InformationModal({
+  mode,
+  sources,
+  onClose,
+  restoreFocus,
+  onShare,
+  scrollOffset,
+  scrollKey,
+  onScrollOffset,
+}: Props) {
+  const { restore, ...scroll } = useScrollRestoration(
+    scrollOffset,
+    scrollKey,
+    onScrollOffset,
+    mode === "install" || sources.length > 0,
+  );
   return (
     <Dialog
       open
@@ -18,9 +38,15 @@ export function InformationModal({ mode, sources, onClose, restoreFocus }: Props
       }}
     >
       <DialogContent
+        {...scroll}
         className="modal"
         aria-modal="true"
         showCloseButton={false}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          scroll.ref.current?.focus({ preventScroll: true });
+          restore();
+        }}
         onCloseAutoFocus={(event) => {
           if (restoreFocus) {
             event.preventDefault();
@@ -31,6 +57,14 @@ export function InformationModal({ mode, sources, onClose, restoreFocus }: Props
         <DialogDescription className="sr-only">
           {mode === "sources" ? "資料來源、授權與使用限制" : "依照裝置加入主畫面的方式"}
         </DialogDescription>
+        <Button
+          variant="ghost"
+          className="modal-share icon-button"
+          aria-label="分享目前畫面"
+          onClick={onShare}
+        >
+          <Share2 />
+        </Button>
         <Button
           variant="ghost"
           type="button"

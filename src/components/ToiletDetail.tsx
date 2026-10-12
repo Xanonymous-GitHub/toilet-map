@@ -7,6 +7,7 @@ import {
   Heart,
   MapPin,
   Navigation,
+  Share2,
   X,
 } from "lucide-react";
 import {
@@ -16,6 +17,7 @@ import {
   type Source,
   type Toilet,
 } from "../core";
+import { useScrollRestoration } from "../hooks/useScrollRestoration";
 import { ToiletStatus } from "./ToiletStatus";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
@@ -30,6 +32,10 @@ type Props = {
   openNav: (provider: NavigationProvider, toilet: Toilet) => void;
   copyAddress: (toilet: Toilet) => Promise<void>;
   restoreFocus?: () => void;
+  onShare: () => void;
+  scrollOffset: number;
+  scrollKey: string;
+  onScrollOffset: (offset: number) => void;
 };
 export function ToiletDetail({
   detail,
@@ -41,7 +47,12 @@ export function ToiletDetail({
   openNav,
   copyAddress,
   restoreFocus,
+  onShare,
+  scrollOffset,
+  scrollKey,
+  onScrollOffset,
 }: Props) {
+  const { restore, ...scroll } = useScrollRestoration(scrollOffset, scrollKey, onScrollOffset);
   return (
     <Sheet
       open
@@ -51,9 +62,15 @@ export function ToiletDetail({
       }}
     >
       <SheetContent
+        {...scroll}
         className="detail-panel"
         aria-label="廁所詳細資訊"
         showCloseButton={false}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          scroll.ref.current?.focus({ preventScroll: true });
+          restore();
+        }}
         onCloseAutoFocus={(event) => {
           if (restoreFocus) {
             event.preventDefault();
@@ -67,6 +84,14 @@ export function ToiletDetail({
         <div className="detail-top">
           <span className="eyebrow">A LITTLE RELIEF</span>
           <div>
+            <Button
+              variant="ghost"
+              className="icon-button"
+              aria-label="分享目前畫面"
+              onClick={onShare}
+            >
+              <Share2 size={19} />
+            </Button>
             <Button
               variant="ghost"
               type="button"

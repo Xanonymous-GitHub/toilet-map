@@ -14,7 +14,7 @@
     "format": "bun --bun biome check --write . && uv run --locked ruff check --fix . && uv run --locked ruff format .",
     "check": "bun run lint && bun run typecheck",
     "verify": "bun run build && bun run check && bun run test",
-    "test:browser": "uv run --locked python scripts/browser-qa.py",
+    "test:browser": "uv run --locked python scripts/browser-qa.py && uv run --locked python scripts/state-browser-qa.py",
     "test:performance": "uv run --locked python scripts/performance-qa.py",
     "deps:check": "uv run --locked python scripts/check-dependencies.py",
     "data:expand": "uv run --locked python scripts/import-expansion.py"

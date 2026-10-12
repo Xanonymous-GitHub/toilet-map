@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
   RefreshCw,
   Search,
+  Share2,
   ShieldCheck,
   SlidersHorizontal,
   WifiOff,
@@ -27,11 +28,13 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
 } from "react";
 
+import { ResultList } from "./components/ResultList";
 import { ThemeMenu } from "./components/ThemeMenu";
 
 import { ToiletStatus } from "./components/ToiletStatus";
@@ -58,12 +61,16 @@ import {
 import { type Position, useGeolocation } from "./hooks/useGeolocation";
 import { useInstallPromotion } from "./hooks/useInstallPromotion";
 import { useMobileLayout } from "./hooks/useMobileLayout";
+import { useSelectedToilet } from "./hooks/useSelectedToilet";
 import { useToiletData } from "./hooks/useToiletData";
+import { useViewState } from "./hooks/useViewState";
 import { isRegion, searchableBounds } from "./regions";
 import { readPreference, savePreference } from "./storage";
-import { useTheme } from "./theme";
+import { type Theme, useTheme } from "./theme";
+import { type Camera, defaultView, isToiletId, normalizeView, type ViewState } from "./view-state";
 
 const MobilePanel = lazy(() => import("./components/MobilePanel"));
+const ShareDialog = lazy(() => import("./components/ShareDialog"));
 
 const InformationModal = lazy(() =>
   import("./components/InformationModal").then((module) => ({ default: module.InformationModal })),
@@ -96,16 +103,62 @@ type InstallEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 };
-const initialRegion = () => {
-  const r =
-    new URLSearchParams(location.search).get("region") ??
-    readPreference<Region>("region", "tokyo", isRegion);
-  return isRegion(r) ? r : "tokyo";
-};
-export default function App() {
-  const { theme, setTheme, dark } = useTheme();
+type Props = { initialView: { state: ViewState; cameraExplicit: boolean } };
+export default function App({ initialView }: Props) {
+  const [saved, setSaved] = useState<Set<string>>(
+    () =>
+      new Set(
+        readPreference<string[]>(
+          "saved",
+          [],
+          (value): value is string[] => Array.isArray(value) && value.every(isToiletId),
+        ),
+      ),
+  );
+  const { view, update, navigation, shareUrl } = useViewState(
+    initialView.state,
+    saved,
+    initialView.cameraExplicit,
+  );
+  const {
+    region,
+    camera,
+    query,
+    selected,
+    filters,
+    theme,
+    sidebarOpen,
+    moreFilters,
+    mobilePanel,
+    modal,
+    limit,
+    listScroll,
+    lastViewed,
+    settingsScroll,
+    detailScroll,
+    modalScroll,
+  } = view;
+  const { center } = camera;
+  const { dark } = useTheme(theme);
   const mobile = useMobileLayout();
-  const [mobilePanel, setMobilePanel] = useState<"settings" | "results" | null>(null);
+  const sidebarVisible = sidebarOpen || (!mobile && Boolean(mobilePanel));
+  const focusSelected = useRef(!initialView.cameraExplicit);
+  const setSelected = (id: string | null) =>
+    update({
+      selected: id,
+      mobilePanel: null,
+      modal: null,
+      ...(id && id !== lastViewed ? { detailScroll: 0 } : {}),
+    });
+  const setMobilePanel = (panel: ViewState["mobilePanel"]) =>
+    update({ mobilePanel: panel, modal: null, selected: null });
+  const setModal = (mode: ViewState["modal"]) =>
+    update({ modal: mode, mobilePanel: null, selected: null, modalScroll: 0 });
+  const setTheme = (value: Theme) => update({ theme: value });
+  const setQuery = (value: string) => update({ query: value, limit: 12, listScroll: 0 }, "replace");
+  const setLimit = (value: (previous: number) => number) =>
+    update((previous) => ({ limit: value(previous.limit) }));
+  const setMoreFilters = (value: boolean) => update({ moreFilters: value });
   const panelTrigger = useRef<HTMLElement | null>(null);
   const settingsTrigger = useRef<HTMLButtonElement | null>(null);
   const resultsTrigger = useRef<HTMLButtonElement | null>(null);
@@ -120,53 +173,21 @@ export default function App() {
   const restorePanelFocus = () => {
     if (!skipPanelFocus.current) panelTrigger.current?.focus();
   };
-  useEffect(() => {
-    if (!mobile) {
-      setMobilePanel(null);
-      setSearchFocus(false);
-    }
-  }, [mobile]);
   const promotion = useInstallPromotion();
-  const [sidebarOpen, setSidebarOpen] = useState(() =>
-    readPreference("sidebar-open", true, (v): v is boolean => typeof v === "boolean"),
-  );
-  const [region, setRegion] = useState<Region>(initialRegion);
-  const [center, setCenter] = useState<[number, number]>(REGIONS[region].center);
   const targetCenter = useRef(center);
   const movingToTarget = useRef(true);
   targetCenter.current = center;
-  const [zoom, setZoom] = useState(REGIONS[region].zoom);
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(center);
-  const [query, setQuery] = useState("");
+  const mapCenter = center;
   const deferredQuery = useDeferredValue(query);
   const [searchFocus, setSearchFocus] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [limit, setLimit] = useState(12);
   const [now, setNow] = useState(() => new Date());
-  const [filters, setFilters] = useState<Filters>({
-    open: false,
-    wheelchair: false,
-    free: false,
-    includeUnknown: false,
-    saved: false,
-  });
-  const [saved, setSaved] = useState<Set<string>>(
-    () =>
-      new Set(
-        readPreference<string[]>(
-          "saved",
-          [],
-          (value): value is string[] =>
-            Array.isArray(value) && value.every((id) => typeof id === "string"),
-        ),
-      ),
-  );
   const [online, setOnline] = useState(navigator.onLine);
-  const [modal, setModal] = useState<"sources" | "install" | null>(null);
   const [toast, setToast] = useState("");
   const [install, setInstall] = useState<InstallEvent | null>(null);
-  const [moreFilters, setMoreFilters] = useState(false);
+  const [shareFallback, setShareFallback] = useState<string | null>(null);
+  const shareOrigin = useRef<HTMLElement | null>(null);
+  const gpsNavigation = useRef(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null),
     regionRef = useRef(region);
   regionRef.current = region;
@@ -175,20 +196,20 @@ export default function App() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(""), 5500);
   }, []);
+  const handleEscape = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key !== "Escape" || event.defaultPrevented) return;
+    if (shareFallback) setShareFallback(null);
+    else {
+      update({ modal: null, selected: null, mobilePanel: null });
+      setSearchFocus(false);
+    }
+  });
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 30000);
     const updateOnline = () => setOnline(navigator.onLine);
     const beforeInstall = (e: Event) => {
       e.preventDefault();
       setInstall(e as InstallEvent);
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setModal(null);
-        setSelected(null);
-        setSearchFocus(false);
-        setMobilePanel(null);
-      }
     };
     addEventListener("online", updateOnline);
     addEventListener("offline", updateOnline);
@@ -208,40 +229,63 @@ export default function App() {
     (p: Position) => {
       movingToTarget.current = true;
       const destination = inferRegion(p.lat, p.lon);
-      if (destination && destination !== regionRef.current) {
-        setRegion(destination);
-        savePreference("region", destination);
-        savePreference(`country-${REGIONS[destination].country}`, destination);
-      }
+      const nextRegion = destination ?? regionRef.current;
+      update(
+        {
+          region: nextRegion,
+          camera: { center: [p.lon, p.lat], zoom: 15, bearing: 0, pitch: 0 },
+          selected: null,
+          mobilePanel: null,
+          modal: null,
+        },
+        gpsNavigation.current ? "push" : "replace",
+      );
+      gpsNavigation.current = false;
+      savePreference("region", nextRegion);
+      savePreference(`country-${REGIONS[nextRegion].country}`, nextRegion);
       setBounds(null);
-      setSelected(null);
-      setCenter([p.lon, p.lat]);
-      setZoom(15);
       if (!destination) notify("已定位。日韓以外尚無資料，可從城市選單選擇目的地。");
       else if (p.accuracy > 150)
         notify(`定位精度約 ${Math.round(p.accuracy)} 公尺，距離僅供參考。`);
     },
-    [notify],
+    [notify, update],
   );
   const { position, locating, locate, stopFollowing } = useGeolocation(receivePosition, notify);
   const switchRegion = useCallback(
-    (next: Region, nextCenter = REGIONS[next].center, nextZoom = REGIONS[next].zoom) => {
+    (
+      next: Region,
+      nextCenter = REGIONS[next].center,
+      nextZoom = REGIONS[next].zoom,
+      resetFilters = false,
+    ) => {
       movingToTarget.current = true;
-      setRegion(next);
-      setCenter([...nextCenter]);
-      setZoom(nextZoom);
+      update({
+        region: next,
+        camera: { center: [...nextCenter], zoom: nextZoom, bearing: 0, pitch: 0 },
+        query: "",
+        selected: null,
+        limit: 12,
+        listScroll: 0,
+        ...(resetFilters ? { filters: defaultView().filters } : {}),
+      });
       setBounds(null);
-      setQuery("");
-      setSelected(null);
-      setLimit(12);
       stopFollowing();
       savePreference("region", next);
       savePreference(`country-${REGIONS[next].country}`, next);
     },
-    [stopFollowing],
+    [stopFollowing, update],
   );
+  useEffect(() => {
+    if (!navigation.revision) return;
+    movingToTarget.current = navigation.cameraChanged;
+    focusSelected.current = !navigation.cameraExplicit;
+    if (navigation.cameraChanged) setBounds(null);
+    setSearchFocus(false);
+    stopFollowing();
+  }, [navigation, stopFollowing]);
   const onBounds = useCallback(
-    (nextBounds: [number, number, number, number], nextCenter: [number, number]) => {
+    (nextBounds: [number, number, number, number], nextCamera: Camera) => {
+      const nextCenter = nextCamera.center;
       // A previous flyTo may emit moveend while being replaced. Its bounds belong
       // to the old city and must not trigger a request for the newly selected city.
       if (
@@ -252,22 +296,26 @@ export default function App() {
         return;
       movingToTarget.current = false;
       setBounds(nextBounds);
-      setMapCenter(nextCenter);
+      update({ camera: nextCamera }, "replace");
     },
-    [],
+    [update],
   );
   const onManual = useCallback(() => {
     movingToTarget.current = false;
     stopFollowing();
   }, [stopFollowing]);
+  const effectiveSaved = useMemo(
+    () => (view.sharedSaved ? new Set(view.sharedSaved) : saved),
+    [view.sharedSaved, saved],
+  );
   const filtered = useMemo(() => {
     const q = deferredQuery.trim().toLowerCase();
     return (data?.items ?? []).filter(
       (t) =>
-        matchesFilters(t, filters, saved, now) &&
+        matchesFilters(t, filters, effectiveSaved, now) &&
         (!q || `${t.name} ${t.nameEn ?? ""} ${t.address}`.toLowerCase().includes(q)),
     );
-  }, [data, filters, saved, now, deferredQuery]);
+  }, [data, filters, effectiveSaved, now, deferredQuery]);
   const anchorLat = position?.lat ?? mapCenter[1];
   const anchorLon = position?.lon ?? mapCenter[0];
   const visible = useMemo(
@@ -281,13 +329,41 @@ export default function App() {
         .sort((a, b) => a.distance - b.distance),
     [filtered, bounds, anchorLat, anchorLon],
   );
-  const detail = data?.items.find((t) => t.id === selected) ?? null;
+  const { detail, error: detailError } = useSelectedToilet(
+    selected,
+    data?.items.find((t) => t.id === selected),
+  );
+  useEffect(() => {
+    if (!detail) return;
+    const patch: Partial<ViewState> = { lastViewed: detail.id };
+    if (focusSelected.current || detail.country !== REGIONS[region].country) {
+      patch.region = inferRegion(detail.lat, detail.lon) ?? detail.region;
+      if (focusSelected.current)
+        patch.camera = normalizeView({
+          region: patch.region,
+          camera: { center: [detail.lon, detail.lat], zoom: 16, bearing: 0, pitch: 0 },
+        }).camera;
+      focusSelected.current = false;
+      if (
+        patch.region !== region ||
+        (patch.camera && JSON.stringify(patch.camera) !== JSON.stringify(camera))
+      ) {
+        movingToTarget.current = true;
+        setBounds(null);
+      }
+    }
+    update(patch, "replace");
+  }, [detail, region, camera, update]);
   const suggestions = PLACES.filter((p) =>
     `${p.name} ${p.alias}`.toLowerCase().includes(query.toLowerCase()),
   ).slice(0, 6);
   const setFilter = (key: keyof Filters) => {
-    setFilters((f) => ({ ...f, [key]: !f[key] }));
-    setLimit(12);
+    update((previous) => ({
+      filters: { ...previous.filters, [key]: !previous.filters[key] },
+      sharedSaved: key === "saved" ? null : previous.sharedSaved,
+      limit: 12,
+      listScroll: 0,
+    }));
   };
   const toggleSave = (t: Toilet) => {
     setSaved((old) => {
@@ -299,11 +375,16 @@ export default function App() {
   useEffect(() => savePreference("saved", [...saved]), [saved]);
   const selectToilet = (t: Toilet) => {
     skipPanelFocus.current = true;
-    setMobilePanel(null);
+    focusSelected.current = false;
     movingToTarget.current = true;
-    setSelected(t.id);
-    setCenter([t.lon, t.lat]);
-    setZoom(16);
+    update((previous) => ({
+      selected: t.id,
+      lastViewed: t.id,
+      detailScroll: previous.lastViewed === t.id ? previous.detailScroll : 0,
+      mobilePanel: null,
+      modal: null,
+      camera: { ...previous.camera, center: [t.lon, t.lat], zoom: 16 },
+    }));
     stopFollowing();
   };
   const copyAddress = async (t: Toilet) => {
@@ -314,9 +395,41 @@ export default function App() {
       notify("此瀏覽器無法自動複製，請長按詳細資訊中的地址。");
     }
   };
+  const shareCurrentView = async () => {
+    shareOrigin.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const url = shareUrl();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: detail ? `${detail.name}・一點方便` : "一點方便・日韓廁所地圖",
+          url,
+        });
+        return;
+      } catch (failure) {
+        if (failure instanceof DOMException && failure.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      notify("已複製分享網址，開啟後可還原目前畫面。");
+    } catch {
+      setShareFallback(url);
+    }
+  };
+  const shareControl = (
+    <Button
+      variant="outline"
+      size="icon"
+      className="toolbar-button share-trigger"
+      aria-label="分享目前畫面"
+      onClick={() => void shareCurrentView()}
+    >
+      <Share2 />
+    </Button>
+  );
   const triggerInstall = async () => {
     skipPanelFocus.current = true;
-    setMobilePanel(null);
     if (install) {
       await install.prompt();
       await install.userChoice;
@@ -336,7 +449,6 @@ export default function App() {
   };
   const showSources = () => {
     skipPanelFocus.current = true;
-    setMobilePanel(null);
     setModal("sources");
   };
   const activeFilterCount = [filters.open, filters.wheelchair, filters.free, filters.saved].filter(
@@ -351,7 +463,7 @@ export default function App() {
         type="search"
         enterKeyHint="search"
         aria-label="搜尋城市、車站或廁所"
-        placeholder="城市、車站或廁所名稱"
+        placeholder="搜尋地點或廁所"
         value={query}
         onFocus={() => setSearchFocus(true)}
         onChange={(e) => setQuery(e.target.value)}
@@ -525,6 +637,21 @@ export default function App() {
             只看已收藏
           </label>
           <small>免費與無障礙篩選僅納入有提供資訊的設施。</small>
+          {lastViewed && (
+            <Button
+              variant="ghost"
+              className="last-viewed"
+              onClick={() => {
+                focusSelected.current = true;
+                skipPanelFocus.current = true;
+                setSelected(lastViewed);
+                stopFollowing();
+              }}
+            >
+              <Clock size={16} />
+              回到上次查看的廁所
+            </Button>
+          )}
         </div>
       )}
     </>
@@ -532,7 +659,9 @@ export default function App() {
   const listHeading = (
     <div className="list-heading">
       <div>
-        <strong>{filters.saved ? "收藏的廁所" : "這個區域的廁所"}</strong>
+        <strong>
+          {filters.saved ? (view.sharedSaved ? "分享的收藏" : "收藏的廁所") : "這個區域的廁所"}
+        </strong>
         <span className="count">{loading ? "…" : visible.length}</span>
       </div>
       <span>
@@ -542,7 +671,12 @@ export default function App() {
     </div>
   );
   const toiletList = (
-    <div className="toilet-list" aria-live="polite">
+    <ResultList
+      ready={!loading}
+      offset={listScroll}
+      restoreKey={`${navigation.revision}:${region}:${query}:${JSON.stringify(filters)}`}
+      onOffset={(offset) => update({ listScroll: offset }, "replace")}
+    >
       {loading ? (
         <div className="loading-list">
           {[0, 1, 2].map((i) => (
@@ -581,14 +715,7 @@ export default function App() {
             type="button"
             className="small-primary"
             onClick={() => {
-              setFilters({
-                open: false,
-                wheelchair: false,
-                free: false,
-                includeUnknown: false,
-                saved: false,
-              });
-              switchRegion(region);
+              switchRegion(region, REGIONS[region].center, REGIONS[region].zoom, true);
             }}
           >
             返回城市範圍
@@ -662,7 +789,7 @@ export default function App() {
           <ChevronDown size={16} />
         </Button>
       )}
-    </div>
+    </ResultList>
   );
   const coverageFooter = (
     <footer className="sidebar-footer">
@@ -696,15 +823,15 @@ export default function App() {
   );
   return (
     <Collapsible
-      open={sidebarOpen}
+      open={sidebarVisible}
       onOpenChange={(open) => {
-        setSidebarOpen(open);
+        update({ sidebarOpen: open, mobilePanel: null });
         savePreference("sidebar-open", open);
       }}
       asChild
     >
-      <div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
-        {!mobile && sidebarOpen && (
+      <div className={`app-shell ${sidebarVisible ? "" : "sidebar-collapsed"}`}>
+        {!mobile && sidebarVisible && (
           <aside id="search-sidebar" className="sidebar" aria-label="搜尋與廁所清單">
             <header className="brand-bar">
               <a className="brand" href="/">
@@ -762,8 +889,7 @@ export default function App() {
             <MapView
               dark={dark}
               items={filtered}
-              center={center}
-              zoom={zoom}
+              camera={camera}
               selected={selected}
               position={position}
               now={now}
@@ -773,7 +899,10 @@ export default function App() {
                 promotion.dismiss();
                 onManual();
               }}
-              onLocate={locate}
+              onLocate={() => {
+                gpsNavigation.current = true;
+                locate();
+              }}
               locating={locating}
               locateSupported={Boolean(navigator.geolocation)}
             />
@@ -783,6 +912,7 @@ export default function App() {
               <header className="mobile-map-header">
                 <h1 className="sr-only">一點方便・日韓廁所地圖</h1>
                 {searchControl}
+                {!detail && !modal && !mobilePanel && shareControl}
                 <Button
                   ref={settingsTrigger}
                   variant="outline"
@@ -823,7 +953,7 @@ export default function App() {
           {!mobile && (
             <div className="map-top">
               <div className="map-toolbar">
-                {!sidebarOpen && (
+                {!sidebarVisible && (
                   <CollapsibleTrigger asChild>
                     <Button
                       variant="outline"
@@ -845,6 +975,7 @@ export default function App() {
                 </span>
               </div>
               <div className="map-toolbar">
+                {!detail && !modal && shareControl}
                 {promotion.visible && (
                   <Button
                     variant="outline"
@@ -863,7 +994,7 @@ export default function App() {
                     <span>帶著地圖出發</span>
                   </Button>
                 )}
-                {!sidebarOpen && (
+                {!sidebarVisible && (
                   <Button
                     variant="outline"
                     size="icon"
@@ -884,6 +1015,19 @@ export default function App() {
               離線資料 · {data ? dateLabel(data.fetchedAt) : ""} 匯入，現場狀態未確認
             </div>
           )}
+          {selected && !detail && (
+            <div className="map-network-note selection-note" role="status">
+              <span>{detailError || "正在載入廁所資訊…"}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="關閉廁所資訊"
+                onClick={() => setSelected(null)}
+              >
+                <X />
+              </Button>
+            </div>
+          )}
           {!selected && bounds && !searchableBounds(bounds) && (
             <div className="map-network-note" role="status">
               放大地圖以載入附近點位，或從城市選單快速前往。
@@ -900,6 +1044,10 @@ export default function App() {
                 toggleSave={toggleSave}
                 openNav={openNav}
                 copyAddress={copyAddress}
+                onShare={() => void shareCurrentView()}
+                scrollOffset={detailScroll}
+                scrollKey={`${navigation.revision}:${selected}`}
+                onScrollOffset={(offset) => update({ detailScroll: offset }, "replace")}
                 restoreFocus={mobile ? () => resultsTrigger.current?.focus() : undefined}
               />
             </Suspense>
@@ -911,6 +1059,7 @@ export default function App() {
               results={mobilePanel === "results"}
               onClose={closeMobilePanel}
               restoreFocus={restorePanelFocus}
+              onShare={() => void shareCurrentView()}
             >
               {mobilePanel === "results" ? (
                 <>
@@ -918,7 +1067,14 @@ export default function App() {
                   {toiletList}
                 </>
               ) : (
-                <div className="mobile-settings-body">
+                <ResultList
+                  className="mobile-settings-body"
+                  live={false}
+                  ready={!loading}
+                  offset={settingsScroll}
+                  restoreKey={`${navigation.revision}:settings`}
+                  onOffset={(offset) => update({ settingsScroll: offset }, "replace")}
+                >
                   {destinationControls}
                   <div className="mobile-appearance">
                     <span>地圖外觀</span>
@@ -948,7 +1104,7 @@ export default function App() {
                       非開放時段
                     </span>
                   </div>
-                </div>
+                </ResultList>
               )}
             </MobilePanel>
           </Suspense>
@@ -972,8 +1128,21 @@ export default function App() {
             <InformationModal
               mode={modal}
               sources={data?.sources ?? []}
+              scrollOffset={modalScroll}
+              scrollKey={`${navigation.revision}:${modal}`}
+              onScrollOffset={(offset) => update({ modalScroll: offset }, "replace")}
               onClose={() => setModal(null)}
               restoreFocus={mobile ? () => settingsTrigger.current?.focus() : undefined}
+              onShare={() => void shareCurrentView()}
+            />
+          </Suspense>
+        )}
+        {shareFallback && (
+          <Suspense fallback={null}>
+            <ShareDialog
+              url={shareFallback}
+              onClose={() => setShareFallback(null)}
+              restoreFocus={() => shareOrigin.current?.focus()}
             />
           </Suspense>
         )}

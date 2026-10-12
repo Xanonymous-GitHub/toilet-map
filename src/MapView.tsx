@@ -2,23 +2,23 @@ import { LocateFixed, Map as MapIcon, MapPin, Minus, Plus } from "lucide-react";
 import * as maplibregl from "maplibre-gl";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
 import { scheduleState, type Toilet } from "./core";
+import type { Camera } from "./view-state";
 
 maplibregl.setWorkerUrl(mapWorkerUrl);
 
 type Props = {
   dark: boolean;
   items: Toilet[];
-  center: [number, number];
-  zoom: number;
+  camera: Camera;
   selected: string | null;
   position: { lat: number; lon: number; accuracy: number } | null;
   now: Date;
   onSelect: (id: string) => void;
-  onBounds: (b: [number, number, number, number], c: [number, number]) => void;
+  onBounds: (b: [number, number, number, number], camera: Camera) => void;
   onManual: () => void;
   onLocate: () => void;
   locating: boolean;
@@ -33,6 +33,21 @@ export default function MapView(p: Props) {
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
     [tileError, setTileError] = useState(false);
+  const reportCamera = useCallback(() => {
+    const m = map.current;
+    if (!m) return;
+    const bounds = m.getBounds(),
+      center = m.getCenter();
+    latest.current.onBounds(
+      [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+      {
+        center: [center.lng, center.lat],
+        zoom: m.getZoom(),
+        bearing: m.getBearing(),
+        pitch: m.getPitch(),
+      },
+    );
+  }, []);
   useEffect(() => {
     const container = holder.current;
     if (!container) return;
@@ -41,8 +56,10 @@ export default function MapView(p: Props) {
     try {
       m = new maplibregl.Map({
         container,
-        center: latest.current.center,
-        zoom: latest.current.zoom,
+        center: latest.current.camera.center,
+        zoom: latest.current.camera.zoom,
+        bearing: latest.current.camera.bearing,
+        pitch: latest.current.camera.pitch,
         minZoom: 5,
         maxZoom: 19,
         // Raster tiles stay sharp at 2x without a 3x phone drawing nine pixels per CSS pixel.
@@ -65,7 +82,11 @@ export default function MapView(p: Props) {
               id: "base",
               type: "raster",
               source: "osm",
-              paint: { "raster-saturation": -0.6, "raster-contrast": -0.12 },
+              paint: {
+                "raster-brightness-max": latest.current.dark ? 0.5 : 1,
+                "raster-saturation": latest.current.dark ? -0.9 : -0.6,
+                "raster-contrast": latest.current.dark ? 0.15 : -0.12,
+              },
             },
           ],
         },
@@ -81,14 +102,7 @@ export default function MapView(p: Props) {
       else m.resize();
     });
     observer.observe(container);
-    const emitBounds = () => {
-      const b = m.getBounds(),
-        c = m.getCenter();
-      latest.current.onBounds(
-        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
-        [c.lng, c.lat],
-      );
-    };
+    const emitBounds = reportCamera;
     m.on("load", () => {
       m.addSource("toilets", {
         type: "geojson",
@@ -203,7 +217,7 @@ export default function MapView(p: Props) {
       map.current = null;
       setReady(false);
     };
-  }, []);
+  }, [reportCamera]);
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
@@ -216,12 +230,15 @@ export default function MapView(p: Props) {
     if (!ready || !m) return;
     const current = m.getCenter();
     if (
-      Math.abs(current.lng - p.center[0]) > 0.000001 ||
-      Math.abs(current.lat - p.center[1]) > 0.000001 ||
-      Math.abs(m.getZoom() - p.zoom) > 0.001
-    )
-      m.flyTo({ center: p.center, zoom: p.zoom, duration: 800 });
-  }, [p.center, p.zoom, ready]);
+      Math.abs(current.lng - p.camera.center[0]) > 0.000006 ||
+      Math.abs(current.lat - p.camera.center[1]) > 0.000006 ||
+      Math.abs(m.getZoom() - p.camera.zoom) > 0.006 ||
+      Math.abs(m.getBearing() - p.camera.bearing) > 0.006 ||
+      Math.abs(m.getPitch() - p.camera.pitch) > 0.006
+    ) {
+      m.flyTo({ ...p.camera, duration: 800 });
+    } else queueMicrotask(reportCamera);
+  }, [p.camera, ready, reportCamera]);
   useEffect(() => {
     const m = map.current;
     if (!m || !ready) return;

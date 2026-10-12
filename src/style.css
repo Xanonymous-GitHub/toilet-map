@@ -149,6 +149,32 @@ a {
 .search-wrap input::-webkit-search-cancel-button {
   appearance: none;
 }
+.share-dialog input {
+  margin: 16px 0;
+  font-size: 16px;
+}
+.modal-share {
+  position: absolute;
+  right: 64px;
+  top: 18px;
+}
+.selection-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.selection-note button {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+.last-viewed {
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: flex-start;
+  font-size: 12px;
+}
 .search-clear {
   padding: 0;
   width: 28px;
@@ -1148,6 +1174,9 @@ a {
     position: relative;
     z-index: 4;
   }
+  .mobile-map-header .search-shortcut {
+    display: none;
+  }
   .search-results {
     max-height: min(320px, calc(100dvh - 100px));
   }
@@ -1164,6 +1193,11 @@ a {
     border-radius: 10px;
     background: var(--card);
     box-shadow: var(--shadow);
+  }
+  .mobile-map-header .share-trigger {
+    width: 44px;
+    height: 48px;
+    flex-shrink: 0;
   }
   .filter-count {
     position: absolute;
@@ -1417,6 +1451,10 @@ a {
   }
   .modal h2 {
     font-size: 21px;
+  }
+  .modal .icon-button {
+    width: 44px;
+    height: 44px;
   }
   .toast {
     bottom: max(104px, calc(env(safe-area-inset-bottom) + 84px));
