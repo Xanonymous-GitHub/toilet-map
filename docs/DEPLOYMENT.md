@@ -32,7 +32,7 @@ OSM 完整下載在 Netlify／Vercel 由 API 303 轉導到 `dist/client/download
 4. 瀏覽一次後離線重新開啟，確認 App 與最近載入範圍可用；底圖及外部導航需要網路。
 5. 在實際手機與部署網域量測載入速度、GPS、安裝及地圖 App 交接。本機軟體 WebGL／固定圖磚的 Lighthouse 結果見 `performance-report.json`，不能當成真實手機與圖磚服務的效能承諾。
 
-底圖使用 [OpenFreeMap](https://openfreemap.org/quick_start/) 的 Positron／Dark 向量服務，不需要 API key，也不再使用 OSM 志工 raster 圖塊。保留平台設定中的 `tiles.openfreemap.org` CSP 許可與來源署名。外部服務失敗時，廁所圖層與清單仍可使用，並可手動重試；App 不預下載或離線保存底圖。
+底圖使用 [OpenFreeMap](https://openfreemap.org/quick_start/) 的 Bright／Dark 向量服務，不需要 API key，也不再使用 OSM 志工 raster 圖塊。保留平台設定中的 `tiles.openfreemap.org` CSP 許可與來源署名。外部服務失敗時，廁所圖層與清單仍可使用，並可手動重試；App 不預下載或離線保存底圖。
 
 ## CDN 與 Worker 安全政策
 

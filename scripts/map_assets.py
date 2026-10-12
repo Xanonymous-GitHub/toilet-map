@@ -10,7 +10,7 @@ FIXTURES = Path(__file__).resolve().parent.parent / "tests/fixtures"
 
 def basemap_fixture(url):
     path = urlparse(url).path
-    if path in {"/styles/positron", "/styles/dark"}:
+    if path in {"/styles/bright", "/styles/dark"}:
         name = path.rsplit("/", 1)[1]
         return {
             "status": 200,

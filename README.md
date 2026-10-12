@@ -27,7 +27,7 @@ bun run preview
 
 側邊欄可收起並記住偏好；支援淺色、深色與跟隨系統。地圖控制項放在底部，安裝提醒會自動收起，仍可由頁尾加入主畫面。按鈕、篩選、原生選單、說明與詳細資訊使用官方 shadcn UI 元件。
 
-底圖使用 [OpenFreeMap](https://openfreemap.org/) 的 Positron／Dark 向量樣式。底圖與廁所圖層獨立初始化；服務拒絕、斷線或部分圖塊失敗時，仍可查看廁所標記、清單與導航，並手動重試。切換外觀保留廁所、定位與選取圖層；來源署名持續顯示。地圖 Worker 檔名包含內容與 CSP 版本，安全政策更新會自動取得新資產，避免 CDN／PWA 保留舊連線權限。
+底圖使用 [OpenFreeMap](https://openfreemap.org/) 的 Bright／Dark 向量樣式。底圖與廁所圖層獨立初始化；服務拒絕、斷線或部分圖塊失敗時，仍可查看廁所標記、清單與導航，並手動重試。切換外觀保留廁所、定位與選取圖層；來源署名持續顯示。地圖 Worker 檔名包含內容與 CSP 版本，安全政策更新會自動取得新資產，避免 CDN／PWA 保留舊連線權限。
 
 Netlify／Vercel 的設定與 API adapter 已加入並通過官方打包及 Node handler 檢查，可匯入 repository 部署；尚未替使用者在這兩個平台正式發布。完整步驟見 [部署說明](docs/DEPLOYMENT.md)。
 

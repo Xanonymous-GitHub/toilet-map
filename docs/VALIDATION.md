@@ -13,7 +13,9 @@
 
 ## 底圖服務與失敗恢復
 
-不再請求 `tile.openstreetmap.org`。底圖使用 OpenFreeMap 的 Positron／Dark 向量樣式，深色地名提高對比；保留 OSM／OpenMapTiles 署名。廁所與定位圖層先在本機空白樣式初始化，底圖請求有 15 秒 timeout 和切換時取消舊請求；樣式切換保留資料與選取，不額外發出範圍查詢。HTTP 快取由瀏覽器管理，PWA 不快取、預抓或代理底圖，正式網站直接向供應商請求。
+配色改用 Bright 淺色底圖與經調色的 Dark：水域藍、植被綠、主幹道金色、鐵路紫色；深色建築與街道提高明度，地名使用亮色與暗描邊。保留供應商的幾何、縮放插值、標籤內容與來源署名。
+
+不再請求 `tile.openstreetmap.org`。底圖使用 OpenFreeMap 的 Bright／Dark 向量樣式，深色地名提高對比；保留 OSM／OpenMapTiles 署名。廁所與定位圖層先在本機空白樣式初始化，底圖請求有 15 秒 timeout 和切換時取消舊請求；樣式切換保留資料與選取，不額外發出範圍查詢。HTTP 快取由瀏覽器管理，PWA 不快取、預抓或代理底圖，正式網站直接向供應商請求。
 
 正式網域的 HTML 已允許 OpenFreeMap，但 `/assets/maplibre-gl-worker-CekbQLRq.js` 的 Cloudflare HIT 回應仍帶著只允許 `tile.openstreetmap.org` 的舊 CSP；實測當時 `Age: 59045`。原生 Chromium 可下載樣式／TileJSON／sprites，Worker 的向量圖塊則全數被安全政策阻擋。對照實驗僅替換 Worker 回應的 CSP，所有圖塊即成功載入，確認根因。修正 `a51cc46` 將 CSP 的 SHA-256 版本加入 Worker 檔名；新路徑的 Cloudflare HIT 回應也保有正確權限，PWA precache 與引用 chunk 同步更新。
 

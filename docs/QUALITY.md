@@ -18,7 +18,7 @@ uv sync --locked
 bun run verify
 ```
 
-`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後以 `bun run test` 執行 38 項 Bun 與 4 項 Python 標準庫 unittest 測試。獨立 `typecheck`、`check`、`test` 需要先產生 ignored `server/*.generated.ts`，乾淨 checkout 先執行 `build` 或直接使用 `verify`。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
+`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後以 `bun run test` 執行 43 項 Bun 與 4 項 Python 標準庫 unittest 測試。獨立 `typecheck`、`check`、`test` 需要先產生 ignored `server/*.generated.ts`，乾淨 checkout 先執行 `build` 或直接使用 `verify`。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
 
 Biome recommended 規則與 React／Playwright／types／test domains 保留啟用，warnings 會使檢查失敗。僅 CSS 檔案的 `noDescendingSpecificity` 例外：該規則不理解不同元件的 DOM 邊界，會將無法同時匹配同一元素的 selector 視為衝突。元件語意、按鈕 type、事件操作與 hook dependencies 均修正後通過，沒有以整體關閉 lint 取代修正。
 

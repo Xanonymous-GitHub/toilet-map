@@ -91,12 +91,15 @@ test("Dark map labels stay legible while provider geometry and label expressions
   const fetch = spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json(style));
   try {
     const loaded = await loadBasemap(true, new AbortController().signal);
-    assert.deepEqual(loaded.layers[0], style.layers[0]);
+    assert.deepEqual(loaded.layers[0], {
+      ...style.layers[0],
+      paint: { "background-color": "#16232d" },
+    });
     assert.equal(loaded.layers[1].type, "symbol");
     if (loaded.layers[1].type === "symbol") {
       assert.deepEqual(loaded.layers[1].layout, style.layers[1].layout);
-      assert.equal(loaded.layers[1].paint?.["text-color"], "#a9b8b3");
-      assert.equal(loaded.layers[1].paint?.["text-halo-width"], 1);
+      assert.equal(loaded.layers[1].paint?.["text-color"], "#d4dfe7");
+      assert.equal(loaded.layers[1].paint?.["text-halo-width"], 1.4);
     }
   } finally {
     fetch.mockRestore();
