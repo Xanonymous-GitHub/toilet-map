@@ -459,7 +459,7 @@ export default function MapView(p: Props) {
                 disabled={p.locating || !p.locateSupported}
                 onClick={p.onLocate}
               >
-                <LocateFixed size={22} />
+                <LocateFixed className="size-[24px]" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="left">定位目前位置</TooltipContent>
