@@ -39,18 +39,18 @@ Chromium 69 項檢查涵蓋桌面 1440×1000 與手機 390×844，新增 320×56
 
 ## Lighthouse
 
-以下效能數據保留前輪 `f19f899` 的測量基準，本輪底圖修正未重新量測 Lighthouse，不宣稱本輪已達效能目標。
+以下為配色修正 `41d9aa0` 的冷啟動實測，取代前輪 `f19f899` 的數據；功能與建置預算通過，手機效能指標仍有待改善。
 
 `bun run test:performance` 使用 Lighthouse 13.5.0、冷啟動 browser profiles、固定圖磚、gzip 預覽、Chromium 軟體 WebGL，以及標準手機／桌面模擬節流。可重跑的程式為 `scripts/performance-qa.py`，完整 JSON／HTML 在 `test-results/`，摘要為 `performance-report.json`。
 
 | 模式 | Performance | Accessibility | Best practices | LCP | TBT | CLS |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| mobile | 47 | 100 | 100 | 4.59 s | 3620 ms | 0 |
-| desktop | 65 | 100 | 100 | 0.61 s | 1345 ms | 0 |
+| mobile | 48 | 100 | 100 | 4.30 s | 4851 ms | 0.0050 |
+| desktop | 67 | 100 | 100 | 0.95 s | 705 ms | 0.0007 |
 
 首屏移除同步側邊欄量測；地圖在空閒時初始化，清單首批渲染 12 張卡片而保留完整資料。手機控制面板、工具提示、說明與詳細資訊延後載入，外觀使用 shadcn 原生選單。時區時計共用、聚合不再每幀查詢，移除多餘初始 flyTo；沒有為取得分數停用地圖或縮減來源覆蓋。
 
-無障礙、最佳實務與 CLS 通過，但前輪手機軟體 WebGL 的 LCP／TBT 均未達目標；不將此基準描述為已通過效能指標。完整地圖比原本 32dvh 視窗需要更多繪製，CPU profile 仍顯示 MapLibre／軟體 WebGL 的同步工作是主要成本。2x canvas 上限減少 3x 裝置的 GPU 繪製量，但不保證 Lighthouse 分數提高。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
+無障礙、最佳實務與 CLS 通過，但手機軟體 WebGL 的 LCP／TBT 仍未達目標。完整地圖需要更多繪製，CPU profile 顯示 MapLibre 的同步工作、應用程式運算與軟體 WebGL 都有成本。配色修正未新增套件，應用程式與 MapLibre chunks 仍在強制建置預算內；2x canvas 上限減少 3x 裝置的 GPU 繪製量。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
 
 ## 資料驗證
 
