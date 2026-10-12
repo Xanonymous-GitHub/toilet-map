@@ -18,7 +18,7 @@ uv sync --locked
 bun run verify
 ```
 
-`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後以 `bun run test` 執行 27 項 Bun 與 4 項 Python 標準庫 unittest 測試。獨立 `typecheck`、`check`、`test` 需要先產生 ignored `server/*.generated.ts`，乾淨 checkout 先執行 `build` 或直接使用 `verify`。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
+`verify` 會先建置供 API／PWA 測試使用的資產，再跑 Biome、Ruff、主程式與 Service Worker 的 TypeScript 檢查，最後以 `bun run test` 執行 38 項 Bun 與 4 項 Python 標準庫 unittest 測試。獨立 `typecheck`、`check`、`test` 需要先產生 ignored `server/*.generated.ts`，乾淨 checkout 先執行 `build` 或直接使用 `verify`。`test:browser` 另驗證實際建置後的 UI；可設定 `RELIEF_BASE_URL` 與預覽端的 `RELIEF_PORT`。
 
 Biome recommended 規則與 React／Playwright／types／test domains 保留啟用，warnings 會使檢查失敗。僅 CSS 檔案的 `noDescendingSpecificity` 例外：該規則不理解不同元件的 DOM 邊界，會將無法同時匹配同一元素的 selector 視為衝突。元件語意、按鈕 type、事件操作與 hook dependencies 均修正後通過，沒有以整體關閉 lint 取代修正。
 
@@ -73,3 +73,11 @@ Netlify 最新官方 packager 的 TypeScript parser 尚未相容專案使用的 
 `MobilePanel` 延後載入並重用 shadcn Sheet。手機面板不使用位移動畫，卡片直接顯示，避免 content-visibility 與進場位置造成暫時空白。定位與清單入口至少 44px，支援動態 viewport 與安全區；圖磚著作權仍保留。
 
 高密度螢幕的 MapLibre canvas 上限為 2x；3x 手機由每個 CSS 像素繪製 9 個像素降至 4 個，UI 文字與 DOM 控制仍維持裝置解析度。尺寸變化時透過 MapLibre API 更新，避免重建地圖或清除位置。
+
+## 畫面狀態與分享
+
+`view-state.ts` 定義版本、正規化與 URL 往返；`useViewState` 同步 localStorage、fragment 與 popstate／hashchange，使用結構共用避免捲動或面板操作重新傳送全城 GeoJSON。語意操作建立 history，地圖移動與輸入／捲動取代目前紀錄；捲動寫入以 120ms debounce，pagehide 時補上最新位置。
+
+`useSelectedToilet` 依 ID 個別載入、驗證快取並處理取消與 404。IndexedDB v2 保留 v1 的地區 store，新增廁所 store。`useScrollRestoration` 共用四種捲動還原，透過 shadcn 的 onOpenAutoFocus 避免 Portal 與預設焦點把已還原內容捲回頂部。React 19.3 的 useEffectEvent 讓鍵盤監聽讀到最新分享狀態；Escape 只關閉最上層視窗。
+
+8 項狀態格式與 3 項直接查詢測試補上 160 種篩選／面板往返組合、長收藏 fragment、舊網址、無效參數及回應驗證；另有 32 項實際瀏覽器檢查驗證行為，與原本 69 項回歸共同在 CI 執行。

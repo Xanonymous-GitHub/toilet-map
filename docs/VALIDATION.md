@@ -1,14 +1,14 @@
 # UI、部署與全國覆蓋驗證紀錄
 
-本輪驗證日期：2026-10-12（Asia/Taipei）。從 GitHub 最新 main `0b096ad` 開始修正手機擁擠問題；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
+本輪驗證日期：2026-10-12（Asia/Taipei）。從 GitHub 最新 main `26733d6` 開始加入畫面保存與分享；資料仍使用 2026-10-11 已查證快照，未重新下載或改變 181 城市的覆蓋。
 
 ## 工具鏈與建置
 
 - Bun 1.4.3、Python 3.15.0 final、uv 0.13.0、TypeScript 7.0.2、Vite 8.3.4、Biome 2.5.15、Ruff 0.17.0、Playwright 1.63.0、Chromium 154。
 - TypeScript／前端／Worker target 為 ESNext，Python 最低版本 3.15，Ruff target py315。32 項直接套件／工具均向官方查證為最新穩定版，見 `dependency-versions.json`；沒有依賴刷新 workflow。
-- `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、27 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
+- `bun run verify` 通過正式建置、大小預算、Biome、Ruff、strict 型別、38 項 Bun 與 4 項 Python 測試。API 逐一確認 181 城市、完整分頁、範圍與國家、HEAD／405、非法參數、來源授權與完整匯出。
 - 正式 JS 的 AST 沒有註解，CSS 不含註解，JSON／manifest 等於 compact JSON.stringify；HTML／SVG 亦壓縮。開源聲明另存 `third-party-licenses.json`，可從使用說明開啟。
-- 入口 chunk 約 280 KB（gzip 91 KB），另有首屏共用 chunk 約 53 KB（gzip 21 KB）；首屏 JavaScript 合計約 333 KB（gzip 111 KB）。延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
+- 入口 chunk 約 294 KB（gzip 95 KB），另有首屏共用 chunk 約 53 KB（gzip 21 KB）；首屏 JavaScript 合計約 346 KB（gzip 116 KB）。延後載入 MapView 約 46 KB（gzip 17 KB），MapLibre 約 1,040 KB（gzip 283 KB），地圖 Worker 約 507 KB。應用程式與 MapLibre 各有強制建置預算，所有延後載入 chunks 都納入離線 shell。
 - 正式建置由 Vite／Rolldown、Lightning CSS、cssnano、SVGO 與 html-minifier-terser 壓縮；Netlify Function 使用 Terser 設定解決官方 route scanner 的字串語法限制。
 
 ## 平台與瀏覽器
@@ -21,9 +21,13 @@ Chromium 69 項檢查涵蓋桌面 1440×1000 與手機 390×844，新增 320×56
 
 本輪完整固定圖磚報告為 `browser-fixture-report.json`，另以真實 OSM 圖磚通過 5 項手機主畫面、深色、清單與導航檢查，見 `mobile-live-report.json`；`browser-report.json` 保留前一輪 45 項真實圖磚檢查的歷史紀錄。固定圖磚只替換外部圖像，API、資料、MapLibre、Worker、PWA 和定位回呼均為正式建置。無未處理錯誤或應用程式警告。console 保留刻意離線／阻斷下載造成的網路錯誤。
 
+新增 32 項狀態／分享檢查全部通過，報告為 `state-browser-report.json`。包含原生分享與取消、剪貼簿／手動選取 fallback、跨接收者網址優先、獨立收藏清單、不自動請求 GPS、重新整理與無參數重開、上一頁／下一頁、舊 IndexedDB 升級、離線廁所、非首都 ID-only 連結、失效廁所與無效／儲存受限的還原，以及四種捲動位置與手機旋轉。合計 101 項瀏覽器檢查。
+
 這些檢查是 Chromium 的手機尺寸與觸控模擬，並非已完成 iOS／Android 實機驗證。
 
 ## Lighthouse
+
+以下效能數據保留前輪 `f19f899` 的測量基準，本輪狀態功能未重新量測 Lighthouse，不宣稱本輪已達效能目標。
 
 `bun run test:performance` 使用 Lighthouse 13.5.0、冷啟動 browser profiles、固定圖磚、gzip 預覽、Chromium 軟體 WebGL，以及標準手機／桌面模擬節流。可重跑的程式為 `scripts/performance-qa.py`，完整 JSON／HTML 在 `test-results/`，摘要為 `performance-report.json`。
 
@@ -34,7 +38,7 @@ Chromium 69 項檢查涵蓋桌面 1440×1000 與手機 390×844，新增 320×56
 
 首屏移除同步側邊欄量測；地圖在空閒時初始化，清單首批渲染 12 張卡片而保留完整資料。手機控制面板、工具提示、說明與詳細資訊延後載入，外觀使用 shadcn 原生選單。時區時計共用、聚合不再每幀查詢，移除多餘初始 flyTo；沒有為取得分數停用地圖或縮減來源覆蓋。
 
-無障礙、最佳實務與 CLS 通過，但本輪手機軟體 WebGL 的 LCP／TBT 均未達目標；不將這次 UI 整理描述為已通過效能指標。完整地圖比原本 32dvh 視窗需要更多繪製，CPU profile 仍顯示 MapLibre／軟體 WebGL 的同步工作是主要成本。2x canvas 上限減少 3x 裝置的 GPU 繪製量，但不保證 Lighthouse 分數提高。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
+無障礙、最佳實務與 CLS 通過，但前輪手機軟體 WebGL 的 LCP／TBT 均未達目標；不將此基準描述為已通過效能指標。完整地圖比原本 32dvh 視窗需要更多繪製，CPU profile 仍顯示 MapLibre／軟體 WebGL 的同步工作是主要成本。2x canvas 上限減少 3x 裝置的 GPU 繪製量，但不保證 Lighthouse 分數提高。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
 
 ## 資料驗證
 

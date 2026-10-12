@@ -2,7 +2,7 @@
 
 [![Quality](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml/badge.svg)](https://github.com/Xanonymous-GitHub/toilet-map/actions/workflows/quality.yml)
 
-繁體中文、手機優先的公廁地圖。定位、地圖範圍清單、開放時段推估、無障礙／免費篩選、裝置收藏、外部步行導航，以及已瀏覽城市的離線清單。
+繁體中文、手機優先的公廁地圖。定位、地圖範圍清單、開放時段推估、無障礙／免費篩選、裝置收藏、外部步行導航，已瀏覽城市的離線清單，以及畫面保存與分享網址。
 
 目前整合日本／韓國全國範圍的 OSM 快照，以及江東區、首爾、釜山、仁川、濟州市、全北的官方資料。45,867 筆有效來源紀錄中，API 排除 1,250 筆明示使用限制，提供 44,617 筆候選紀錄（日本 31,238、韓國 13,379）。181 個城市與周邊查詢範圍均有實際點位，包含日本全部 20 個政令指定都市、北海道、沖繩、濟州及離島。
 
@@ -31,7 +31,7 @@ Netlify／Vercel 的設定與 API adapter 已加入並通過官方打包及 Node
 
 ## 程式碼品質
 
-`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、27 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
+`bun run verify` 依序建置、執行 Biome、Ruff、TypeScript、38 項 Bun 原生測試與 4 項 Python 回歸測試。`bun run format` 統一格式與整理 imports；`bun run deps:check` 查核鎖定版本是否有新的穩定版。GitHub Actions 在每次 push／PR 執行品質、資料重現性與桌面／手機瀏覽器檢查；實作更新時查核最新依賴。產物與使用方式見 [CI 說明](docs/CI.md)。
 
 | 指令 | 用途 |
 | --- | --- |
@@ -98,8 +98,12 @@ bun run test
 
 ## 瀏覽器驗證
 
-先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。69 項檢查的結果與截圖寫入 `test-results/`。預設由瀏覽器以 TLS 驗證載入真實底圖；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
+先執行 `uv run --locked playwright install chromium` 並啟動建置後的 `bun run preview`，再於另一個 terminal 執行 `bun run test:browser`。101 項檢查的結果與截圖寫入 `test-results/`。69 項地圖回歸預設由瀏覽器以 TLS 驗證載入真實底圖；32 項狀態／分享檢查使用固定圖磚；字型使用裝置內建字型；設定 HTTP／HTTPS 代理時才使用受信任 CA 的來源橋接器，離線階段關閉橋接器。CI 使用 `RELIEF_QA_FIXTURE_ASSETS=1 bun run test:browser` 的固定圖磚模式，避免依賴外部服務。完整驗證紀錄見 `docs/VALIDATION.md`。
 
 ## 手機操作
 
-手機預設為完整地圖：上方搜尋、右上角「地點與篩選」、底部附近清單與定位。國家／城市、條件、深淺色、資料來源、安裝指引、全國統計和圖例都在需要時展開；附近清單可獨立捲動並返回地圖。支援觸控橫向模式、安全區與較短視窗，桌面維持可收起的側欄。
+手機預設為完整地圖：上方搜尋與分享、右上角「地點與篩選」、底部附近清單與定位。國家／城市、條件、深淺色、資料來源、安裝指引、全國統計和圖例都在需要時展開；附近清單可獨立捲動並返回地圖。支援觸控橫向模式、安全區與較短視窗，桌面維持可收起的側欄。
+
+## 保存與分享
+
+重新開啟首頁會恢復上次的城市、地圖位置、廁所、篩選、外觀與面板；分享網址優先還原其指定的畫面，並支援上一頁／下一頁。清單、設定、詳細資訊與說明的捲動位置也會保存。使用「分享目前畫面」或直接複製網址；分享收藏清單不會覆蓋接收者自己的收藏。格式與還原範圍見 [保存與分享說明](docs/SHARING.md)。
