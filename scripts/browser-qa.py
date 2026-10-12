@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
+from map_assets import BASEMAP_HOST, basemap_fixture
 from playwright.sync_api import expect, sync_playwright
 
 BASE_URL = os.environ.get("RELIEF_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
@@ -39,7 +40,7 @@ report = {
     "startedAt": datetime.now(UTC).isoformat(),
     "passed": False,
     "transport": (
-        "CI uses a committed PNG map-tile fixture and system fonts. Toilet data, API, "
+        "CI uses committed vector tiles and non-symbol provider style layers. Toilet data, API, "
         "map worker and PWA assets come from the actual local production build."
         if FIXTURE_ASSETS
         else (
@@ -93,26 +94,14 @@ if proxy_url:
 def verified_asset(route):
     req = route.request
     host = urlparse(req.url).hostname
-    if report.get("offlineBridge") and host in {
-        "tile.openstreetmap.org",
-        "fonts.googleapis.com",
-        "fonts.gstatic.com",
-    }:
+    if report.get("offlineBridge") and host == BASEMAP_HOST:
         return route.abort()
-    if host not in {"tile.openstreetmap.org", "fonts.googleapis.com", "fonts.gstatic.com"}:
+    if host != BASEMAP_HOST:
         return route.continue_()
     if not FIXTURE_ASSETS and not proxy_url:
         return route.continue_()
     if FIXTURE_ASSETS:
-        if host == "tile.openstreetmap.org":
-            return route.fulfill(
-                status=200,
-                content_type="image/png",
-                body=(ROOT / "tests/fixtures/basemap.png").read_bytes(),
-            )
-        if host == "fonts.googleapis.com":
-            return route.fulfill(status=200, content_type="text/css", body="")
-        return route.abort()
+        return route.fulfill(**basemap_fixture(req.url))
     try:
         request = urllib.request.Request(
             req.url,
@@ -170,7 +159,7 @@ with sync_playwright() as pw:
         "response",
         lambda r: (
             report.update(tileResponses=report["tileResponses"] + 1)
-            if "tile.openstreetmap.org/" in r.url and r.ok
+            if BASEMAP_HOST in r.url and ("/planet/" in r.url or "/fixtures/" in r.url) and r.ok
             else None
         ),
     )
@@ -194,7 +183,9 @@ with sync_playwright() as pw:
     check("Installation promotion hides automatically")
     page.get_by_role("button", name="收起側邊欄", exact=True).click()
     expect(page.locator(".sidebar")).to_have_count(0)
-    page.wait_for_timeout(250)
+    page.wait_for_function(
+        "() => document.querySelector('.maplibregl-canvas').getBoundingClientRect().width === 1440"
+    )
     check(
         "Collapsing the sidebar gives its space to a resized map",
         page.locator(".map-panel").bounding_box()["width"] == 1440

@@ -3,6 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { fallbackStyle, loadBasemap, preserveOverlays } from "./basemap";
 import { Button } from "./components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/tooltip";
 import { scheduleState, type Toilet } from "./core";
@@ -32,7 +33,8 @@ export default function MapView(p: Props) {
   latest.current = p;
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
-    [tileError, setTileError] = useState(false);
+    [tileError, setTileError] = useState(false),
+    [basemapAttempt, setBasemapAttempt] = useState(0);
   const reportCamera = useCallback(() => {
     const m = map.current;
     if (!m) return;
@@ -62,34 +64,10 @@ export default function MapView(p: Props) {
         pitch: latest.current.camera.pitch,
         minZoom: 5,
         maxZoom: 19,
-        // Raster tiles stay sharp at 2x without a 3x phone drawing nine pixels per CSS pixel.
+        // Cap GPU work on high-DPI phones while keeping the vector map and UI sharp.
         pixelRatio: Math.min(devicePixelRatio, 2),
         attributionControl: { compact: false },
-        style: {
-          version: 8,
-          sources: {
-            osm: {
-              type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              maxzoom: 19,
-              attribution:
-                '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
-            },
-          },
-          layers: [
-            {
-              id: "base",
-              type: "raster",
-              source: "osm",
-              paint: {
-                "raster-brightness-max": latest.current.dark ? 0.5 : 1,
-                "raster-saturation": latest.current.dark ? -0.9 : -0.6,
-                "raster-contrast": latest.current.dark ? 0.15 : -0.12,
-              },
-            },
-          ],
-        },
+        style: fallbackStyle(latest.current.dark),
       });
     } catch {
       setFailed(true);
@@ -103,88 +81,101 @@ export default function MapView(p: Props) {
     });
     observer.observe(container);
     const emitBounds = reportCamera;
-    m.on("load", () => {
-      m.addSource("toilets", {
-        type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
-        cluster: true,
-        clusterMaxZoom: 13,
-        clusterRadius: 48,
-      });
-      m.addLayer({
-        id: "cluster-circles",
-        type: "circle",
-        source: "toilets",
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": "#075f51",
-          "circle-radius": 18,
-          "circle-stroke-color": "#fff",
-          "circle-stroke-width": 3,
-        },
-      });
-      m.addLayer({
-        id: "points",
-        type: "circle",
-        source: "toilets",
-        filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-radius": 8,
-          "circle-color": [
-            "match",
-            ["get", "state"],
-            "open",
-            "#16836c",
-            "closed",
-            "#aa7864",
-            "#77938c",
-          ],
-          "circle-stroke-color": "#fff",
-          "circle-stroke-width": 2.5,
-        },
-      });
-      m.addLayer({
-        id: "selected",
-        type: "circle",
-        source: "toilets",
-        filter: ["==", ["get", "id"], ""],
-        paint: {
-          "circle-radius": 14,
-          "circle-color": "#075f51",
-          "circle-stroke-width": 4,
-          "circle-stroke-color": "#cef0bd",
-        },
-      });
-      m.addSource("position", {
-        type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
-      });
-      m.addLayer({
-        id: "precision",
-        type: "circle",
-        source: "position",
-        paint: {
-          "circle-color": "#3977e8",
-          "circle-opacity": 0.13,
-          "circle-radius": ["get", "radius"],
-          "circle-stroke-color": "#3977e8",
-          "circle-stroke-width": 1,
-          "circle-stroke-opacity": 0.3,
-        },
-      });
-      m.addLayer({
-        id: "position-dot",
-        type: "circle",
-        source: "position",
-        paint: {
-          "circle-color": "#3977e8",
-          "circle-radius": 7,
-          "circle-stroke-color": "#fff",
-          "circle-stroke-width": 3,
-        },
-      });
+    let initialized = false;
+    m.on("style.load", () => {
+      if (!m.getSource("toilets"))
+        m.addSource("toilets", {
+          type: "geojson",
+          attribution:
+            '<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+          data: { type: "FeatureCollection", features: [] },
+          cluster: true,
+          clusterMaxZoom: 13,
+          clusterRadius: 48,
+        });
+      if (!m.getLayer("cluster-circles"))
+        m.addLayer({
+          id: "cluster-circles",
+          type: "circle",
+          source: "toilets",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": "#075f51",
+            "circle-radius": 18,
+            "circle-stroke-color": "#fff",
+            "circle-stroke-width": 3,
+          },
+        });
+      if (!m.getLayer("points"))
+        m.addLayer({
+          id: "points",
+          type: "circle",
+          source: "toilets",
+          filter: ["!", ["has", "point_count"]],
+          paint: {
+            "circle-radius": 8,
+            "circle-color": [
+              "match",
+              ["get", "state"],
+              "open",
+              "#16836c",
+              "closed",
+              "#aa7864",
+              "#77938c",
+            ],
+            "circle-stroke-color": "#fff",
+            "circle-stroke-width": 2.5,
+          },
+        });
+      if (!m.getLayer("selected"))
+        m.addLayer({
+          id: "selected",
+          type: "circle",
+          source: "toilets",
+          filter: ["==", ["get", "id"], ""],
+          paint: {
+            "circle-radius": 14,
+            "circle-color": "#075f51",
+            "circle-stroke-width": 4,
+            "circle-stroke-color": "#cef0bd",
+          },
+        });
+      if (!m.getSource("position"))
+        m.addSource("position", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+      if (!m.getLayer("precision"))
+        m.addLayer({
+          id: "precision",
+          type: "circle",
+          source: "position",
+          paint: {
+            "circle-color": "#3977e8",
+            "circle-opacity": 0.13,
+            "circle-radius": ["get", "radius"],
+            "circle-stroke-color": "#3977e8",
+            "circle-stroke-width": 1,
+            "circle-stroke-opacity": 0.3,
+          },
+        });
+      if (!m.getLayer("position-dot"))
+        m.addLayer({
+          id: "position-dot",
+          type: "circle",
+          source: "position",
+          paint: {
+            "circle-color": "#3977e8",
+            "circle-radius": 7,
+            "circle-stroke-color": "#fff",
+            "circle-stroke-width": 3,
+          },
+        });
       setReady(true);
-      emitBounds();
+      if (!initialized) {
+        initialized = true;
+        emitBounds();
+      }
     });
     m.on("click", "points", (e) => {
       const id = e.features?.[0]?.properties?.id;
@@ -202,10 +193,11 @@ export default function MapView(p: Props) {
     });
     m.on("moveend", emitBounds);
     m.on("error", (e) => {
-      if (/tile|fetch|network|ajax/i.test(e.error?.message ?? "")) setTileError(true);
-    });
-    m.on("sourcedata", (e) => {
-      if (e.sourceId === "osm" && e.tile?.state === "loaded") setTileError(false);
+      if (
+        e.error instanceof maplibregl.AJAXError ||
+        /tile|fetch|network|ajax|glyph|sprite/i.test(e.error?.message ?? "")
+      )
+        setTileError(true);
     });
     return () => {
       observer.disconnect();
@@ -220,11 +212,23 @@ export default function MapView(p: Props) {
   }, [reportCamera]);
   useEffect(() => {
     const m = map.current;
-    if (!ready || !m) return;
-    m.setPaintProperty("base", "raster-brightness-max", p.dark ? 0.5 : 1);
-    m.setPaintProperty("base", "raster-saturation", p.dark ? -0.9 : -0.6);
-    m.setPaintProperty("base", "raster-contrast", p.dark ? 0.15 : -0.12);
-  }, [p.dark, ready]);
+    if (!m) return;
+    const controller = new AbortController();
+    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]);
+    setTileError(false);
+    if (m.isStyleLoaded() && !m.getSource("openmaptiles"))
+      m.setPaintProperty("background", "background-color", p.dark ? "#101c18" : "#f5f4ee");
+    void loadBasemap(p.dark, signal)
+      .then((style) => {
+        if (controller.signal.aborted) return;
+        if (basemapAttempt > 0) setReady(false);
+        m.setStyle(style, { transformStyle: preserveOverlays, diff: basemapAttempt === 0 });
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setTileError(true);
+      });
+    return () => controller.abort();
+  }, [p.dark, basemapAttempt]);
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
@@ -410,7 +414,16 @@ export default function MapView(p: Props) {
           </div>
         )}
         {tileError && !failed && (
-          <div className="map-network-note">底圖暫時無法載入，廁所清單仍可使用。</div>
+          <div className="map-network-note" role="status">
+            <span>底圖暫時無法載入，廁所標記與清單仍可使用。</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setBasemapAttempt((attempt) => attempt + 1)}
+            >
+              重試
+            </Button>
+          </div>
         )}
         <div className="map-controls">
           <div className="zoom-controls">

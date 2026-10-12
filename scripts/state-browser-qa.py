@@ -6,6 +6,7 @@ import os
 from datetime import UTC, datetime
 from pathlib import Path
 
+from map_assets import BASEMAP_HOST, basemap_fixture
 from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -50,12 +51,8 @@ def context_for(browser, mobile=False, seed=None):
         has_touch=mobile,
     )
     context.route(
-        "https://tile.openstreetmap.org/**",
-        lambda route: route.fulfill(
-            status=200,
-            content_type="image/png",
-            body=(ROOT / "tests/fixtures/basemap.png").read_bytes(),
-        ),
+        f"https://{BASEMAP_HOST}/**",
+        lambda route: route.fulfill(**basemap_fixture(route.request.url)),
     )
     if seed:
         context.add_init_script(
@@ -159,7 +156,11 @@ with sync_playwright() as playwright:
     page.get_by_role("button", name="資料來源與使用說明", exact=True).click()
     expect(page.get_by_role("dialog", name="每一點，都有出處。")).to_be_visible()
     page.locator(".modal").evaluate("e => e.scrollTop=e.scrollHeight")
-    page.wait_for_timeout(300)
+    page.wait_for_function(
+        "() => { const panel=document.querySelector('.modal');"
+        " const state=JSON.parse(localStorage.getItem('view-state'));"
+        " return panel.scrollTop > 0 && Math.abs(state.modalScroll - panel.scrollTop) < 1; }"
+    )
     source_url = page.url
     source_offset = snapshot(page)["modalScroll"]
     check("Source information has a distinct shareable URL", "panel=sources" in source_url)
@@ -313,7 +314,10 @@ with sync_playwright() as playwright:
     expect(phone.locator(".toilet-card").first).to_be_visible()
     phone.get_by_role("button", name="顯示更多", exact=False).click()
     phone.locator(".toilet-list").evaluate("e => e.scrollTop=380")
-    phone.wait_for_timeout(300)
+    phone.wait_for_function(
+        "() => { const state=JSON.parse(localStorage.getItem('view-state'));"
+        " return state.limit === 36 && state.listScroll === 380; }"
+    )
     list_url = phone.url
     check(
         "Mobile list URLs include the expanded count and settled scroll position",
@@ -334,9 +338,18 @@ with sync_playwright() as playwright:
     check("A mobile recipient opens the same result panel, expanded cards and scroll position")
     phone.locator(".card-main").first.click()
     expect(phone.locator(".detail-panel")).to_be_visible()
+    expect(phone.locator(".detail-nav")).to_be_visible(timeout=20000)
     phone.set_viewport_size({"width": 390, "height": 600})
+    phone.wait_for_function(
+        "() => { const panel=document.querySelector('.detail-panel');"
+        " return panel.scrollHeight > panel.clientHeight; }"
+    )
     phone.locator(".detail-panel").evaluate("e => e.scrollTop=e.scrollHeight")
-    phone.wait_for_timeout(300)
+    phone.wait_for_function(
+        "() => { const panel=document.querySelector('.detail-panel');"
+        " const state=JSON.parse(localStorage.getItem('view-state'));"
+        " return panel.scrollTop > 0 && Math.abs(state.detailScroll - panel.scrollTop) < 1; }"
+    )
     detail_url = phone.url
     detail_offset = snapshot(phone)["detailScroll"]
     other_phone.set_viewport_size({"width": 390, "height": 600})
@@ -350,7 +363,11 @@ with sync_playwright() as playwright:
     phone.get_by_role("button", name="關閉廁所詳細資訊", exact=True).click()
     phone.get_by_role("button", name="地點與篩選", exact=True).click()
     phone.locator(".mobile-settings-body").evaluate("e => e.scrollTop=e.scrollHeight")
-    phone.wait_for_timeout(300)
+    phone.wait_for_function(
+        "() => { const panel=document.querySelector('.mobile-settings-body');"
+        " const state=JSON.parse(localStorage.getItem('view-state'));"
+        " return panel.scrollTop > 0 && Math.abs(state.settingsScroll - panel.scrollTop) < 1; }"
+    )
     settings_offset = snapshot(phone)["settingsScroll"]
     settings_url = phone.url
     other_phone.goto(settings_url, wait_until="networkidle")

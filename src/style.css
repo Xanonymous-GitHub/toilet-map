@@ -815,6 +815,15 @@ a {
   gap: 6px;
   align-items: center;
 }
+.map-network-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 3;
+}
+.map-network-note button {
+  min-height: 44px;
+}
 .maplibregl-ctrl-attrib {
   background: var(--card);
   color: var(--muted-foreground);

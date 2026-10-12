@@ -8,6 +8,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+from map_assets import BASEMAP_HOST, basemap_fixture
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,11 +33,10 @@ async def measure(playwright, device, bun, chromium):
 
             async def tile(route):
                 await route.fulfill(
-                    content_type="image/png",
-                    body=(ROOT / "tests/fixtures/basemap.png").read_bytes(),
+                    **basemap_fixture(route.request.url),
                 )
 
-            await context.route("https://tile.openstreetmap.org/**", tile)
+            await context.route(f"https://{BASEMAP_HOST}/**", tile)
             args = [
                 bun,
                 "--bun",
