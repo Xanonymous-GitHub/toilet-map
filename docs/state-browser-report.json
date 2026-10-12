@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-12T12:21:25.888693+00:00",
+  "startedAt": "2026-10-12T14:22:52.128906+00:00",
   "passed": true,
   "transport": "Fixed map tiles; actual production API, state, UI, worker and PWA assets.",
   "checks": [
@@ -36,5 +36,6 @@
     "Share URLs remain usable when browser preference storage is disabled",
     "No unhandled browser errors in state restoration and sharing"
   ],
-  "pageErrors": []
+  "pageErrors": [],
+  "measuredSourceCommit": "52e1dbd63468e6c9de60152d15e98311f1e30414"
 }

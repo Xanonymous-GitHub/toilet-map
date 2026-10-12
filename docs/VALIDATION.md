@@ -1,6 +1,6 @@
 # UI、部署與全國覆蓋驗證紀錄
 
-本輪驗證日期：2026-10-12。從 GitHub main `033fe3c` 追查正式網域 `toilet-map.xcc.tw` 的黑屏，修正 Worker 的 CDN 安全標頭快取；保留既有畫面保存與分享，資料仍使用 2026-10-11 已查證快照，未改變 181 城市的覆蓋。
+本輪驗證日期：2026-10-12。從 GitHub main `033fe3c` 追查正式網域 `toilet-map.xcc.tw` 的黑屏；先修正 Worker 的 CDN 安全標頭快取，後依使用者指示恢復官方 OSM，逐筆指定 Referer 政策；保留既有畫面保存與分享，資料仍使用 2026-10-11 已查證快照，未改變 181 城市的覆蓋。
 
 ## 工具鏈與建置
 
@@ -13,15 +13,15 @@
 
 ## 底圖服務與失敗恢復
 
-配色改用 Bright 淺色底圖與經調色的 Dark：水域藍、植被綠、主幹道金色、鐵路紫色；深色建築與街道提高明度，地名使用亮色與暗描邊。保留供應商的幾何、縮放插值、標籤內容與來源署名。
+依使用者實測確認的 Referer 問題，恢復 OpenStreetMap 官方 `https://tile.openstreetmap.org/{z}/{x}/{y}.png`。`transformMapRequest` 逐筆指定 `referrerPolicy: "strict-origin-when-cross-origin"`；原生 Chromium 的反例測試將頁面標頭改成 `same-origin`，一般跨來源 Fetch 缺少 Referer，但圖塊仍帶著網站來源。沒有手動設定 Referer／User-Agent、換 host 或停用 TLS。`refreshExpiredTiles: true` 保留 Fetch 的政策與 HTTP 快取處理；PWA 不預抓、代理或保存外部圖塊。
 
-不再請求 `tile.openstreetmap.org`。底圖使用 OpenFreeMap 的 Bright／Dark 向量樣式，深色地名提高對比；保留 OSM／OpenMapTiles 署名。廁所與定位圖層先在本機空白樣式初始化，底圖請求有 15 秒 timeout 和切換時取消舊請求；樣式切換保留資料與選取，不額外發出範圍查詢。HTTP 快取由瀏覽器管理，PWA 不快取、預抓或代理底圖，正式網站直接向供應商請求。
+底圖保留 OSM 原始彩色道路、水域、公園及地名；深色介面略降低圖塊亮度，不反相或轉灰階。底圖樣式在本機建立，切換外觀保留廁所、定位、選取與鏡頭，不另行下載樣式、字形或 sprites。首次樣式未載入時明確重建，避免 style diff 警告。來源署名保持可見，圖塊失敗時仍可使用廁所標記、清單與導航，並手動重試。
 
-正式網域的 HTML 已允許 OpenFreeMap，但 `/assets/maplibre-gl-worker-CekbQLRq.js` 的 Cloudflare HIT 回應仍帶著只允許 `tile.openstreetmap.org` 的舊 CSP；實測當時 `Age: 59045`。原生 Chromium 可下載樣式／TileJSON／sprites，Worker 的向量圖塊則全數被安全政策阻擋。對照實驗僅替換 Worker 回應的 CSP，所有圖塊即成功載入，確認根因。修正 `a51cc46` 將 CSP 的 SHA-256 版本加入 Worker 檔名；新路徑的 Cloudflare HIT 回應也保有正確權限，PWA precache 與引用 chunk 同步更新。
+之前 OpenFreeMap 黑屏的獨立原因也保留修正：Cloudflare 快取的 Worker 回應仍帶著上一版 CSP。`vite.config.ts` 將 CSP 的 SHA-256 版本加入 Worker 檔名；政策變更會更新 URL、引用 chunk 與 PWA precache。切回 OSM 後仍保留此防護。
 
-底圖專項本機與正式網域各 13 項檢查通過：10 項涵蓋樣式 403、部分圖塊失敗、手動重試、鏡頭／查看紀錄保存、快速外觀切換，以及舊 Worker CSP 黑屏與新政策恢復；另 3 項驗證東京桌面明暗和釜山手機的真實樣式、向量圖塊、glyphs、sprites 與署名。真實服務階段由 Chromium 原生網路請求，經環境代理並信任提供的 CA，保留 TLS 驗證，不攔截或替換底圖 bytes；等待 MapLibre idle 後擷取截圖。本輪本機合計 114 項瀏覽器檢查，CI 執行 111 項固定底圖檢查。
+底圖專項的 10 項固定圖塊檢查涵蓋全部／部分 403、錯誤提示、重試、鏡頭／查看紀錄保存、快速外觀切換及頁面 Referer 政策覆寫。可選的 3 項真實服務檢查涵蓋東京桌面明暗與釜山手機；由 Chromium 原生請求官方圖塊，檢查實際 Referer、HTTP 200、完成繪製與署名，不攔截底圖 bytes。合計 111 項 CI 瀏覽器檢查；加上真實服務模式為 114 項。正式網域的 13 項檢查通過，實際圖塊回傳 200 且 Referer 為 `https://toilet-map.xcc.tw/`；證據見 `basemap-live-report.json`。
 
-服務規範與整合來源：[OSMF 圖塊政策](https://operations.osmfoundation.org/policies/tiles/)、[OpenFreeMap 官方說明](https://openfreemap.org/)、[MapLibre 整合指南](https://openfreemap.org/quick_start/)。
+使用規範：[OSMF 圖塊政策](https://operations.osmfoundation.org/policies/tiles/)。
 
 ## 平台與瀏覽器
 
@@ -31,26 +31,26 @@ Chromium 69 項檢查涵蓋桌面 1440×1000 與手機 390×844，新增 320×56
 
 功能回歸包含深淺色與跟隨系統、偏好重開、桌面側欄收合、底部控制、安裝提醒自動收起、聚合點選、搜尋與 Enter／空結果、來源 modal 的名稱與鍵盤焦點、詳細資訊、導航、收藏、GPS 拒絕／晚到回呼、非首都與離島切換、拖曳新範圍、桌面與手機離線重開、地圖 chunk 失敗回復。詳細資訊／說明先關閉舊面板，關閉後回到手機入口焦點。
 
-本輪完整固定向量底圖報告為 `browser-fixture-report.json`。固定底圖使用供應商非文字樣式圖層與單一真實圖塊的 water 圖層；API、資料、MapLibre、Worker、PWA 和定位回呼均為正式建置。無未處理錯誤或應用程式警告。console 保留刻意離線／阻斷下載造成的網路錯誤。`mobile-live-report.json` 與 `browser-report.json` 保留前幾輪 OSM raster 底圖的歷史檢查，不能代表本輪向量底圖。
+本輪固定 OSM 圖塊的完整介面報告為 `browser-fixture-report.json`，使用 256 × 256 PNG；API、資料、MapLibre、Worker、PWA 和定位回呼均為正式建置。無未處理錯誤或應用程式警告。console 保留刻意離線／阻斷下載造成的網路錯誤。
 
-新增 32 項狀態／分享檢查全部通過，報告為 `state-browser-report.json`。包含原生分享與取消、剪貼簿／手動選取 fallback、跨接收者網址優先、獨立收藏清單、不自動請求 GPS、重新整理與無參數重開、上一頁／下一頁、舊 IndexedDB 升級、離線廁所、非首都 ID-only 連結、失效廁所與無效／儲存受限的還原，以及四種捲動位置與手機旋轉。上述合計 101 項操作與狀態檢查，另有 8 項底圖失敗／恢復 CI 檢查。
+新增 32 項狀態／分享檢查全部通過，報告為 `state-browser-report.json`。包含原生分享與取消、剪貼簿／手動選取 fallback、跨接收者網址優先、獨立收藏清單、不自動請求 GPS、重新整理與無參數重開、上一頁／下一頁、舊 IndexedDB 升級、離線廁所、非首都 ID-only 連結、失效廁所與無效／儲存受限的還原，以及四種捲動位置與手機旋轉。上述合計 101 項操作與狀態檢查，另有 10 項底圖失敗／恢復及 Referer CI 檢查。
 
 這些檢查是 Chromium 的手機尺寸與觸控模擬，並非已完成 iOS／Android 實機驗證。
 
 ## Lighthouse
 
-以下為配色修正 `41d9aa0` 的冷啟動實測，取代前輪 `f19f899` 的數據；功能與建置預算通過，手機效能指標仍有待改善。
+以下為 OSM 修正 `3527f81` 的冷啟動實測。停用 raster 圖塊淡入以減少持續重繪；手機軟體 WebGL 的冷啟動效能仍有待改善。
 
 `bun run test:performance` 使用 Lighthouse 13.5.0、冷啟動 browser profiles、固定圖磚、gzip 預覽、Chromium 軟體 WebGL，以及標準手機／桌面模擬節流。可重跑的程式為 `scripts/performance-qa.py`，完整 JSON／HTML 在 `test-results/`，摘要為 `performance-report.json`。
 
 | 模式 | Performance | Accessibility | Best practices | LCP | TBT | CLS |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| mobile | 48 | 100 | 100 | 4.30 s | 4851 ms | 0.0050 |
-| desktop | 67 | 100 | 100 | 0.95 s | 705 ms | 0.0007 |
+| mobile | 48 | 100 | 100 | 4.15 s | 3882 ms | 0 |
+| desktop | 66 | 100 | 100 | 0.88 s | 829 ms | 0 |
 
 首屏移除同步側邊欄量測；地圖在空閒時初始化，清單首批渲染 12 張卡片而保留完整資料。手機控制面板、工具提示、說明與詳細資訊延後載入，外觀使用 shadcn 原生選單。時區時計共用、聚合不再每幀查詢，移除多餘初始 flyTo；沒有為取得分數停用地圖或縮減來源覆蓋。
 
-無障礙、最佳實務與 CLS 通過，但手機軟體 WebGL 的 LCP／TBT 仍未達目標。完整地圖需要更多繪製，CPU profile 顯示 MapLibre 的同步工作、應用程式運算與軟體 WebGL 都有成本。配色修正未新增套件，應用程式與 MapLibre chunks 仍在強制建置預算內；2x canvas 上限減少 3x 裝置的 GPU 繪製量。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
+無障礙、最佳實務與 CLS 通過，但手機軟體 WebGL 的 LCP／TBT 仍未達目標。完整地圖需要更多繪製，CPU profile 顯示 MapLibre 的同步工作、應用程式運算與軟體 WebGL 都有成本。OSM 切換未新增套件，應用程式與 MapLibre chunks 仍在強制建置預算內；2x canvas 上限減少 3x 裝置的 GPU 繪製量。本機結果不能當成真實手機已通過 Core Web Vitals 的證明；部署後需在實際手機、圖磚供應商與 CDN 下量測。Lighthouse 的頁面 transferBytes 不涵蓋所有 Service Worker 背景 precache 請求，不將它當成完整首次下載量。
 
 ## 資料驗證
 

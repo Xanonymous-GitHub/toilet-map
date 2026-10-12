@@ -1,40 +1,40 @@
 {
-  "checkedAt": "2026-10-12T13:56:34.196545+00:00",
+  "checkedAt": "2026-10-12T14:29:44.935844+00:00",
   "lighthouse": "13.5.0",
   "environment": "Cold local production loads, gzip, deterministic tiles, software WebGL, simulated Lighthouse throttling",
   "results": [
     {
       "device": "mobile",
       "fixtureTiles": true,
-      "url": "http://127.0.0.1:8788/#v=1&region=tokyo&c=139.767%2C35.681%2C13.5%2C0%2C0&theme=system&sidebar=1&panel=map",
+      "url": "http://127.0.0.1:8790/#v=1&region=tokyo&c=139.767%2C35.681%2C13.5%2C0%2C0&theme=system&sidebar=1&panel=map",
       "scores": {
         "performance": 48,
         "accessibility": 100,
         "best-practices": 100
       },
       "metrics": {
-        "largest-contentful-paint": 4304.000338186225,
-        "total-blocking-time": 4850.8886604873915,
-        "cumulative-layout-shift": 0.00502462650014756
+        "largest-contentful-paint": 4154.3202,
+        "total-blocking-time": 3882.1699500000004,
+        "cumulative-layout-shift": 0
       },
-      "transferBytes": 664482
+      "transferBytes": 613842
     },
     {
       "device": "desktop",
       "fixtureTiles": true,
-      "url": "http://127.0.0.1:8788/#v=1&region=tokyo&c=139.767%2C35.681%2C13.5%2C0%2C0&theme=system&sidebar=1&panel=map",
+      "url": "http://127.0.0.1:8790/#v=1&region=tokyo&c=139.767%2C35.681%2C13.5%2C0%2C0&theme=system&sidebar=1&panel=map",
       "scores": {
-        "performance": 67,
+        "performance": 66,
         "accessibility": 100,
         "best-practices": 100
       },
       "metrics": {
-        "largest-contentful-paint": 947.4829465876367,
-        "total-blocking-time": 705.0000000000001,
-        "cumulative-layout-shift": 0.0006648677144441526
+        "largest-contentful-paint": 879.75405,
+        "total-blocking-time": 828.74865,
+        "cumulative-layout-shift": 0
       },
-      "transferBytes": 700398
+      "transferBytes": 627042
     }
   ],
-  "measuredSourceCommit": "41d9aa08257ef254ad52f761fd8ab84495e97902"
+  "measuredSourceCommit": "3527f81312af1b4c8ebe8291b6a67028f44b0664"
 }

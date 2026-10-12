@@ -1,22 +1,22 @@
 {
-  "startedAt": "2026-10-12T13:57:34.097072+00:00",
+  "startedAt": "2026-10-12T14:21:10.402702+00:00",
   "passed": true,
   "baseUrl": "https://toilet-map.xcc.tw",
   "realMap": true,
   "realMapTransport": "Native Chromium requests with TLS verification",
   "checks": [
-    "style: provider 403 leaves toilet markers and list usable",
-    "style: retry restores tiles and preserves the viewed toilet and camera",
-    "style: fast appearance switches leave map data responsive",
+    "all-tiles: provider 403 leaves toilet markers and list usable",
+    "all-tiles: retry restores tiles and preserves the viewed toilet and camera",
+    "all-tiles: fast appearance switches leave map data responsive",
     "partial-tiles: provider 403 leaves toilet markers and list usable",
     "A successful tile does not hide a failure elsewhere",
     "partial-tiles: retry restores tiles and preserves the viewed toilet and camera",
     "partial-tiles: fast appearance switches leave map data responsive",
-    "Stale worker CSP blocks tiles while page style and toilet markers load",
-    "Fresh worker CSP restores vector tiles without clearing saved settings",
-    "desktop-tokyo-light: real style, vector tiles, glyphs and sprites load with attribution",
-    "desktop-tokyo-dark: real style, vector tiles, glyphs and sprites load with attribution",
-    "mobile-busan-dark: real style, vector tiles, glyphs and sprites load with attribution",
+    "Document same-origin policy suppresses Referer on an ordinary cross-origin fetch",
+    "OSM tile requests override document policy and send only the website origin",
+    "desktop-tokyo-light: official OSM tiles load with valid Referer and attribution",
+    "desktop-tokyo-dark: official OSM tiles load with valid Referer and attribution",
+    "mobile-busan-dark: official OSM tiles load with valid Referer and attribution",
     "No unhandled errors during provider failures and map recovery"
   ],
   "pageErrors": [],
@@ -25,76 +25,154 @@
       "viewport": "desktop-tokyo-light",
       "responses": [
         {
-          "url": "https://tiles.openfreemap.org/styles/bright",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14554/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14551/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         }
       ]
     },
@@ -102,64 +180,154 @@
       "viewport": "desktop-tokyo-dark",
       "responses": [
         {
-          "url": "https://tiles.openfreemap.org/styles/dark",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14554/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3225.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7276/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7275/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14551/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3226.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/13/7277/3224.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14552/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/14/14553/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14552/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14554/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14551/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6451.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14551/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14554/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6449.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6450.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6452.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14550/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/14/14555/6453.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         }
       ]
     },
@@ -167,35 +335,47 @@
       "viewport": "mobile-busan-dark",
       "responses": [
         {
-          "url": "https://tiles.openfreemap.org/styles/dark",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7033/3240.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7032/3239.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7032/3238.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7033/3239.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/12/3516/1620.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7033/3238.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/planet/20261004_113936_pt/12/3516/1619.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7032/3241.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         },
         {
-          "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
-          "status": 200
+          "url": "https://tile.openstreetmap.org/13/7032/3240.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
+        },
+        {
+          "url": "https://tile.openstreetmap.org/13/7033/3241.png",
+          "status": 200,
+          "referer": "https://toilet-map.xcc.tw/"
         }
       ]
     }
   ],
-  "measuredSourceCommit": "41d9aa08257ef254ad52f761fd8ab84495e97902"
+  "measuredSourceCommit": "52e1dbd63468e6c9de60152d15e98311f1e30414"
 }
